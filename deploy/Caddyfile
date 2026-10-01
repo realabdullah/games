@@ -7,7 +7,17 @@
 	@immutable path /_app/immutable/*
 	header @immutable Cache-Control "public, max-age=31536000, immutable"
 
-	# Prerendered pages are /play.html etc.; room pages fall back to the SPA shell.
-	try_files {path} {path}.html {path}/index.html /200.html
-	file_server
+	route {
+		# A missing file (anything with an extension, like /favicon.ico) is a real 404,
+		# never the app shell, so CDNs don't cache HTML under an asset's URL.
+		@missingFile {
+			path_regexp \.[A-Za-z0-9]+$
+			not file
+		}
+		respond @missingFile 404
+
+		# Prerendered pages are /play.html etc.; room pages fall back to the SPA shell.
+		try_files {path} {path}.html {path}/index.html /200.html
+		file_server
+	}
 }
