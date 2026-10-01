@@ -1,0 +1,146 @@
+# Test, build the two images on GitHub's runners (not the VPS), push them to
+# GitHub Container Registry, then ask Dokploy to pull and restart.
+#
+# Pull requests: test only. Pushes to main: test → build → deploy.
+
+name: Test, build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  # Superseded PR runs are cancelled; a deploy on main is never cut off halfway.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: 1.4.2
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - run: bun install --frozen-lockfile
+
+      - name: Unit tests
+        run: bun test
+
+      - name: Typecheck
+        run: bun run check
+
+      - name: Formatting
+        run: bun run lint
+
+      - name: Install the browser for end-to-end tests
+        run: bunx playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: bun run test:e2e
+
+      - name: Keep Playwright traces if anything failed
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+  images:
+    name: Build ${{ matrix.app }} image
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        app: [server, web]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: meta
+        uses: docker/metadata-action@v6
+        with:
+          # Image names must be lowercase.
+          images: ghcr.io/${{ github.repository_owner }}/games-${{ matrix.app }}
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: deploy/${{ matrix.app }}.Dockerfile
+          # Set the repository variable IMAGE_PLATFORMS=linux/arm64 if your VPS is ARM.
+          platforms: ${{ vars.IMAGE_PLATFORMS || 'linux/amd64' }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_GOATCOUNTER_URL=${{ vars.VITE_GOATCOUNTER_URL }}
+          cache-from: type=gha,scope=${{ matrix.app }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app }}
+
+  deploy:
+    name: Deploy to Dokploy
+    needs: images
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: production
+    env:
+      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+    steps:
+      - name: Check the Dokploy secrets are set
+        run: |
+          missing=0
+          for name in DOKPLOY_URL DOKPLOY_API_KEY DOKPLOY_SERVER_APP_ID DOKPLOY_WEB_APP_ID; do
+            if [ -z "${!name}" ]; then echo "::error::Secret $name is not set"; missing=1; fi
+          done
+          exit $missing
+        env:
+          DOKPLOY_SERVER_APP_ID: ${{ secrets.DOKPLOY_SERVER_APP_ID }}
+          DOKPLOY_WEB_APP_ID: ${{ secrets.DOKPLOY_WEB_APP_ID }}
+
+      # The server goes first: it snapshots live rooms on the way down, and
+      # clients reconnect to the new one by themselves.
+      - name: Redeploy the game server
+        run: |
+          curl --fail-with-body -sS -X POST "${DOKPLOY_URL%/}/api/application.deploy" \
+            -H 'accept: application/json' \
+            -H 'content-type: application/json' \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -d "{\"applicationId\": \"${{ secrets.DOKPLOY_SERVER_APP_ID }}\"}"
+
+      - name: Redeploy the web app
+        run: |
+          curl --fail-with-body -sS -X POST "${DOKPLOY_URL%/}/api/application.deploy" \
+            -H 'accept: application/json' \
+            -H 'content-type: application/json' \
+            -H "x-api-key: ${DOKPLOY_API_KEY}" \
+            -d "{\"applicationId\": \"${{ secrets.DOKPLOY_WEB_APP_ID }}\"}"

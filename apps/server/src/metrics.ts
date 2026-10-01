@@ -91,3 +91,13 @@ export class Metrics {
 		return [...counters, ...this.gauges].flatMap((m) => m.render()).join('\n') + '\n';
 	}
 }
+
+/** With no token configured, /metrics is open (keep it off public routes); otherwise require it. */
+export function metricsAllowed(authorization: string | null, token: string | null): boolean {
+	if (!token) return true;
+	const given = authorization?.replace(/^Bearer\s+/i, '') ?? '';
+	const a = new TextEncoder().encode(given);
+	const b = new TextEncoder().encode(token);
+	// Constant-time compare so the token can't be guessed byte by byte.
+	return a.length === b.length && crypto.timingSafeEqual(a, b);
+}

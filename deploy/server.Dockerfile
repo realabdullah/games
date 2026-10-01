@@ -1,5 +1,6 @@
 # Build context: repo root. Dokploy: Dockerfile path = deploy/server.Dockerfile
-FROM oven/bun:1.4-alpine
+# Pinned to the Bun version that wrote bun.lock.
+FROM oven/bun:1.4.2-alpine
 WORKDIR /app
 COPY package.json bun.lock ./
 COPY apps/server/package.json apps/server/
@@ -16,8 +17,13 @@ RUN bun install --frozen-lockfile --production --filter server
 COPY packages packages
 COPY apps/server apps/server
 ENV NODE_ENV=production PORT=3001 DATA_DIR=/data
+# Run as the image's unprivileged user; a fresh volume at /data inherits this ownership.
+RUN mkdir -p /data && chown bun:bun /data
+USER bun
 VOLUME /data
 EXPOSE 3001
 WORKDIR /app/apps/server
+HEALTHCHECK --interval=15s --timeout=3s --start-period=10s --retries=3 \
+	CMD bun -e "fetch('http://127.0.0.1:3001/health').then(r => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
 # Bun receives SIGTERM directly (no shell wrapper) so rooms get snapshotted on redeploy.
 CMD ["bun", "src/index.ts"]

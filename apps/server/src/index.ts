@@ -6,7 +6,7 @@ import { openDb } from './db/index.ts';
 import { ApiError } from './errors.ts';
 import { createRegistry } from './games.ts';
 import { createApi } from './http.ts';
-import { Metrics } from './metrics.ts';
+import { Metrics, metricsAllowed } from './metrics.ts';
 import { PackStore } from './packs.ts';
 import { RateLimiter } from './rate-limit.ts';
 import { RoomManager } from './rooms.ts';
@@ -21,6 +21,8 @@ const startedAt = Date.now();
 const metrics = new Metrics();
 const AI_DAILY_PER_CLIENT = Number(process.env.AI_DAILY_PER_CLIENT ?? 5);
 const AI_DAILY_TOTAL = Number(process.env.AI_DAILY_TOTAL ?? 100);
+/** If set, /metrics needs `Authorization: Bearer <token>` (e.g. for Grafana Cloud to scrape it publicly). */
+const METRICS_TOKEN = process.env.METRICS_TOKEN || null;
 
 interface WsData {
 	session: string;
@@ -126,10 +128,17 @@ server = Bun.serve({
 				uptimeSeconds: Math.round((Date.now() - startedAt) / 1000)
 			}),
 		// Not routed publicly: scrape it on the internal Docker network.
-		'/metrics': () =>
-			new Response(metrics.render(), {
+		'/metrics': (req) => {
+			if (!metricsAllowed(req.headers.get('authorization'), METRICS_TOKEN)) {
+				return new Response('Unauthorized', {
+					status: 401,
+					headers: { 'www-authenticate': 'Bearer' }
+				});
+			}
+			return new Response(metrics.render(), {
 				headers: { 'content-type': 'text/plain; version=0.0.4' }
-			}),
+			});
+		},
 		'/api/*': (req, srv) => api(req, clientIp(req, srv)),
 		'/ws': (req, srv) => {
 			const session = new URL(req.url).searchParams.get('session') ?? '';
