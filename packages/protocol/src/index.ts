@@ -58,6 +58,8 @@ export interface RoomView {
 	code: string;
 	mode: RoomMode;
 	phase: 'lobby' | 'playing';
+	/** The game being played, while phase is 'playing'. */
+	gameId: string | null;
 	players: PlayerInfo[];
 	audienceCount: number;
 	/** Party mode only: whether the shared host screen is connected. */
@@ -112,12 +114,30 @@ export type ErrorCode =
 
 export const ClientMessage = v.variant('type', [
 	v.object({ type: v.literal('kick'), playerId: v.string() }),
-	v.object({ type: v.literal('leave') })
+	v.object({ type: v.literal('leave') }),
+	v.object({
+		type: v.literal('start'),
+		gameId: v.pipe(v.string(), v.maxLength(40)),
+		packId: v.optional(v.pipe(v.string(), v.maxLength(80))),
+		config: v.optional(v.record(v.string(), v.union([v.number(), v.string(), v.boolean()])))
+	}),
+	/** A game action; the game validates its shape. */
+	v.object({ type: v.literal('action'), action: v.unknown() }),
+	/** Leave the current game and go back to the lobby. */
+	v.object({ type: v.literal('endGame') })
 ]);
 export type ClientMessage = v.InferOutput<typeof ClientMessage>;
 
+/** A game view for one viewer, plus server time so clients can correct for clock skew. */
+export interface GameUpdate {
+	gameId: string;
+	view: unknown;
+	now: number;
+}
+
 export type ServerMessage =
-	| { type: 'welcome'; you: You; room: RoomView }
+	| { type: 'welcome'; you: You; room: RoomView; game: GameUpdate | null }
+	| ({ type: 'game' } & GameUpdate)
 	| { type: 'room'; room: RoomView }
 	| { type: 'you'; you: You }
 	| { type: 'kicked' }

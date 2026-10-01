@@ -10,3 +10,7 @@ data
 .DS_Store
 test-results
 playwright-report
+
+# Playwright
+/test-results
+/playwright-report

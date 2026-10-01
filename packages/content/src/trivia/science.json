@@ -1,0 +1,71 @@
+{
+	"id": "science",
+	"title": "Science & Nature",
+	"description": "Atoms, animals and the odd fact about space.",
+	"emoji": "🔬",
+	"questions": [
+		{
+			"q": "What is the chemical symbol for gold?",
+			"choices": ["Go", "Gd", "Au", "Ag"],
+			"answer": 2,
+			"fact": "Au comes from the Latin word for gold, aurum."
+		},
+		{
+			"q": "What gas do plants take in from the air for photosynthesis?",
+			"choices": ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"],
+			"answer": 1
+		},
+		{
+			"q": "What is the largest planet in our solar system?",
+			"choices": ["Saturn", "Neptune", "Jupiter", "Uranus"],
+			"answer": 2
+		},
+		{
+			"q": "How many bones are in the adult human body?",
+			"choices": ["186", "206", "226", "246"],
+			"answer": 1,
+			"fact": "Babies are born with around 300, and many fuse together as they grow."
+		},
+		{
+			"q": "What is the boiling point of water at sea level, in Celsius?",
+			"choices": ["90°C", "100°C", "110°C", "120°C"],
+			"answer": 1
+		},
+		{
+			"q": "Which is the largest mammal on Earth?",
+			"choices": ["African elephant", "Blue whale", "Giraffe", "Sperm whale"],
+			"answer": 1
+		},
+		{
+			"q": "What part of the cell holds most of its DNA?",
+			"choices": ["Nucleus", "Membrane", "Ribosome", "Cytoplasm"],
+			"answer": 0
+		},
+		{
+			"q": "Which planet is closest to the Sun?",
+			"choices": ["Venus", "Earth", "Mars", "Mercury"],
+			"answer": 3
+		},
+		{
+			"q": "What force keeps us on the ground?",
+			"choices": ["Magnetism", "Friction", "Gravity", "Inertia"],
+			"answer": 2
+		},
+		{
+			"q": "How many legs does a spider have?",
+			"choices": ["6", "8", "10", "12"],
+			"answer": 1
+		},
+		{
+			"q": "What is H₂O better known as?",
+			"choices": ["Salt", "Hydrogen peroxide", "Water", "Ammonia"],
+			"answer": 2
+		},
+		{
+			"q": "Roughly how long does light from the Sun take to reach Earth?",
+			"choices": ["8 seconds", "8 minutes", "8 hours", "8 days"],
+			"answer": 1,
+			"fact": "About 8 minutes 20 seconds, on average."
+		}
+	]
+}

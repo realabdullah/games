@@ -28,17 +28,31 @@ export type Viewer =
 	| { kind: 'player'; playerId: string }
 	| { kind: 'audience'; audienceId: string };
 
-/** Who sent an action. The server fills this in — clients can't claim to be someone else. */
+/** Who sent an action. The runner fills this in, so clients can't claim to be someone else. */
 export type Actor =
 	| { kind: 'host' }
 	| { kind: 'player'; playerId: string; vip: boolean }
 	| { kind: 'audience'; audienceId: string }
 	| { kind: 'system' };
 
+/** The party host screen, or the VIP in online and solo play, runs the game. */
+export function isController(actor: Actor): boolean {
+	return actor.kind === 'host' || (actor.kind === 'player' && actor.vip);
+}
+
+/**
+ * Actions the runner sends on its own, with actor `system`:
+ * - `tick`: time has passed; check deadlines from `nextDeadline`.
+ * - `roster`: players left or were kicked; `ctx.active` has the new list.
+ */
+export type SystemAction = { type: 'tick' } | { type: 'roster' };
+
 export interface GameContext {
 	rng: Rng;
-	/** Server time in ms. Pass it in rather than reading the clock so reduce stays pure. */
+	/** Server time in ms. Passed in rather than read from the clock so reduce stays pure. */
 	now: number;
+	/** Ids of players still in the room (disconnected players count; they may be back). */
+	active: readonly string[];
 }
 
 export interface SetupInput<Config, Content> {
@@ -51,8 +65,8 @@ export interface SetupInput<Config, Content> {
 /**
  * A game is a pure state machine. The server (or the browser, in solo mode)
  * owns the state, feeds actions through `reduce`, and sends each viewer only
- * what `view` returns for them — so secrets (answers, other players' drawings
- * before reveal) never leave the server.
+ * what `view` returns for them. That way secrets (answers, other players'
+ * drawings before reveal) never leave the server.
  */
 export interface GameDefinition<
 	State,
@@ -64,16 +78,16 @@ export interface GameDefinition<
 	meta: GameMeta;
 	defaultConfig: Config;
 	setup(input: SetupInput<Config, Content>, ctx: GameContext): State;
-	reduce(state: State, action: Action, actor: Actor, ctx: GameContext): State;
+	reduce(state: State, action: Action | SystemAction, actor: Actor, ctx: GameContext): State;
 	view(state: State, viewer: Viewer): View;
-	/**
-	 * When the state wants a timed transition (e.g. the answer window closes),
-	 * return the deadline. The runner dispatches a `tick` with actor `system`
-	 * at that time. Return null when nothing is pending.
-	 */
-	nextDeadline?(state: State): number | null;
+	/** Validate an action from a client. Return null to reject it. */
+	parseAction(raw: unknown): Action | null;
+	/** The next time something should happen on its own; the runner sends a `tick` then. */
+	nextDeadline(state: State): number | null;
 	isOver(state: State): boolean;
 }
+
+export type AnyGame = GameDefinition<any, any, any, any, any>;
 
 export function defineGame<State, Action, Config, Content, View>(
 	def: GameDefinition<State, Action, Config, Content, View>

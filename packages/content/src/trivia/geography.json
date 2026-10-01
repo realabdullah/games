@@ -1,0 +1,69 @@
+{
+	"id": "geography",
+	"title": "Around the World",
+	"description": "Capitals, rivers and where on Earth things are.",
+	"emoji": "🗺️",
+	"questions": [
+		{
+			"q": "What is the capital of Japan?",
+			"choices": ["Osaka", "Kyoto", "Tokyo", "Hiroshima"],
+			"answer": 2
+		},
+		{
+			"q": "Which is the largest country by area?",
+			"choices": ["Canada", "China", "United States", "Russia"],
+			"answer": 3
+		},
+		{
+			"q": "What is the capital of Australia?",
+			"choices": ["Sydney", "Melbourne", "Canberra", "Perth"],
+			"answer": 2,
+			"fact": "Canberra was purpose-built as a compromise between Sydney and Melbourne."
+		},
+		{
+			"q": "Which country has the largest population in Africa?",
+			"choices": ["Egypt", "Nigeria", "Ethiopia", "South Africa"],
+			"answer": 1
+		},
+		{
+			"q": "Which is the highest mountain above sea level?",
+			"choices": ["K2", "Kilimanjaro", "Everest", "Denali"],
+			"answer": 2
+		},
+		{
+			"q": "What is the capital of Canada?",
+			"choices": ["Toronto", "Ottawa", "Vancouver", "Montreal"],
+			"answer": 1
+		},
+		{
+			"q": "The Sahara Desert is on which continent?",
+			"choices": ["Asia", "Australia", "Africa", "South America"],
+			"answer": 2
+		},
+		{
+			"q": "Which river flows through Paris?",
+			"choices": ["Thames", "Seine", "Danube", "Rhine"],
+			"answer": 1
+		},
+		{
+			"q": "Which country is shaped like a boot?",
+			"choices": ["Greece", "Portugal", "Italy", "Croatia"],
+			"answer": 2
+		},
+		{
+			"q": "What is the capital of Brazil?",
+			"choices": ["Rio de Janeiro", "São Paulo", "Brasília", "Salvador"],
+			"answer": 2
+		},
+		{
+			"q": "Which ocean lies between Africa and Australia?",
+			"choices": ["Indian", "Atlantic", "Pacific", "Southern"],
+			"answer": 0
+		},
+		{
+			"q": "Mount Kilimanjaro is in which country?",
+			"choices": ["Kenya", "Tanzania", "Uganda", "Ethiopia"],
+			"answer": 1
+		}
+	]
+}

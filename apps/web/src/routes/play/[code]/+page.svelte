@@ -2,7 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
+	import type { TriviaView } from '@games/trivia';
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
+	import GamePicker from '$lib/components/GamePicker.svelte';
+	import TriviaPlayer from '$lib/games/trivia/TriviaPlayer.svelte';
+	import type { StartRequest } from '$lib/games/types';
 	import PlayerList from '$lib/components/PlayerList.svelte';
 	import ProfileForm from '$lib/components/ProfileForm.svelte';
 	import { t } from '$lib/i18n';
@@ -28,6 +32,12 @@
 		if (conn?.ended) clearSession('play', code);
 	});
 
+	let lastStart: StartRequest | null = null;
+	function start(req: StartRequest) {
+		lastStart = req;
+		conn?.send({ type: 'start', ...req });
+	}
+
 	function leave() {
 		conn?.send({ type: 'leave' });
 		clearSession('play', code);
@@ -48,34 +58,67 @@
 		{@const room = conn.room!}
 		{@const you = conn.you!}
 		{@const vip = room.players.find((p) => p.vip)}
-		<main class="narrow">
-			<header class="top">
-				<span class="code">{code}</span>
-				<button class="btn ghost small" onclick={leave}>{t.lobby.leave}</button>
-			</header>
-
-			<div class="card status">
-				{#if you.role === 'audience'}
-					<p>{t.lobby.youAreAudience}</p>
-				{:else if you.vip}
-					<p>{t.lobby.youAreVip}</p>
-				{:else if room.mode === 'party'}
-					<p>{t.lobby.waitingForHost}</p>
-				{:else}
-					<p>{t.lobby.waitingForVip(vip?.name ?? 'the host')}</p>
+		{#if room.phase === 'playing' && conn.game}
+			<main class="narrow">
+				<header class="top small">
+					<span class="code">{code}</span>
+					<span class="actions">
+						{#if you.vip}
+							<button class="btn ghost small" onclick={() => conn?.send({ type: 'endGame' })}>
+								{t.lobby.endGame}
+							</button>
+						{/if}
+						<button class="btn ghost small" onclick={leave}>{t.lobby.leave}</button>
+					</span>
+				</header>
+				{#if conn.game.gameId === 'trivia'}
+					<TriviaPlayer
+						view={conn.game.view as TriviaView}
+						clockOffset={conn.clockOffset}
+						youId={you.id}
+						audience={you.role === 'audience'}
+						canControl={you.vip}
+						onaction={(action) => conn?.send({ type: 'action', action })}
+						onplayagain={() => lastStart && start(lastStart)}
+						onendgame={() => conn?.send({ type: 'endGame' })}
+					/>
 				{/if}
-			</div>
+				{#if conn.error}<p class="error" role="alert">{conn.error}</p>{/if}
+			</main>
+		{:else}
+			<main class="narrow">
+				<header class="top">
+					<span class="code">{code}</span>
+					<button class="btn ghost small" onclick={leave}>{t.lobby.leave}</button>
+				</header>
 
-			<h2>{t.lobby.players(room.players.length)}</h2>
-			<PlayerList
-				players={room.players}
-				youId={you.id}
-				onkick={you.vip ? (p) => conn?.send({ type: 'kick', playerId: p.id }) : undefined}
-			/>
+				<div class="card status">
+					{#if you.role === 'audience'}
+						<p>{t.lobby.youAreAudience}</p>
+					{:else if you.vip}
+						<p>{t.lobby.youAreVip}</p>
+					{:else if room.mode === 'party'}
+						<p>{t.lobby.waitingForHost}</p>
+					{:else}
+						<p>{t.lobby.waitingForVip(vip?.name ?? 'the host')}</p>
+					{/if}
+				</div>
 
-			{#if you.vip}<p class="muted">{t.lobby.gamesSoon}</p>{/if}
-			{#if conn.error}<p class="error" role="alert">{conn.error}</p>{/if}
-		</main>
+				<h2>{t.lobby.players(room.players.length)}</h2>
+				<PlayerList
+					players={room.players}
+					youId={you.id}
+					onkick={you.vip ? (p) => conn?.send({ type: 'kick', playerId: p.id }) : undefined}
+				/>
+
+				{#if you.vip}
+					<div class="card pick">
+						<GamePicker mode={room.mode} playerCount={room.players.length} onstart={start} />
+					</div>
+				{/if}
+				{#if conn.error}<p class="error" role="alert">{conn.error}</p>{/if}
+			</main>
+		{/if}
 	</ConnectionGate>
 {/if}
 
@@ -103,6 +146,16 @@
 		align-items: center;
 		justify-content: space-between;
 		font-size: 1.5rem;
+	}
+	.actions {
+		display: flex;
+		gap: 8px;
+	}
+	.top.small {
+		font-size: 1.1rem;
+	}
+	.pick {
+		padding: 20px;
 	}
 	.status {
 		padding: 20px;

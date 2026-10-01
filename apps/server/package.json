@@ -9,7 +9,9 @@
 	},
 	"dependencies": {
 		"@games/engine": "workspace:*",
-		"@games/protocol": "workspace:*"
+		"@games/protocol": "workspace:*",
+		"@games/content": "workspace:*",
+		"@games/trivia": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/bun": "latest"

@@ -45,6 +45,10 @@ const rooms = new RoomManager({
 	youChanged(session, you) {
 		send(sockets.get(session), { type: 'you', you });
 	},
+	gameChanged(updates) {
+		for (const { session, update } of updates)
+			send(sockets.get(session), { type: 'game', ...update });
+	},
 	sessionEnded(session, reason) {
 		const ws = sockets.get(session);
 		if (!ws) return;
@@ -199,6 +203,9 @@ server = Bun.serve({
 	}
 });
 
+// Game timers: 4 checks a second is plenty for countdowns and costs nothing when idle.
+const ticker = setInterval(() => rooms.tick(), 250);
+
 const sweeper = setInterval(() => {
 	rooms.sweep();
 	limiter.sweep();
@@ -209,6 +216,7 @@ function shutdown(signal: string) {
 	if (shuttingDown) return;
 	shuttingDown = true;
 	clearInterval(sweeper);
+	clearInterval(ticker);
 	const snapshot = rooms.snapshot();
 	if (snapshot.rooms.length > 0) store.save(snapshot);
 	store.close();

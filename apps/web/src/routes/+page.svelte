@@ -61,7 +61,11 @@
 								.join(' · ')}
 						</p>
 					</div>
-					{#if g.status === 'soon'}<span class="soon">Coming soon</span>{/if}
+					{#if g.status === 'soon'}
+						<span class="soon">Coming soon</span>
+					{:else if g.modes.includes('solo')}
+						<a class="btn small solo" href="/solo/{g.id}">Play solo</a>
+					{/if}
 				</li>
 			{/each}
 		</ul>
@@ -135,6 +139,14 @@
 	.meta {
 		font-size: 0.9rem;
 		font-weight: 700;
+	}
+	.solo {
+		margin: 0 18px 18px;
+		justify-self: start;
+	}
+	.game {
+		display: grid;
+		grid-template-rows: auto 1fr auto;
 	}
 	.soon {
 		position: absolute;

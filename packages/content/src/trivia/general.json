@@ -1,0 +1,88 @@
+{
+	"id": "general",
+	"title": "General Knowledge",
+	"description": "A bit of everything. A good warm-up for any group.",
+	"emoji": "🌍",
+	"questions": [
+		{
+			"q": "How many minutes are in a full day?",
+			"choices": ["1,440", "1,240", "2,400", "960"],
+			"answer": 0,
+			"fact": "24 hours × 60 minutes = 1,440."
+		},
+		{
+			"q": "Which planet is known as the Red Planet?",
+			"choices": ["Venus", "Mars", "Jupiter", "Mercury"],
+			"answer": 1,
+			"fact": "Iron oxide (rust) in its soil gives Mars its color."
+		},
+		{
+			"q": "How many sides does a hexagon have?",
+			"choices": ["5", "6", "7", "8"],
+			"answer": 1
+		},
+		{
+			"q": "Who painted the Mona Lisa?",
+			"choices": ["Michelangelo", "Raphael", "Leonardo da Vinci", "Rembrandt"],
+			"answer": 2
+		},
+		{
+			"q": "What is the largest ocean on Earth?",
+			"choices": ["Atlantic", "Indian", "Arctic", "Pacific"],
+			"answer": 3,
+			"fact": "The Pacific covers more area than all of Earth's land combined."
+		},
+		{
+			"q": "Which language has the most native speakers?",
+			"choices": ["English", "Spanish", "Mandarin Chinese", "Hindi"],
+			"answer": 2
+		},
+		{
+			"q": "How many players are on the field for one football (soccer) team?",
+			"choices": ["9", "10", "11", "12"],
+			"answer": 2
+		},
+		{
+			"q": "What is the hardest natural substance?",
+			"choices": ["Gold", "Iron", "Quartz", "Diamond"],
+			"answer": 3
+		},
+		{
+			"q": "In which year did the first person walk on the Moon?",
+			"choices": ["1965", "1969", "1972", "1959"],
+			"answer": 1,
+			"fact": "Neil Armstrong stepped onto the Moon on 20 July 1969."
+		},
+		{
+			"q": "Which instrument has 88 keys?",
+			"choices": ["Piano", "Accordion", "Organ", "Harpsichord"],
+			"answer": 0,
+			"fact": "A standard modern piano has 52 white keys and 36 black keys."
+		},
+		{
+			"q": "What is the main ingredient in guacamole?",
+			"choices": ["Tomato", "Avocado", "Pea", "Lime"],
+			"answer": 1
+		},
+		{
+			"q": "How many continents are there (by the most common count)?",
+			"choices": ["5", "6", "7", "8"],
+			"answer": 2
+		},
+		{
+			"q": "Which company makes the iPhone?",
+			"choices": ["Samsung", "Google", "Apple", "Sony"],
+			"answer": 2
+		},
+		{
+			"q": "What do bees collect from flowers to make honey?",
+			"choices": ["Pollen", "Nectar", "Sap", "Dew"],
+			"answer": 1
+		},
+		{
+			"q": "Which shape has three sides?",
+			"choices": ["Square", "Pentagon", "Triangle", "Circle"],
+			"answer": 2
+		}
+	]
+}

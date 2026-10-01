@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
-import { MAX_ROOM_PLAYERS, type RoomView, type You } from '@games/protocol';
+import { MAX_ROOM_PLAYERS, type GameUpdate, type RoomView, type You } from '@games/protocol';
+import type { TriviaView } from '@games/trivia';
+import { INTRO_MS } from '@games/trivia';
 import {
 	IDLE_ROOM_TTL_MS,
 	RoomError,
@@ -13,6 +15,7 @@ let ids: number;
 let views: Map<string, RoomView>;
 let yous: Map<string, You>;
 let ended: Map<string, string>;
+let games: Map<string, GameUpdate>;
 let rooms: RoomManager;
 
 beforeEach(() => {
@@ -21,10 +24,14 @@ beforeEach(() => {
 	views = new Map();
 	yous = new Map();
 	ended = new Map();
+	games = new Map();
 	const events: RoomEvents = {
 		roomChanged: (code, view) => views.set(code, view),
 		youChanged: (session, you) => yous.set(session, you),
-		sessionEnded: (session, reason) => ended.set(session, reason)
+		sessionEnded: (session, reason) => ended.set(session, reason),
+		gameChanged: (updates) => {
+			for (const { session, update } of updates) games.set(session, update);
+		}
 	};
 	rooms = new RoomManager(
 		events,
@@ -147,7 +154,7 @@ describe('lifecycle', () => {
 		const snapshot = JSON.parse(JSON.stringify(rooms.snapshot()));
 
 		const fresh = new RoomManager(
-			{ roomChanged() {}, youChanged() {}, sessionEnded() {} },
+			{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {} },
 			() => clock
 		);
 		fresh.restore(snapshot);
@@ -155,5 +162,104 @@ describe('lifecycle', () => {
 		expect(you.role).toBe('player');
 		expect(room.hostConnected).toBe(false);
 		expect(room.players).toMatchObject([{ name: 'Ada', connected: true }]);
+	});
+});
+
+describe('games', () => {
+	const trivia = (session: string) => games.get(session)?.view as TriviaView | undefined;
+
+	function partyWithPlayers(n: number) {
+		const host = rooms.create({ mode: 'party' });
+		const players = Array.from({ length: n }, (_, i) => join(host.code, `P${i}`));
+		return { host, players };
+	}
+
+	test('host starts trivia; everyone gets their own view', () => {
+		const { host, players } = partyWithPlayers(2);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia', packId: 'science' });
+		expect(views.get(host.code)).toMatchObject({ phase: 'playing', gameId: 'trivia' });
+		expect(trivia(host.session)).toMatchObject({
+			phase: 'intro',
+			packTitle: 'Science & Nature',
+			you: null
+		});
+		expect(trivia(players[0]!.session)?.you).toMatchObject({ score: 0 });
+	});
+
+	test('players cannot start games in party rooms', () => {
+		const { host, players } = partyWithPlayers(2);
+		expect(() => rooms.handle(players[0]!.session, { type: 'start', gameId: 'trivia' })).toThrow(
+			RoomError
+		);
+		expect(views.get(host.code)?.phase).toBe('lobby');
+	});
+
+	test('rejects unknown games and packs', () => {
+		const { host } = partyWithPlayers(1);
+		expect(() => rooms.handle(host.session, { type: 'start', gameId: 'nope' })).toThrow(RoomError);
+		expect(() =>
+			rooms.handle(host.session, { type: 'start', gameId: 'trivia', packId: 'nope' })
+		).toThrow(RoomError);
+	});
+
+	test('the online VIP starts the game', () => {
+		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: '🦊' });
+		rooms.handle(ada.session, { type: 'start', gameId: 'trivia' });
+		expect(trivia(ada.session)?.phase).toBe('intro');
+	});
+
+	test('timers advance the game through tick()', () => {
+		const { host } = partyWithPlayers(1);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		rooms.tick();
+		expect(trivia(host.session)?.phase).toBe('intro');
+		clock += INTRO_MS;
+		rooms.tick();
+		expect(trivia(host.session)?.phase).toBe('question');
+	});
+
+	test('answers flow through and the round reveals when everyone answers', () => {
+		const { host, players } = partyWithPlayers(2);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		clock += INTRO_MS;
+		rooms.tick();
+		for (const p of players) {
+			rooms.handle(p.session, { type: 'action', action: { type: 'answer', choice: 0 } });
+		}
+		expect(trivia(host.session)?.phase).toBe('reveal');
+		expect(trivia(players[0]!.session)?.you?.answered).toBe(0);
+	});
+
+	test('kicking the last unanswered player reveals the round', () => {
+		const { host, players } = partyWithPlayers(2);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		clock += INTRO_MS;
+		rooms.tick();
+		rooms.handle(players[0]!.session, { type: 'action', action: { type: 'answer', choice: 0 } });
+		rooms.handle(host.session, { type: 'kick', playerId: players[1]!.you.id! });
+		expect(trivia(host.session)?.phase).toBe('reveal');
+	});
+
+	test('endGame returns to the lobby', () => {
+		const { host } = partyWithPlayers(1);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		rooms.handle(host.session, { type: 'endGame' });
+		expect(views.get(host.code)).toMatchObject({ phase: 'lobby', gameId: null });
+	});
+
+	test('a game in progress survives snapshot + restore', () => {
+		const { host, players } = partyWithPlayers(1);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		clock += INTRO_MS;
+		rooms.tick();
+		const before = trivia(players[0]!.session)!;
+
+		const fresh = new RoomManager(
+			{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {} },
+			() => clock
+		);
+		fresh.restore(JSON.parse(JSON.stringify(rooms.snapshot())));
+		const { game } = fresh.connect(players[0]!.session);
+		expect((game?.view as TriviaView).question).toEqual(before.question);
 	});
 });

@@ -14,7 +14,9 @@
 	"dependencies": {
 		"@fontsource-variable/bricolage-grotesque": "^5.3.0",
 		"@games/engine": "workspace:*",
-		"@games/protocol": "workspace:*"
+		"@games/protocol": "workspace:*",
+		"@games/content": "workspace:*",
+		"@games/trivia": "workspace:*"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",

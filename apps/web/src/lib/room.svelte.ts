@@ -1,6 +1,7 @@
 import {
 	CloseCode,
 	type ClientMessage,
+	type GameUpdate,
 	type RoomView,
 	type ServerMessage,
 	type You
@@ -10,6 +11,8 @@ export type ConnectionStatus = 'connecting' | 'open' | 'reconnecting' | 'ended';
 export type EndReason = 'kicked' | 'closed' | 'invalid' | 'replaced';
 
 const MAX_BACKOFF_MS = 5_000;
+/** Messages sent while reconnecting are held this long, then dropped as stale. */
+const QUEUE_TTL_MS = 5_000;
 
 /**
  * A live connection to one room. Reconnects on its own (network blips, locked
@@ -20,12 +23,17 @@ export class RoomConnection {
 	ended = $state<EndReason | null>(null);
 	room = $state<RoomView | null>(null);
 	you = $state<You | null>(null);
+	game = $state<GameUpdate | null>(null);
 	error = $state<string | null>(null);
+	/** Server clock minus local clock, so countdowns match the server's deadlines. */
+	clockOffset = $state(0);
 
 	#ws: WebSocket | null = null;
 	#attempt = 0;
 	#retryTimer: ReturnType<typeof setTimeout> | undefined;
 	#stopped = false;
+	#errorTimer: ReturnType<typeof setTimeout> | undefined;
+	#queue: { msg: ClientMessage; at: number }[] = [];
 
 	constructor(private session: string) {
 		this.#connect();
@@ -33,8 +41,22 @@ export class RoomConnection {
 		window.addEventListener('online', this.#onVisible);
 	}
 
+	/**
+	 * Send now if connected; otherwise hold it briefly so a tap during a
+	 * reconnect (e.g. right after a server restart) isn't silently lost.
+	 */
 	send(msg: ClientMessage) {
-		if (this.#ws?.readyState === WebSocket.OPEN) this.#ws.send(JSON.stringify(msg));
+		if (this.status === 'open' && this.#ws?.readyState === WebSocket.OPEN) {
+			this.#ws.send(JSON.stringify(msg));
+		} else if (!this.#stopped) {
+			this.#queue.push({ msg, at: Date.now() });
+		}
+	}
+
+	#flush() {
+		const fresh = this.#queue.filter((q) => Date.now() - q.at < QUEUE_TTL_MS);
+		this.#queue = [];
+		for (const { msg } of fresh) this.#ws?.send(JSON.stringify(msg));
 	}
 
 	destroy() {
@@ -60,9 +82,15 @@ export class RoomConnection {
 					this.status = 'open';
 					this.you = msg.you;
 					this.room = msg.room;
+					this.#setGame(msg.game);
+					this.#flush();
 					break;
 				case 'room':
 					this.room = msg.room;
+					if (!msg.room.gameId) this.game = null;
+					break;
+				case 'game':
+					this.#setGame(msg);
 					break;
 				case 'you':
 					this.you = msg.you;
@@ -75,6 +103,8 @@ export class RoomConnection {
 					break;
 				case 'error':
 					this.error = msg.message;
+					clearTimeout(this.#errorTimer);
+					this.#errorTimer = setTimeout(() => (this.error = null), 5_000);
 					break;
 			}
 		};
@@ -86,6 +116,11 @@ export class RoomConnection {
 			this.status = 'reconnecting';
 			this.#scheduleRetry();
 		};
+	}
+
+	#setGame(update: GameUpdate | null) {
+		this.game = update && { gameId: update.gameId, view: update.view, now: update.now };
+		if (update) this.clockOffset = update.now - Date.now();
 	}
 
 	#scheduleRetry() {

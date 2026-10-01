@@ -1,10 +1,20 @@
 import {
+	startGame,
+	stepFromClient,
+	stepSystem,
+	viewFor,
+	type Actor,
+	type GameSession,
+	type Viewer
+} from '@games/engine';
+import {
 	MAX_ROOM_PLAYERS,
 	ROOM_CODE_ALPHABET,
 	ROOM_CODE_LENGTH,
 	type ClientMessage,
 	type CreateRoomBody,
 	type ErrorCode,
+	type GameUpdate,
 	type JoinRoomBody,
 	type RoomInfoResponse,
 	type RoomMode,
@@ -12,6 +22,7 @@ import {
 	type SessionResponse,
 	type You
 } from '@games/protocol';
+import { registry } from './games.ts';
 
 /** How long a disconnected VIP keeps their crown before it passes on. */
 export const VIP_GRACE_MS = 30_000;
@@ -48,6 +59,7 @@ interface Room {
 	players: Member[];
 	audience: Member[];
 	vipId: string | null;
+	game: GameSession | null;
 }
 
 interface Session {
@@ -61,6 +73,8 @@ export interface RoomEvents {
 	roomChanged(code: string, view: RoomView): void;
 	youChanged(session: string, you: You): void;
 	sessionEnded(session: string, reason: 'kicked' | 'left' | 'expired'): void;
+	/** Each connected-or-not member's own view of the game. */
+	gameChanged(updates: { session: string; update: GameUpdate }[]): void;
 }
 
 export interface RoomSnapshot {
@@ -95,7 +109,8 @@ export class RoomManager {
 			host: null,
 			players: [],
 			audience: [],
-			vipId: null
+			vipId: null,
+			game: null
 		};
 		this.rooms.set(code, room);
 
@@ -129,7 +144,7 @@ export class RoomManager {
 	}
 
 	/** Mark a session connected. Returns what to send in the welcome message. */
-	connect(session: string): { you: You; room: RoomView } {
+	connect(session: string): { you: You; room: RoomView; game: GameUpdate | null } {
 		const s = this.mustSession(session);
 		const room = this.mustGet(s.code);
 		if (s.role === 'host') room.host!.connected = true;
@@ -140,7 +155,7 @@ export class RoomManager {
 		}
 		room.lastSeenAt = this.now();
 		this.changed(room);
-		return { you: this.you(room, s), room: this.view(room) };
+		return { you: this.you(room, s), room: this.view(room), game: this.gameUpdate(room, s) };
 	}
 
 	disconnect(session: string) {
@@ -174,6 +189,42 @@ export class RoomManager {
 				if (s.role === 'host') return this.close(room, 'left');
 				this.removeMember(room, this.member(room, s), 'left');
 				return;
+			}
+			case 'start':
+				return this.startGame(room, s, msg);
+			case 'action': {
+				if (!room.game) return;
+				const { game } = registry[room.game.gameId]!;
+				const actor = this.actor(room, s) as Exclude<Actor, { kind: 'system' }>;
+				const changed = stepFromClient(game, room.game, msg.action, actor, {
+					now: this.now(),
+					active: this.activeIds(room)
+				});
+				if (changed) this.gameChanged(room);
+				return;
+			}
+			case 'endGame': {
+				if (!this.canControl(room, s))
+					throw new RoomError('forbidden', 'Only the host can end the game');
+				if (!room.game) return;
+				room.game = null;
+				room.phase = 'lobby';
+				this.changed(room);
+				return;
+			}
+		}
+	}
+
+	/** Fire game deadlines that have passed (timers, auto-advance). Call often. */
+	tick() {
+		const now = this.now();
+		for (const room of this.rooms.values()) {
+			if (!room.game) continue;
+			const { game } = registry[room.game.gameId]!;
+			const deadline = game.nextDeadline(room.game.state);
+			if (deadline === null || now < deadline) continue;
+			if (stepSystem(game, room.game, { type: 'tick' }, { now, active: this.activeIds(room) })) {
+				this.gameChanged(room);
 			}
 		}
 	}
@@ -209,6 +260,7 @@ export class RoomManager {
 		const t = this.now();
 		for (const room of snapshot.rooms) {
 			room.lastSeenAt = t;
+			room.game ??= null;
 			if (room.host) {
 				room.host.connected = false;
 				this.sessions.set(room.host.session, { code: room.code, role: 'host', id: null });
@@ -228,6 +280,72 @@ export class RoomManager {
 	}
 
 	// ---------- internals ----------
+
+	private startGame(room: Room, s: Session, msg: Extract<ClientMessage, { type: 'start' }>) {
+		if (!this.canControl(room, s))
+			throw new RoomError('forbidden', 'Only the host can start a game');
+		if (room.game && !registry[room.game.gameId]!.game.isOver(room.game.state)) {
+			throw new RoomError('bad_request', 'A game is already running');
+		}
+		const entry = registry[msg.gameId];
+		if (!entry || !entry.game.meta.modes.includes(room.mode)) {
+			throw new RoomError('bad_request', 'That game isn’t available here');
+		}
+		const { min, max } = entry.game.meta.players;
+		if (room.players.length < min) {
+			throw new RoomError('bad_request', `This game needs at least ${min} players`);
+		}
+		if (room.players.length > max) {
+			throw new RoomError('bad_request', `This game allows at most ${max} players`);
+		}
+		const content = entry.content(msg.packId);
+		if (!content) throw new RoomError('bad_request', 'That question pack doesn’t exist');
+
+		room.game = startGame(entry.game, {
+			mode: room.mode,
+			players: room.players.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar })),
+			content,
+			config: entry.config(msg.config),
+			seed: Math.floor(this.random() * 2 ** 32),
+			now: this.now()
+		});
+		room.phase = 'playing';
+		this.changed(room);
+		this.gameChanged(room);
+	}
+
+	private actor(room: Room, s: Session): Actor {
+		if (s.role === 'host') return { kind: 'host' };
+		if (s.role === 'audience') return { kind: 'audience', audienceId: s.id! };
+		return { kind: 'player', playerId: s.id!, vip: s.id === room.vipId };
+	}
+
+	private viewer(s: Session): Viewer {
+		if (s.role === 'host') return { kind: 'host' };
+		if (s.role === 'audience') return { kind: 'audience', audienceId: s.id! };
+		return { kind: 'player', playerId: s.id! };
+	}
+
+	private activeIds(room: Room) {
+		return room.players.map((p) => p.id);
+	}
+
+	private gameUpdate(room: Room, s: Session): GameUpdate | null {
+		if (!room.game) return null;
+		const { game } = registry[room.game.gameId]!;
+		return {
+			gameId: room.game.gameId,
+			view: viewFor(game, room.game, this.viewer(s)),
+			now: this.now()
+		};
+	}
+
+	private gameChanged(room: Room) {
+		const updates = [...this.sessions.entries()]
+			.filter(([, s]) => s.code === room.code)
+			.map(([session, s]) => ({ session, update: this.gameUpdate(room, s)! }));
+		this.events.gameChanged(updates);
+	}
 
 	private addMember(room: Room, name: string, avatar: string): SessionResponse {
 		const role = room.players.length < MAX_ROOM_PLAYERS ? 'player' : 'audience';
@@ -255,6 +373,11 @@ export class RoomManager {
 		this.events.sessionEnded(m.session, reason);
 		// Online rooms only exist for their players.
 		if (room.mode === 'online' && room.players.length === 0) return this.close(room, 'expired');
+		if (room.game) {
+			const { game } = registry[room.game.gameId]!;
+			const ctx = { now: this.now(), active: this.activeIds(room) };
+			if (stepSystem(game, room.game, { type: 'roster' }, ctx)) this.gameChanged(room);
+		}
 		if (room.vipId === m.id) {
 			const next = room.players.find((p) => p.connected) ?? room.players[0];
 			this.setVip(room, next?.id ?? null);
@@ -313,6 +436,7 @@ export class RoomManager {
 			code: room.code,
 			mode: room.mode,
 			phase: room.phase,
+			gameId: room.game?.gameId ?? null,
 			players: room.players.map((p) => ({
 				id: p.id,
 				name: p.name,

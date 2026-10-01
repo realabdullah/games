@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
+	import type { TriviaView } from '@games/trivia';
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
+	import GamePicker from '$lib/components/GamePicker.svelte';
+	import type { StartRequest } from '$lib/games/types';
+	import TriviaHost from '$lib/games/trivia/TriviaHost.svelte';
 	import PlayerList from '$lib/components/PlayerList.svelte';
 	import { t } from '$lib/i18n';
 	import { RoomConnection } from '$lib/room.svelte';
@@ -17,6 +21,12 @@
 	});
 
 	const joinUrl = `${page.url.host}/play`;
+
+	let lastStart: StartRequest | null = null;
+	function start(req: StartRequest) {
+		lastStart = req;
+		conn?.send({ type: 'start', ...req });
+	}
 
 	function closeRoom() {
 		conn?.send({ type: 'leave' });
@@ -37,38 +47,66 @@
 {:else}
 	<ConnectionGate {conn}>
 		{@const room = conn.room!}
-		<main class="host">
-			<header class="join card">
-				<p class="how">
-					{t.lobby.joinAt} <strong>{joinUrl}</strong>
-					{t.lobby.withCode}
-				</p>
-				<p class="code" aria-label="Room code {code.split('').join(' ')}">{code}</p>
-			</header>
-
-			<section class="lobby" aria-live="polite">
-				<div class="count">
-					<h2>{t.lobby.players(room.players.length)}</h2>
-					{#if room.audienceCount > 0}
-						<span class="muted">{t.lobby.audience(room.audienceCount)}</span>
-					{/if}
-				</div>
-				{#if room.players.length === 0}
-					<p class="waiting">{t.lobby.waiting}</p>
-				{:else}
-					<PlayerList
-						players={room.players}
-						large
-						onkick={(p) => conn.send({ type: 'kick', playerId: p.id })}
+		{#if room.phase === 'playing' && conn.game}
+			<main class="host playing">
+				<header class="bar">
+					<span class="muted">{t.lobby.joinAt} <strong>{joinUrl}</strong></span>
+					<span class="bar-end">
+						<button class="btn ghost small" onclick={() => conn.send({ type: 'endGame' })}>
+							{t.lobby.endGame}
+						</button>
+						<span class="mini-code">{code}</span>
+					</span>
+				</header>
+				{#if conn.game.gameId === 'trivia'}
+					<TriviaHost
+						view={conn.game.view as TriviaView}
+						clockOffset={conn.clockOffset}
+						onaction={(action) => conn.send({ type: 'action', action })}
+						onplayagain={() => lastStart && start(lastStart)}
+						onendgame={() => conn.send({ type: 'endGame' })}
 					/>
 				{/if}
-			</section>
+			</main>
+		{:else}
+			<main class="host">
+				<header class="join card">
+					<p class="how">
+						{t.lobby.joinAt} <strong>{joinUrl}</strong>
+						{t.lobby.withCode}
+					</p>
+					<p class="code" aria-label="Room code {code.split('').join(' ')}">{code}</p>
+				</header>
 
-			<footer>
-				<p class="muted">{t.lobby.gamesSoon}</p>
-				<button class="btn ghost small" onclick={closeRoom}>{t.lobby.closeRoom}</button>
-			</footer>
-		</main>
+				<div class="split">
+					<section class="lobby" aria-live="polite">
+						<div class="count">
+							<h2>{t.lobby.players(room.players.length)}</h2>
+							{#if room.audienceCount > 0}
+								<span class="muted">{t.lobby.audience(room.audienceCount)}</span>
+							{/if}
+						</div>
+						{#if room.players.length === 0}
+							<p class="waiting">{t.lobby.waiting}</p>
+						{:else}
+							<PlayerList
+								players={room.players}
+								large
+								onkick={(p) => conn.send({ type: 'kick', playerId: p.id })}
+							/>
+						{/if}
+					</section>
+					<aside class="card pick">
+						<GamePicker mode={room.mode} playerCount={room.players.length} onstart={start} />
+						{#if conn.error}<p class="error" role="alert">{conn.error}</p>{/if}
+					</aside>
+				</div>
+
+				<footer>
+					<button class="btn ghost small" onclick={closeRoom}>{t.lobby.closeRoom}</button>
+				</footer>
+			</main>
+		{/if}
 	</ConnectionGate>
 {/if}
 
@@ -146,9 +184,44 @@
 	}
 	footer {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
+		justify-content: flex-end;
+	}
+	.split {
+		display: grid;
+		gap: 24px;
+		align-items: start;
+	}
+	@media (min-width: 960px) {
+		.split {
+			grid-template-columns: 1fr minmax(340px, 420px);
+		}
+	}
+	.pick {
+		display: grid;
 		gap: 12px;
+		padding: 20px;
+	}
+	.playing {
+		grid-template-rows: auto 1fr;
+	}
+	.bar {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 16px;
+		font-size: clamp(1rem, 1.5vw, 1.3rem);
+	}
+	.bar-end {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+	.mini-code {
+		padding: 4px 14px;
+		border: var(--border);
+		border-radius: 999px;
+		background: var(--yellow);
+		font-weight: 800;
+		letter-spacing: 0.12em;
 	}
 </style>

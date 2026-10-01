@@ -1,4 +1,5 @@
-import type { GameMode, GameTag } from '@games/engine';
+import type { GameMeta, GameMode, GameTag } from '@games/engine';
+import { trivia } from '@games/trivia';
 
 /**
  * Catalog entries. Once a game package exists, its entry comes from its
@@ -16,18 +17,19 @@ export interface CatalogEntry {
 	status: 'live' | 'soon';
 }
 
+const live = (meta: GameMeta, art: Pick<CatalogEntry, 'emoji' | 'color'>): CatalogEntry => ({
+	id: meta.id,
+	name: meta.name,
+	tagline: meta.tagline,
+	tags: meta.tags,
+	modes: meta.modes,
+	players: meta.players,
+	...art,
+	status: 'live'
+});
+
 export const catalog: CatalogEntry[] = [
-	{
-		id: 'trivia',
-		name: 'Trivia Rush',
-		tagline: 'Fast questions, faster fingers. Points for speed.',
-		tags: ['learning', 'fun'],
-		modes: ['party', 'online', 'solo'],
-		players: { min: 1, max: 12 },
-		emoji: '🧠',
-		color: 'var(--yellow)',
-		status: 'soon'
-	},
+	live(trivia.meta, { emoji: '🧠', color: 'var(--yellow)' }),
 	{
 		id: 'icebreakers',
 		name: 'Who Said It?',
