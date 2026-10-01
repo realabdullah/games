@@ -27,7 +27,7 @@ export interface SeoTags {
 }
 
 export const DEFAULT_SEO: Seo = {
-	title: `${t.appName}: party games for any group`,
+	title: `Party games for any group · ${t.appName}`,
 	description: t.tagline,
 	image: '/og/default.png'
 };

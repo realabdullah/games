@@ -3,7 +3,7 @@
  * components. English only for now.
  */
 export const t = {
-	appName: 'Game Night',
+	appName: 'Games',
 	tagline:
 		'Party games, brain teasers and icebreakers for any group. One screen, everyone’s phones.',
 	home: {

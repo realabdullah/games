@@ -110,6 +110,43 @@ export const writerPrompt = (
 	return `${ask}\n\n<research>\n${research.notes}\n</research>\n\n<sources>\n${sources}\n</sources>`;
 };
 
+/**
+ * For providers without schema-enforced output: the writer rules plus the JSON
+ * shape to reply in. Their reply is checked against the same schema afterwards.
+ */
+export const JSON_WRITER_SYSTEM = `${WRITER_SYSTEM}
+
+Reply with only a JSON object, no other text, matching this JSON schema:
+${JSON.stringify(z.toJSONSchema(WrittenPack))}`;
+
+/** Parse a provider's JSON reply into a pack, or explain why it can't be used. */
+export function parseWritten(
+	text: string | null | undefined,
+	req: GenerateRequest,
+	sources: string[] = []
+): TriviaPackDraft {
+	let json: unknown;
+	try {
+		// Some models wrap JSON in a ```json fence despite being asked not to.
+		json = JSON.parse((text ?? '').replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ''));
+	} catch {
+		throw new ApiError('unavailable', 'The generated questions didn’t come out right. Try again.');
+	}
+	const out = WrittenPack.safeParse(json);
+	if (!out.success) {
+		throw new ApiError('unavailable', 'The generated questions didn’t come out right. Try again.');
+	}
+	return toDraft(out.data, req.count, sources);
+}
+
+/** Map a provider's HTTP failure to what the host sees. */
+export function providerError(provider: string, status: number, body: string): ApiError {
+	console.error(`${provider} request failed`, status, body.slice(0, 500));
+	return status === 429
+		? new ApiError('rate_limited', 'The question writer is busy. Try again in a minute.')
+		: new ApiError('unavailable', 'Couldn’t generate questions right now. Try again later.');
+}
+
 /** Only pages the research actually returned (so none are made up), and only ones that fit. */
 const usableSource = (url: string | undefined) => (url && url.length <= 500 ? url : undefined);
 
