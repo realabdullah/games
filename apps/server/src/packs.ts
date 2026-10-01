@@ -6,7 +6,7 @@ import {
 	type EditPackResponse,
 	type PackSummary
 } from '@games/protocol';
-import { and, eq, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import type { Db } from './db/index.ts';
 import { packs } from './db/schema.ts';
 import { ApiError } from './errors.ts';
@@ -25,7 +25,7 @@ export class PackStore {
 
 	create(
 		draft: TriviaPackDraft,
-		opts: { source: 'custom' | 'ai'; topicKey?: string } = { source: 'custom' }
+		opts: { source: 'custom' | 'ai' } = { source: 'custom' }
 	): CreatedPackResponse {
 		const editToken = newToken();
 		const t = this.now();
@@ -42,7 +42,6 @@ export class PackStore {
 						questionCount: draft.questions.length,
 						editTokenHash: hashToken(editToken),
 						source: opts.source,
-						topicKey: opts.topicKey ?? null,
 						flagged: packIsProfane(draft),
 						createdAt: t,
 						updatedAt: t
@@ -101,17 +100,6 @@ export class PackStore {
 			.set({ plays: sql`${packs.plays} + 1` })
 			.where(eq(packs.code, code.toUpperCase()))
 			.run();
-	}
-
-	/** An earlier AI generation for the same request, to reuse instead of paying again. */
-	findGenerated(topicKey: string): TriviaPackDraft | null {
-		const row = this.db
-			.select()
-			.from(packs)
-			.where(and(eq(packs.topicKey, topicKey), eq(packs.source, 'ai')))
-			.limit(1)
-			.get();
-		return row ? (row.content as TriviaPackDraft) : null;
 	}
 
 	private find(code: string): PackRow | undefined {

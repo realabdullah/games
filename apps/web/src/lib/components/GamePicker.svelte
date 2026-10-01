@@ -9,6 +9,7 @@
 	import type { StartRequest } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import { myPacks } from '$lib/my-packs.svelte';
+	import GeneratePack from './GeneratePack.svelte';
 
 	interface Props {
 		mode: GameMode;
@@ -175,6 +176,7 @@
 			</form>
 			{#if codeError}<p class="error">{codeError}</p>{/if}
 		{/if}
+		<GeneratePack onpack={(code) => (packId = code)} />
 		<a class="make" href="/packs/new" target={settings ? '_blank' : undefined}>{p.makePack} →</a>
 
 		<div class="settings">

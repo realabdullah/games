@@ -9,7 +9,7 @@ import {
 	type ErrorCode,
 	type ErrorResponse
 } from '@games/protocol';
-import { topicKey, type AiQuota, type PackGenerator } from './ai.ts';
+import type { AiQuota, PackGenerator } from './ai.ts';
 import { ApiError } from './errors.ts';
 import { Metrics } from './metrics.ts';
 import type { PackStore } from './packs.ts';
@@ -124,21 +124,13 @@ export function createApi({ rooms, packs, limiter, ai, metrics = new Metrics() }
 				if (!ai) throw new ApiError('unavailable', 'AI packs aren’t set up on this server');
 				limited(ip);
 				const body = v.parse(GeneratePackBody, await readJson(req));
-				const key = topicKey(body);
-
-				// Same request as before: copy the earlier result, no AI call, no quota used.
-				const cached = packs.findGenerated(key);
-				if (cached) {
-					metrics.aiGenerations.inc({ result: 'cached' });
-					return json(packs.create(cached, { source: 'ai', topicKey: key }), 201);
-				}
 
 				ai.quota.take(ip);
 				try {
 					const draft = await ai.generator.generate(body);
 					metrics.aiGenerations.inc({ result: 'generated' });
 					metrics.packsCreated.inc({ source: 'ai' });
-					return json(packs.create(draft, { source: 'ai', topicKey: key }), 201);
+					return json(packs.create(draft, { source: 'ai' }), 201);
 				} catch (err) {
 					ai.quota.release(ip);
 					metrics.aiGenerations.inc({ result: err instanceof ApiError ? err.code : 'error' });

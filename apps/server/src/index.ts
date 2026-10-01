@@ -1,7 +1,8 @@
 import { mkdirSync } from 'node:fs';
 import type { Server, ServerWebSocket } from 'bun';
 import { CloseCode, parseClientMessage, type ServerMessage } from '@games/protocol';
-import { AiQuota, ClaudePackGenerator } from './ai.ts';
+import { AiQuota } from './ai.ts';
+import { createPackGenerator } from './ai-providers.ts';
 import { openDb } from './db/index.ts';
 import { ApiError } from './errors.ts';
 import { createRegistry } from './games.ts';
@@ -95,15 +96,19 @@ if (restored) {
 
 const limiter = new RateLimiter({ windowMs: 60_000, max: 30 });
 
+// AI packs are on when at least one provider in AI_PROVIDERS has credentials.
+const aiGenerator = createPackGenerator(undefined, (provider, result) =>
+	metrics.aiProviderCalls.inc({ provider, result })
+);
+
 const api = createApi({
 	rooms,
 	packs,
 	limiter,
 	metrics,
-	// AI packs are on when an API key is configured.
-	ai: process.env.ANTHROPIC_API_KEY
+	ai: aiGenerator
 		? {
-				generator: new ClaudePackGenerator(),
+				generator: aiGenerator,
 				quota: new AiQuota(db, { perClient: AI_DAILY_PER_CLIENT, total: AI_DAILY_TOTAL })
 			}
 		: null

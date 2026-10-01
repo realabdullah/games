@@ -1,4 +1,10 @@
-import { doodlePack, findTriviaPack, icebreakerPack, witPack } from '@games/content';
+import {
+	doodlePack,
+	findTriviaPack,
+	icebreakerPack,
+	witPack,
+	type TriviaPack
+} from '@games/content';
 import { doodle, type DoodleConfig } from '@games/doodle';
 import { icebreakers, type IcebreakersConfig } from '@games/icebreakers';
 import { wit, type WitConfig } from '@games/wit';
@@ -23,6 +29,53 @@ export interface RegisteredGame {
 	content(packId: string | undefined): LoadedContent | null;
 	/** Turn client-supplied settings into safe values. Room settings (family filter) are added after. */
 	config(raw: RawConfig): unknown;
+	/**
+	 * Pick this game's items so a room doesn't replay ones it has already had.
+	 * `played` lists the keys used since the room last went through the whole pack.
+	 */
+	fresh?(content: unknown, config: unknown, played: readonly string[], random: () => number): Fresh;
+}
+
+export interface Fresh {
+	content: unknown;
+	/** Keys of the items picked this game. */
+	used: string[];
+	/** The pack ran out of unplayed items, so this game starts a new cycle. */
+	cycled: boolean;
+}
+
+/** `n` items in random order, without repeats. */
+function sample<T>(items: readonly T[], n: number, random: () => number): T[] {
+	const pool = [...items];
+	for (let i = pool.length - 1; i > 0; i--) {
+		const j = Math.floor(random() * (i + 1));
+		[pool[i], pool[j]] = [pool[j]!, pool[i]!];
+	}
+	return pool.slice(0, n);
+}
+
+/** Unplayed questions first; when too few are left, top up from played ones and start over. */
+export function freshTrivia(
+	pack: TriviaPack,
+	questionCount: number,
+	played: readonly string[],
+	random: () => number
+): Fresh {
+	const seen = new Set(played);
+	const unplayed = pack.questions.filter((q) => !seen.has(q.q));
+	const wanted = Math.min(questionCount, pack.questions.length);
+	const cycled = unplayed.length < wanted;
+	const questions = cycled
+		? [
+				...unplayed,
+				...sample(
+					pack.questions.filter((q) => seen.has(q.q)),
+					wanted - unplayed.length,
+					random
+				)
+			]
+		: sample(unplayed, wanted, random);
+	return { content: { ...pack, questions }, used: questions.map((q) => q.q), cycled };
 }
 
 export type Registry = Record<string, RegisteredGame>;
@@ -52,7 +105,9 @@ export function createRegistry(packs?: PackStore): Registry {
 					60,
 					trivia.defaultConfig.secondsPerQuestion
 				)
-			})
+			}),
+			fresh: (content, config, played, random) =>
+				freshTrivia(content as TriviaPack, (config as TriviaConfig).questionCount, played, random)
 		},
 		icebreakers: {
 			game: icebreakers,

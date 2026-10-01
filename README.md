@@ -1,10 +1,10 @@
-# Game Night
+# Games
 
 A small collection of party games for friends, families and teams.
 
 One person opens the game on a big screen (a TV, or a shared screen on a video call). Everyone else joins on their phone with a four-letter room code. No accounts, no app to install.
 
-## Games
+## The games
 
 - **Trivia Rush**: quick multiple-choice questions, with points for speed. You can write your own question packs.
 - **Who Said It?**: everyone answers a question about themselves, then the group guesses who wrote what.
