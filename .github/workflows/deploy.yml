@@ -113,34 +113,28 @@ jobs:
     timeout-minutes: 5
     environment: production
     env:
-      DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
-      DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+      # Each app's "Deploy webhook" URL from Dokploy (Deployments tab). Kept as
+      # secrets because the URL itself is the credential.
+      SERVER_WEBHOOK: ${{ secrets.DOKPLOY_SERVER_WEBHOOK }}
+      WEB_WEBHOOK: ${{ secrets.DOKPLOY_WEB_WEBHOOK }}
+      # Passed through env, never pasted into the script, so a commit message can't inject shell.
+      COMMIT_MESSAGE: ${{ github.event.head_commit.message || 'Manual deploy' }}
     steps:
-      - name: Check the Dokploy secrets are set
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+
+      - name: Check the webhook secrets are set
         run: |
           missing=0
-          for name in DOKPLOY_URL DOKPLOY_API_KEY DOKPLOY_SERVER_APP_ID DOKPLOY_WEB_APP_ID; do
-            if [ -z "${!name}" ]; then echo "::error::Secret $name is not set"; missing=1; fi
-          done
+          [ -n "$SERVER_WEBHOOK" ] || { echo "::error::Secret DOKPLOY_SERVER_WEBHOOK is not set"; missing=1; }
+          [ -n "$WEB_WEBHOOK" ] || { echo "::error::Secret DOKPLOY_WEB_WEBHOOK is not set"; missing=1; }
           exit $missing
-        env:
-          DOKPLOY_SERVER_APP_ID: ${{ secrets.DOKPLOY_SERVER_APP_ID }}
-          DOKPLOY_WEB_APP_ID: ${{ secrets.DOKPLOY_WEB_APP_ID }}
 
       # The server goes first: it snapshots live rooms on the way down, and
       # clients reconnect to the new one by themselves.
       - name: Redeploy the game server
-        run: |
-          curl --fail-with-body -sS -X POST "${DOKPLOY_URL%/}/api/application.deploy" \
-            -H 'accept: application/json' \
-            -H 'content-type: application/json' \
-            -H "x-api-key: ${DOKPLOY_API_KEY}" \
-            -d "{\"applicationId\": \"${{ secrets.DOKPLOY_SERVER_APP_ID }}\"}"
+        run: ./.github/scripts/dokploy-webhook.sh "$SERVER_WEBHOOK" games-server
 
       - name: Redeploy the web app
-        run: |
-          curl --fail-with-body -sS -X POST "${DOKPLOY_URL%/}/api/application.deploy" \
-            -H 'accept: application/json' \
-            -H 'content-type: application/json' \
-            -H "x-api-key: ${DOKPLOY_API_KEY}" \
-            -d "{\"applicationId\": \"${{ secrets.DOKPLOY_WEB_APP_ID }}\"}"
+        run: ./.github/scripts/dokploy-webhook.sh "$WEB_WEBHOOK" games-web
