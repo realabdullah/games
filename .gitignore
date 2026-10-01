@@ -1,0 +1,12 @@
+node_modules
+.svelte-kit
+build
+dist
+data
+*.sqlite*
+.env
+.env.*
+!.env.example
+.DS_Store
+test-results
+playwright-report

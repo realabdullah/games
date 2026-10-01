@@ -1,0 +1,23 @@
+{
+	"name": "games",
+	"private": true,
+	"type": "module",
+	"workspaces": [
+		"apps/*",
+		"packages/*",
+		"packages/games/*"
+	],
+	"scripts": {
+		"dev": "bun run --filter server --filter web dev",
+		"build": "bun run --filter web build",
+		"test": "bun test",
+		"check": "bun run --filter '*' check",
+		"format": "prettier --write .",
+		"lint": "prettier --check ."
+	},
+	"devDependencies": {
+		"prettier": "^3.8.3",
+		"prettier-plugin-svelte": "^4.1.0",
+		"typescript": "^6.0.3"
+	}
+}

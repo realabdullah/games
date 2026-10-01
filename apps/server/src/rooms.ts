@@ -1,0 +1,354 @@
+import {
+	MAX_ROOM_PLAYERS,
+	ROOM_CODE_ALPHABET,
+	ROOM_CODE_LENGTH,
+	type ClientMessage,
+	type CreateRoomBody,
+	type ErrorCode,
+	type JoinRoomBody,
+	type RoomInfoResponse,
+	type RoomMode,
+	type RoomView,
+	type SessionResponse,
+	type You
+} from '@games/protocol';
+
+/** How long a disconnected VIP keeps their crown before it passes on. */
+export const VIP_GRACE_MS = 30_000;
+/** Rooms with nobody connected are closed after this long. */
+export const IDLE_ROOM_TTL_MS = 10 * 60_000;
+
+export class RoomError extends Error {
+	constructor(
+		readonly code: ErrorCode,
+		message: string
+	) {
+		super(message);
+	}
+}
+
+interface Member {
+	id: string;
+	name: string;
+	avatar: string;
+	session: string;
+	connected: boolean;
+	disconnectedAt: number | null;
+	joinedAt: number;
+}
+
+interface Room {
+	code: string;
+	mode: RoomMode;
+	phase: RoomView['phase'];
+	createdAt: number;
+	/** Last time anyone was connected. */
+	lastSeenAt: number;
+	host: { session: string; connected: boolean } | null;
+	players: Member[];
+	audience: Member[];
+	vipId: string | null;
+}
+
+interface Session {
+	code: string;
+	role: You['role'];
+	id: string | null;
+}
+
+/** Side effects the transport layer (WebSockets) carries out. */
+export interface RoomEvents {
+	roomChanged(code: string, view: RoomView): void;
+	youChanged(session: string, you: You): void;
+	sessionEnded(session: string, reason: 'kicked' | 'left' | 'expired'): void;
+}
+
+export interface RoomSnapshot {
+	version: 1;
+	rooms: Room[];
+}
+
+export class RoomManager {
+	private rooms = new Map<string, Room>();
+	private sessions = new Map<string, Session>();
+
+	constructor(
+		private events: RoomEvents,
+		private now: () => number = Date.now,
+		private random: () => number = Math.random,
+		private newId: () => string = () => crypto.randomUUID()
+	) {}
+
+	get roomCount() {
+		return this.rooms.size;
+	}
+
+	create(body: CreateRoomBody): SessionResponse {
+		const code = this.newCode();
+		const t = this.now();
+		const room: Room = {
+			code,
+			mode: body.mode,
+			phase: 'lobby',
+			createdAt: t,
+			lastSeenAt: t,
+			host: null,
+			players: [],
+			audience: [],
+			vipId: null
+		};
+		this.rooms.set(code, room);
+
+		if (body.mode === 'party') {
+			const session = this.newId();
+			room.host = { session, connected: false };
+			this.sessions.set(session, { code, role: 'host', id: null });
+			return { code, session, you: { role: 'host', id: null, vip: false } };
+		}
+		return this.addMember(room, body.name, body.avatar);
+	}
+
+	join(code: string, body: JoinRoomBody): SessionResponse {
+		const room = this.mustGet(code);
+		const name = body.name.toLowerCase();
+		if ([...room.players, ...room.audience].some((m) => m.name.toLowerCase() === name)) {
+			throw new RoomError('name_taken', 'Someone in this room already has that name');
+		}
+		return this.addMember(room, body.name, body.avatar);
+	}
+
+	info(code: string): RoomInfoResponse {
+		const room = this.mustGet(code);
+		return {
+			code: room.code,
+			mode: room.mode,
+			phase: room.phase,
+			playerCount: room.players.length,
+			full: room.players.length >= MAX_ROOM_PLAYERS
+		};
+	}
+
+	/** Mark a session connected. Returns what to send in the welcome message. */
+	connect(session: string): { you: You; room: RoomView } {
+		const s = this.mustSession(session);
+		const room = this.mustGet(s.code);
+		if (s.role === 'host') room.host!.connected = true;
+		else {
+			const m = this.member(room, s);
+			m.connected = true;
+			m.disconnectedAt = null;
+		}
+		room.lastSeenAt = this.now();
+		this.changed(room);
+		return { you: this.you(room, s), room: this.view(room) };
+	}
+
+	disconnect(session: string) {
+		const s = this.sessions.get(session);
+		const room = s && this.rooms.get(s.code);
+		if (!s || !room) return;
+		if (s.role === 'host') room.host!.connected = false;
+		else {
+			const m = this.member(room, s);
+			m.connected = false;
+			m.disconnectedAt = this.now();
+		}
+		room.lastSeenAt = this.now();
+		this.changed(room);
+	}
+
+	handle(session: string, msg: ClientMessage) {
+		const s = this.mustSession(session);
+		const room = this.mustGet(s.code);
+		switch (msg.type) {
+			case 'kick': {
+				if (!this.canControl(room, s)) throw new RoomError('forbidden', 'Only the host can kick');
+				const target =
+					room.players.find((p) => p.id === msg.playerId) ??
+					room.audience.find((a) => a.id === msg.playerId);
+				if (!target || target.id === s.id) return;
+				this.removeMember(room, target, 'kicked');
+				return;
+			}
+			case 'leave': {
+				if (s.role === 'host') return this.close(room, 'left');
+				this.removeMember(room, this.member(room, s), 'left');
+				return;
+			}
+		}
+	}
+
+	/** Periodic housekeeping: pass on VIP from long-gone players, close idle rooms. */
+	sweep() {
+		const t = this.now();
+		for (const room of this.rooms.values()) {
+			if (this.anyoneConnected(room)) room.lastSeenAt = t;
+			else if (t - room.lastSeenAt > IDLE_ROOM_TTL_MS) {
+				this.close(room, 'expired');
+				continue;
+			}
+			const vip = room.players.find((p) => p.id === room.vipId);
+			if (vip && !vip.connected && t - (vip.disconnectedAt ?? t) > VIP_GRACE_MS) {
+				const next = room.players.find((p) => p.connected);
+				if (next) this.setVip(room, next.id);
+			}
+		}
+	}
+
+	snapshot(): RoomSnapshot {
+		return { version: 1, rooms: structuredClone([...this.rooms.values()]) };
+	}
+
+	/**
+	 * Load rooms saved before a restart. Everyone comes back as disconnected
+	 * and reconnects with their session token; the restart counts as activity
+	 * so rooms don't instantly expire.
+	 */
+	restore(snapshot: RoomSnapshot) {
+		if (snapshot.version !== 1) return;
+		const t = this.now();
+		for (const room of snapshot.rooms) {
+			room.lastSeenAt = t;
+			if (room.host) {
+				room.host.connected = false;
+				this.sessions.set(room.host.session, { code: room.code, role: 'host', id: null });
+			}
+			for (const [list, role] of [
+				[room.players, 'player'],
+				[room.audience, 'audience']
+			] as const) {
+				for (const m of list) {
+					m.connected = false;
+					m.disconnectedAt = t;
+					this.sessions.set(m.session, { code: room.code, role, id: m.id });
+				}
+			}
+			this.rooms.set(room.code, room);
+		}
+	}
+
+	// ---------- internals ----------
+
+	private addMember(room: Room, name: string, avatar: string): SessionResponse {
+		const role = room.players.length < MAX_ROOM_PLAYERS ? 'player' : 'audience';
+		const member: Member = {
+			id: this.newId(),
+			name,
+			avatar,
+			session: this.newId(),
+			connected: false,
+			disconnectedAt: null,
+			joinedAt: this.now()
+		};
+		(role === 'player' ? room.players : room.audience).push(member);
+		const s: Session = { code: room.code, role, id: member.id };
+		this.sessions.set(member.session, s);
+		if (role === 'player' && room.mode === 'online' && room.vipId === null) room.vipId = member.id;
+		this.changed(room);
+		return { code: room.code, session: member.session, you: this.you(room, s) };
+	}
+
+	private removeMember(room: Room, m: Member, reason: 'kicked' | 'left') {
+		room.players = room.players.filter((p) => p.id !== m.id);
+		room.audience = room.audience.filter((a) => a.id !== m.id);
+		this.sessions.delete(m.session);
+		this.events.sessionEnded(m.session, reason);
+		// Online rooms only exist for their players.
+		if (room.mode === 'online' && room.players.length === 0) return this.close(room, 'expired');
+		if (room.vipId === m.id) {
+			const next = room.players.find((p) => p.connected) ?? room.players[0];
+			this.setVip(room, next?.id ?? null);
+		}
+		this.changed(room);
+	}
+
+	private setVip(room: Room, id: string | null) {
+		const prev = room.players.find((p) => p.id === room.vipId);
+		room.vipId = id;
+		const next = room.players.find((p) => p.id === id);
+		for (const m of [prev, next]) {
+			if (m) this.events.youChanged(m.session, this.you(room, this.sessions.get(m.session)!));
+		}
+		this.changed(room);
+	}
+
+	private close(room: Room, reason: 'left' | 'expired') {
+		this.rooms.delete(room.code);
+		const sessions = [
+			room.host?.session,
+			...room.players.map((p) => p.session),
+			...room.audience.map((a) => a.session)
+		];
+		for (const session of sessions) {
+			if (!session) continue;
+			this.sessions.delete(session);
+			this.events.sessionEnded(session, reason === 'left' ? 'left' : 'expired');
+		}
+	}
+
+	private canControl(room: Room, s: Session) {
+		return room.mode === 'party' ? s.role === 'host' : s.role === 'player' && s.id === room.vipId;
+	}
+
+	private anyoneConnected(room: Room) {
+		return (
+			!!room.host?.connected ||
+			room.players.some((p) => p.connected) ||
+			room.audience.some((a) => a.connected)
+		);
+	}
+
+	private member(room: Room, s: Session): Member {
+		const m = (s.role === 'player' ? room.players : room.audience).find((x) => x.id === s.id);
+		if (!m) throw new RoomError('session_invalid', 'You are no longer in this room');
+		return m;
+	}
+
+	private you(room: Room, s: Session): You {
+		return { role: s.role, id: s.id, vip: s.role === 'player' && s.id === room.vipId };
+	}
+
+	private view(room: Room): RoomView {
+		return {
+			code: room.code,
+			mode: room.mode,
+			phase: room.phase,
+			players: room.players.map((p) => ({
+				id: p.id,
+				name: p.name,
+				avatar: p.avatar,
+				connected: p.connected,
+				vip: p.id === room.vipId
+			})),
+			audienceCount: room.audience.length,
+			hostConnected: !!room.host?.connected
+		};
+	}
+
+	private changed(room: Room) {
+		if (this.rooms.has(room.code)) this.events.roomChanged(room.code, this.view(room));
+	}
+
+	private mustGet(code: string): Room {
+		const room = this.rooms.get(code.toUpperCase());
+		if (!room) throw new RoomError('room_not_found', 'No room with that code');
+		return room;
+	}
+
+	private mustSession(session: string): Session {
+		const s = this.sessions.get(session);
+		if (!s || !this.rooms.has(s.code)) throw new RoomError('session_invalid', 'Session expired');
+		return s;
+	}
+
+	private newCode(): string {
+		for (let attempt = 0; attempt < 100; attempt++) {
+			let code = '';
+			for (let i = 0; i < ROOM_CODE_LENGTH; i++) {
+				code += ROOM_CODE_ALPHABET[Math.floor(this.random() * ROOM_CODE_ALPHABET.length)];
+			}
+			if (!this.rooms.has(code)) return code;
+		}
+		throw new Error('Could not allocate a room code');
+	}
+}

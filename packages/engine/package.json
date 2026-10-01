@@ -1,0 +1,14 @@
+{
+	"name": "@games/engine",
+	"private": true,
+	"type": "module",
+	"exports": {
+		".": "./src/index.ts"
+	},
+	"scripts": {
+		"check": "tsc -p ."
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	}
+}

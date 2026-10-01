@@ -1,0 +1,13 @@
+# Serves the static SvelteKit build. TLS is handled by Traefik in front.
+:80 {
+	root * /srv
+	encode zstd gzip
+
+	# Hashed assets never change.
+	@immutable path /_app/immutable/*
+	header @immutable Cache-Control "public, max-age=31536000, immutable"
+
+	# Prerendered pages are /play.html etc.; room pages fall back to the SPA shell.
+	try_files {path} {path}.html {path}/index.html /200.html
+	file_server
+}
