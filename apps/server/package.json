@@ -11,9 +11,12 @@
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.131.0",
 		"@games/content": "workspace:*",
+		"@games/doodle": "workspace:*",
 		"@games/engine": "workspace:*",
+		"@games/icebreakers": "workspace:*",
 		"@games/protocol": "workspace:*",
 		"@games/trivia": "workspace:*",
+		"@games/wit": "workspace:*",
 		"drizzle-orm": "^0.45.3",
 		"zod": "^4.6.5"
 	},

@@ -1,10 +1,10 @@
+import { doodle } from '@games/doodle';
 import type { GameMeta, GameMode, GameTag } from '@games/engine';
+import { icebreakers } from '@games/icebreakers';
 import { trivia } from '@games/trivia';
+import { wit } from '@games/wit';
 
-/**
- * Catalog entries. Once a game package exists, its entry comes from its
- * `meta`; until then, upcoming games are listed so the catalog isn't empty.
- */
+/** Catalog entries: each game's own `meta`, plus its card art. */
 export interface CatalogEntry {
 	id: string;
 	name: string;
@@ -30,37 +30,7 @@ const live = (meta: GameMeta, art: Pick<CatalogEntry, 'emoji' | 'color'>): Catal
 
 export const catalog: CatalogEntry[] = [
 	live(trivia.meta, { emoji: '🧠', color: 'var(--yellow)' }),
-	{
-		id: 'icebreakers',
-		name: 'Who Said It?',
-		tagline: 'Answer about yourself, then guess who wrote what.',
-		tags: ['bonding'],
-		modes: ['party', 'online'],
-		players: { min: 3, max: 12 },
-		emoji: '🧊',
-		color: 'var(--teal)',
-		status: 'soon'
-	},
-	{
-		id: 'wit',
-		name: 'Quick Wit',
-		tagline: 'Write the funniest answer. The room votes.',
-		tags: ['creative', 'fun'],
-		modes: ['party', 'online'],
-		players: { min: 3, max: 10 },
-		emoji: '✍️',
-		color: 'var(--pink)',
-		status: 'soon'
-	},
-	{
-		id: 'drawing',
-		name: 'Doodle Dash',
-		tagline: 'Draw it on your phone. Everyone guesses.',
-		tags: ['creative', 'fun'],
-		modes: ['party', 'online', 'solo'],
-		players: { min: 3, max: 10 },
-		emoji: '🎨',
-		color: 'var(--violet)',
-		status: 'soon'
-	}
+	live(icebreakers.meta, { emoji: '🧊', color: 'var(--teal)' }),
+	live(wit.meta, { emoji: '✍️', color: 'var(--pink)' }),
+	live(doodle.meta, { emoji: '🎨', color: 'var(--violet)' })
 ];

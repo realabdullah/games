@@ -2,10 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
-	import type { TriviaView } from '@games/trivia';
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
 	import GamePicker from '$lib/components/GamePicker.svelte';
-	import TriviaPlayer from '$lib/games/trivia/TriviaPlayer.svelte';
+	import { gameUi } from '$lib/games/registry';
 	import type { StartRequest } from '$lib/games/types';
 	import PlayerList from '$lib/components/PlayerList.svelte';
 	import ProfileForm from '$lib/components/ProfileForm.svelte';
@@ -71,15 +70,17 @@
 						<button class="btn ghost small" onclick={leave}>{t.lobby.leave}</button>
 					</span>
 				</header>
-				{#if conn.game.gameId === 'trivia'}
-					<TriviaPlayer
-						view={conn.game.view as TriviaView}
+				{#if gameUi[conn.game.gameId]}
+					{@const Screen = gameUi[conn.game.gameId]!.Player}
+					<Screen
+						view={conn.game.view}
 						clockOffset={conn.clockOffset}
+						stream={conn.stream}
 						youId={you.id}
 						audience={you.role === 'audience'}
 						canControl={you.vip}
 						onaction={(action) => conn?.send({ type: 'action', action })}
-						onplayagain={() => lastStart && start(lastStart)}
+						onplayagain={() => start(lastStart ?? { gameId: conn!.game!.gameId })}
 						onendgame={() => conn?.send({ type: 'endGame' })}
 					/>
 				{/if}

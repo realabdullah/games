@@ -5,6 +5,7 @@
 	import { trivia, type TriviaView } from '@games/trivia';
 	import GamePicker from '$lib/components/GamePicker.svelte';
 	import TriviaPlayer from '$lib/games/trivia/TriviaPlayer.svelte';
+	import { noStream } from '$lib/games/registry';
 	import type { StartRequest } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import { LocalGame } from '$lib/local-game.svelte';
@@ -68,9 +69,13 @@
 			view={game.view}
 			clockOffset={0}
 			youId="you"
+			audience={false}
+			stream={noStream}
 			canControl
 			onaction={(action) => game?.send(action)}
-			onplayagain={() => lastStart && start(lastStart)}
+			onplayagain={() => {
+				if (lastStart) start(lastStart);
+			}}
 			onendgame={quit}
 		/>
 	{:else}

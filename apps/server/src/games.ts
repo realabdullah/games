@@ -1,4 +1,7 @@
-import { findTriviaPack } from '@games/content';
+import { doodlePack, findTriviaPack, icebreakerPack, witPack } from '@games/content';
+import { doodle, type DoodleConfig } from '@games/doodle';
+import { icebreakers, type IcebreakersConfig } from '@games/icebreakers';
+import { wit, type WitConfig } from '@games/wit';
 import type { AnyGame } from '@games/engine';
 import { trivia, type TriviaConfig } from '@games/trivia';
 import type { PackStore } from './packs.ts';
@@ -17,7 +20,7 @@ export interface RegisteredGame {
 	game: AnyGame;
 	/** Load the content to play with, or null if the pack doesn't exist. */
 	content(packId: string | undefined): LoadedContent | null;
-	/** Turn client-supplied settings into safe values. */
+	/** Turn client-supplied settings into safe values. Room settings (family filter) are added after. */
 	config(raw: RawConfig): unknown;
 }
 
@@ -48,6 +51,32 @@ export function createRegistry(packs?: PackStore): Registry {
 					60,
 					trivia.defaultConfig.secondsPerQuestion
 				)
+			})
+		},
+		icebreakers: {
+			game: icebreakers,
+			content: () => ({ content: icebreakerPack, flagged: false }),
+			config: (raw): Omit<IcebreakersConfig, 'familyFilter'> => ({
+				rounds: clamp(raw?.rounds, 1, 5, icebreakers.defaultConfig.rounds),
+				writeSeconds: clamp(raw?.writeSeconds, 20, 180, icebreakers.defaultConfig.writeSeconds),
+				guessSeconds: clamp(raw?.guessSeconds, 10, 60, icebreakers.defaultConfig.guessSeconds)
+			})
+		},
+		wit: {
+			game: wit,
+			content: () => ({ content: witPack, flagged: false }),
+			config: (raw): Omit<WitConfig, 'familyFilter'> => ({
+				rounds: clamp(raw?.rounds, 1, 3, wit.defaultConfig.rounds),
+				writeSeconds: clamp(raw?.writeSeconds, 30, 180, wit.defaultConfig.writeSeconds),
+				voteSeconds: clamp(raw?.voteSeconds, 10, 60, wit.defaultConfig.voteSeconds)
+			})
+		},
+		doodle: {
+			game: doodle,
+			content: () => ({ content: doodlePack, flagged: false }),
+			config: (raw): Omit<DoodleConfig, 'familyFilter'> => ({
+				rounds: clamp(raw?.rounds, 1, 3, doodle.defaultConfig.rounds),
+				drawSeconds: clamp(raw?.drawSeconds, 30, 120, doodle.defaultConfig.drawSeconds)
 			})
 		}
 	};

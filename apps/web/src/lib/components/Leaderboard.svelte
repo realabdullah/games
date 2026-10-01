@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { LeaderboardEntry } from '@games/trivia';
+	import type { LeaderboardEntry } from '@games/engine';
 	import { flip } from 'svelte/animate';
 
 	interface Props {

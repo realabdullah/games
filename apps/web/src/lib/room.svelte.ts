@@ -6,6 +6,7 @@ import {
 	type ServerMessage,
 	type You
 } from '@games/protocol';
+import type { GameStream } from './games/types';
 
 export type ConnectionStatus = 'connecting' | 'open' | 'reconnecting' | 'ended';
 export type EndReason = 'kicked' | 'closed' | 'invalid' | 'replaced';
@@ -34,6 +35,9 @@ export class RoomConnection {
 	#stopped = false;
 	#errorTimer: ReturnType<typeof setTimeout> | undefined;
 	#queue: { msg: ClientMessage; at: number }[] = [];
+	#streamListeners = new Set<(from: string | null, event: unknown) => void>();
+	/** Catch-up for the game's stream channel, from the latest welcome. */
+	streamSnapshot: unknown = null;
 
 	constructor(private session: string) {
 		this.#connect();
@@ -59,6 +63,21 @@ export class RoomConnection {
 		for (const { msg } of fresh) this.#ws?.send(JSON.stringify(msg));
 	}
 
+	/** This connection as a game stream (drawing strokes) for game screens. */
+	get stream(): GameStream {
+		return {
+			snapshot: this.streamSnapshot,
+			send: (event) => this.send({ type: 'stream', event }),
+			subscribe: (fn) => this.onStream(fn)
+		};
+	}
+
+	/** Listen for stream events (e.g. drawing strokes). Returns an unsubscribe function. */
+	onStream(fn: (from: string | null, event: unknown) => void): () => void {
+		this.#streamListeners.add(fn);
+		return () => this.#streamListeners.delete(fn);
+	}
+
 	destroy() {
 		this.#stopped = true;
 		clearTimeout(this.#retryTimer);
@@ -82,6 +101,7 @@ export class RoomConnection {
 					this.status = 'open';
 					this.you = msg.you;
 					this.room = msg.room;
+					this.streamSnapshot = msg.game?.stream ?? null;
 					this.#setGame(msg.game);
 					this.#flush();
 					break;
@@ -91,6 +111,9 @@ export class RoomConnection {
 					break;
 				case 'game':
 					this.#setGame(msg);
+					break;
+				case 'stream':
+					for (const fn of this.#streamListeners) fn(msg.from, msg.event);
 					break;
 				case 'you':
 					this.you = msg.you;

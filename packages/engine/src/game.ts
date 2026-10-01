@@ -85,6 +85,20 @@ export interface GameDefinition<
 	/** The next time something should happen on its own; the runner sends a `tick` then. */
 	nextDeadline(state: State): number | null;
 	isOver(state: State): boolean;
+	/**
+	 * Optional high-frequency channel (e.g. drawing strokes). Stream events
+	 * update state like actions, but instead of re-sending every viewer's full
+	 * view, the runner relays the event itself to the room. `snapshot` is sent
+	 * when someone connects, so late joiners and reconnects catch up.
+	 */
+	stream?: GameStream<State>;
+}
+
+export interface GameStream<State> {
+	parse(raw: unknown): unknown | null;
+	/** Apply an event; return null to reject it (e.g. not the drawer). */
+	apply(state: State, event: unknown, actor: Actor, ctx: GameContext): State | null;
+	snapshot(state: State): unknown;
 }
 
 export type AnyGame = GameDefinition<any, any, any, any, any>;

@@ -8,6 +8,9 @@ COPY packages/engine/package.json packages/engine/
 COPY packages/protocol/package.json packages/protocol/
 COPY packages/content/package.json packages/content/
 COPY packages/games/trivia/package.json packages/games/trivia/
+COPY packages/games/icebreakers/package.json packages/games/icebreakers/
+COPY packages/games/wit/package.json packages/games/wit/
+COPY packages/games/doodle/package.json packages/games/doodle/
 RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run --filter web build

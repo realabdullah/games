@@ -1,11 +1,10 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import type { TriviaView } from '@games/trivia';
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
 	import GamePicker from '$lib/components/GamePicker.svelte';
 	import type { StartRequest } from '$lib/games/types';
-	import TriviaHost from '$lib/games/trivia/TriviaHost.svelte';
+	import { gameUi } from '$lib/games/registry';
 	import PlayerList from '$lib/components/PlayerList.svelte';
 	import { t } from '$lib/i18n';
 	import { RoomConnection } from '$lib/room.svelte';
@@ -58,12 +57,14 @@
 						<span class="mini-code">{code}</span>
 					</span>
 				</header>
-				{#if conn.game.gameId === 'trivia'}
-					<TriviaHost
-						view={conn.game.view as TriviaView}
+				{#if gameUi[conn.game.gameId]}
+					{@const Screen = gameUi[conn.game.gameId]!.Host}
+					<Screen
+						view={conn.game.view}
 						clockOffset={conn.clockOffset}
+						stream={conn.stream}
 						onaction={(action) => conn.send({ type: 'action', action })}
-						onplayagain={() => lastStart && start(lastStart)}
+						onplayagain={() => start(lastStart ?? { gameId: conn.game!.gameId })}
 						onendgame={() => conn.send({ type: 'endGame' })}
 					/>
 				{/if}

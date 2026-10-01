@@ -2,6 +2,8 @@ import {
 	startGame,
 	stepFromClient,
 	stepSystem,
+	streamFromClient,
+	streamSnapshot,
 	viewFor,
 	type Actor,
 	type GameSession,
@@ -69,6 +71,8 @@ export interface RoomEvents {
 	sessionEnded(session: string, reason: 'kicked' | 'left' | 'expired'): void;
 	/** Each connected-or-not member's own view of the game. */
 	gameChanged(updates: { session: string; update: GameUpdate }[]): void;
+	/** Relay a stream event to everyone in the room. */
+	streamed(code: string, from: string | null, event: unknown): void;
 }
 
 export interface RoomSnapshot {
@@ -156,7 +160,11 @@ export class RoomManager {
 		}
 		room.lastSeenAt = this.now();
 		this.changed(room);
-		return { you: this.you(room, s), room: this.view(room), game: this.gameUpdate(room, s) };
+		const game = this.gameUpdate(room, s);
+		if (game && room.game) {
+			game.stream = streamSnapshot(this.registry[room.game.gameId]!.game, room.game);
+		}
+		return { you: this.you(room, s), room: this.view(room), game };
 	}
 
 	disconnect(session: string) {
@@ -209,6 +217,17 @@ export class RoomManager {
 					throw new ApiError('forbidden', 'Only the host can change settings');
 				room.settings = { familyFilter: msg.familyFilter };
 				this.changed(room);
+				return;
+			}
+			case 'stream': {
+				if (!room.game) return;
+				const { game } = this.registry[room.game.gameId]!;
+				const actor = this.actor(room, s) as Exclude<Actor, { kind: 'system' }>;
+				const event = streamFromClient(game, room.game, msg.event, actor, {
+					now: this.now(),
+					active: this.activeIds(room)
+				});
+				if (event !== null) this.events.streamed(room.code, s.id, event);
 				return;
 			}
 			case 'endGame': {
@@ -320,7 +339,7 @@ export class RoomManager {
 			mode: room.mode,
 			players: room.players.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar })),
 			content: loaded.content,
-			config: entry.config(msg.config),
+			config: { ...(entry.config(msg.config) as object), familyFilter: room.settings.familyFilter },
 			seed: Math.floor(this.random() * 2 ** 32),
 			now: this.now()
 		});

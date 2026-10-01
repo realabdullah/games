@@ -147,6 +147,72 @@ export const t = {
 			correctBlank: (n: number) => `Question ${n}: the correct choice is empty`
 		}
 	},
+	games: {
+		send: 'Send',
+		roundOf: (r: number, n: number) => `Round ${r} of ${n}`,
+		done: (d: number, n: number) => `${d} of ${n} done`,
+		getReady: 'Get ready!',
+		startNow: 'Start now',
+		skip: 'Skip timer',
+		next: 'Next',
+		lockedIn: 'Locked in! Waiting for the others…',
+		points: (n: number) => `+${n}`,
+		settings: {
+			rounds: 'Rounds',
+			drawSeconds: 'Seconds to draw'
+		}
+	},
+	icebreakers: {
+		howTo: 'Answer about yourself. Then everyone guesses who wrote what.',
+		writeOnPhone: 'Answer on your phone',
+		yourAnswer: 'Your answer',
+		placeholder: 'Be honest, be specific…',
+		whoSaidIt: 'Who said it?',
+		answerOf: (i: number, n: number) => `Answer ${i} of ${n}`,
+		yours: 'This one’s yours. Keep a straight face 🤫',
+		youGuessed: (name: string) => `You guessed ${name}`,
+		itWas: 'It was',
+		gotIt: (names: string) => `Got it: ${names}`,
+		nobodyGotIt: 'Nobody guessed it!',
+		fooled: (n: number) => (n === 1 ? 'Fooled 1 person' : `Fooled ${n} people`),
+		correct: 'You got it!',
+		wrong: 'Not this time',
+		noGuess: 'No guess'
+	},
+	wit: {
+		howTo: 'Answer two prompts. Then the room votes for the funnier answer.',
+		writeOnPhone: 'Answer your prompts on your phone',
+		promptOf: (i: number, n: number) => `Prompt ${i} of ${n}`,
+		placeholder: 'Make them laugh…',
+		allDone: 'All done! Waiting for the others…',
+		vote: 'Vote for your favorite',
+		yours: 'One of these is yours. Sit back and hope.',
+		voted: 'Vote in!',
+		noAnswer: 'No answer',
+		votes: (n: number) => (n === 1 ? '1 vote' : `${n} votes`),
+		sweep: 'Clean sweep! +200',
+		matchupOf: (i: number, n: number) => `${i} of ${n}`
+	},
+	doodle: {
+		howTo: 'Take turns drawing a word. Everyone else races to guess it.',
+		choosing: (name: string) => `${name} is choosing a word…`,
+		pickWord: 'Pick a word to draw',
+		draw: 'Draw:',
+		drawing: (name: string) => `${name} is drawing`,
+		guessPlaceholder: 'Type your guess',
+		guess: 'Guess',
+		feedEmpty: 'Guesses show up here.',
+		guessedIt: (name: string) => `${name} guessed it!`,
+		youGotIt: 'You got it! 🎉',
+		guessed: (d: number, n: number) => `${d} of ${n} guessed`,
+		theWordWas: 'The word was',
+		turnOf: (i: number, n: number) => `Turn ${i} of ${n}`,
+		undo: 'Undo',
+		clear: 'Clear',
+		color: (n: number) => `Color ${n}`,
+		size: (n: number) => `Brush size ${n}`,
+		canvas: 'Drawing canvas'
+	},
 	solo: {
 		title: 'Solo trivia',
 		intro: 'Play on your own. Same questions, same scoring, no room needed.',

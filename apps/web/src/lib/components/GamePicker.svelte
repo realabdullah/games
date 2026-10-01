@@ -4,6 +4,7 @@
 	import type { PackSummary, RoomSettings } from '@games/protocol';
 	import { api } from '$lib/api';
 	import { catalog } from '$lib/catalog';
+	import { gameUi } from '$lib/games/registry';
 	import type { StartRequest } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import { myPacks } from '$lib/my-packs.svelte';
@@ -38,6 +39,15 @@
 	let packId = $state(curated[0]!.id);
 	let questionCount = $state(10);
 	let secondsPerQuestion = $state(20);
+	/** Settings for the other games, keyed by game then setting. */
+	let extra = $state<Record<string, Record<string, number>>>(
+		Object.fromEntries(
+			Object.entries(gameUi).map(([id, ui]) => [
+				id,
+				Object.fromEntries(ui.settings.map((st) => [st.key, st.default]))
+			])
+		)
+	);
 
 	let code = $state('');
 	let codePack = $state<PackSummary | null>(null);
@@ -63,7 +73,11 @@
 	}
 
 	function start() {
-		onstart({ gameId, packId, config: { questionCount, secondsPerQuestion } });
+		if (gameId === 'trivia') {
+			onstart({ gameId, packId, config: { questionCount, secondsPerQuestion } });
+		} else {
+			onstart({ gameId, config: { ...extra[gameId] } });
+		}
 	}
 </script>
 
@@ -72,7 +86,7 @@
 		<legend class="label">{t.picker.title}</legend>
 		{#each games as g (g.id)}
 			<label class="game card option" class:selected={g.id === gameId} style:--accent={g.color}>
-				<input type="radio" name="game" value={g.id} bind:group={gameId} class="sr-only" />
+				<input type="radio" name="{uid}-game" value={g.id} bind:group={gameId} class="sr-only" />
 				<span class="emoji" aria-hidden="true">{g.emoji}</span>
 				<span>
 					<strong>{g.name}</strong>
@@ -162,6 +176,17 @@
 					{#each [10, 20, 30] as n (n)}<option value={n}>{n}</option>{/each}
 				</select>
 			</div>
+		</div>
+	{:else if gameUi[gameId]?.settings.length}
+		<div class="settings">
+			{#each gameUi[gameId]!.settings as st (st.key)}
+				<div class="field">
+					<label for="{uid}-{st.key}">{st.label}</label>
+					<select id="{uid}-{st.key}" class="input" bind:value={extra[gameId]![st.key]}>
+						{#each st.options as n (n)}<option value={n}>{n}</option>{/each}
+					</select>
+				</div>
+			{/each}
 		</div>
 	{/if}
 

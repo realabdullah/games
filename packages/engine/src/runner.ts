@@ -78,3 +78,33 @@ export function stepSystem(
 export function viewFor(game: AnyGame, session: GameSession, viewer: Viewer): unknown {
 	return game.view(session.state, viewer);
 }
+
+/**
+ * Validate and apply a stream event from a client. Returns the event to relay,
+ * or null if it was rejected.
+ */
+export function streamFromClient(
+	game: AnyGame,
+	session: GameSession,
+	raw: unknown,
+	actor: Exclude<Actor, { kind: 'system' }>,
+	ctx: { now: number; active: readonly string[] }
+): unknown | null {
+	if (!game.stream) return null;
+	const event = game.stream.parse(raw);
+	if (event === null) return null;
+	const rng = createRng(session.rngState);
+	const next = game.stream.apply(session.state, event, actor, {
+		rng,
+		now: ctx.now,
+		active: ctx.active
+	});
+	if (next === null) return null;
+	session.state = next;
+	session.rngState = rng.state;
+	return event;
+}
+
+export function streamSnapshot(game: AnyGame, session: GameSession): unknown {
+	return game.stream ? game.stream.snapshot(session.state) : null;
+}

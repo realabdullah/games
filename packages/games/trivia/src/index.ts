@@ -2,10 +2,14 @@ import type { TriviaPack } from '@games/content';
 import {
 	defineGame,
 	isController,
+	rankPlayers,
 	type Actor,
 	type GameContext,
-	type GamePlayer
+	type GamePlayer,
+	type LeaderboardEntry
 } from '@games/engine';
+
+export type { LeaderboardEntry };
 
 export const INTRO_MS = 4_000;
 export const REVEAL_MS = 9_000;
@@ -48,15 +52,6 @@ export interface TriviaState {
 }
 
 export type TriviaAction = { type: 'answer'; choice: number } | { type: 'next' };
-
-export interface LeaderboardEntry {
-	id: string;
-	name: string;
-	avatar: string;
-	score: number;
-	delta: number;
-	rank: number;
-}
 
 export interface TriviaView {
 	phase: Phase;
@@ -332,22 +327,5 @@ function phaseDuration(state: TriviaState): number {
 }
 
 function rankings(state: TriviaState): LeaderboardEntry[] {
-	const sorted = [...state.players].sort(
-		(a, b) => (state.scores[b.id] ?? 0) - (state.scores[a.id] ?? 0)
-	);
-	let rank = 0;
-	let prevScore = Number.NaN;
-	return sorted.map((p, i) => {
-		const score = state.scores[p.id] ?? 0;
-		if (score !== prevScore) rank = i + 1; // ties share a rank
-		prevScore = score;
-		return {
-			id: p.id,
-			name: p.name,
-			avatar: p.avatar,
-			score,
-			delta: state.lastPoints[p.id] ?? 0,
-			rank
-		};
-	});
+	return rankPlayers(state.players, state.scores, state.lastPoints);
 }

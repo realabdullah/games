@@ -26,7 +26,8 @@ beforeEach(() => {
 		sessionEnded: (session, reason) => ended.set(session, reason),
 		gameChanged: (updates) => {
 			for (const { session, update } of updates) games.set(session, update);
-		}
+		},
+		streamed: () => {}
 	};
 	rooms = new RoomManager(
 		events,
@@ -149,7 +150,7 @@ describe('lifecycle', () => {
 		const snapshot = JSON.parse(JSON.stringify(rooms.snapshot()));
 
 		const fresh = new RoomManager(
-			{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {} },
+			{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {}, streamed() {} },
 			() => clock
 		);
 		fresh.restore(snapshot);
@@ -250,11 +251,75 @@ describe('games', () => {
 		const before = trivia(players[0]!.session)!;
 
 		const fresh = new RoomManager(
-			{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {} },
+			{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {}, streamed() {} },
 			() => clock
 		);
 		fresh.restore(JSON.parse(JSON.stringify(rooms.snapshot())));
 		const { game } = fresh.connect(players[0]!.session);
 		expect((game?.view as TriviaView).question).toEqual(before.question);
+	});
+});
+
+describe('phase 4 games', () => {
+	function partyOf(n: number) {
+		const host = rooms.create({ mode: 'party' });
+		const players = Array.from({ length: n }, (_, i) => join(host.code, `P${i}`));
+		return { host, players };
+	}
+
+	test.each(['icebreakers', 'wit', 'doodle'])('%s starts with 3 players, not 2', (gameId) => {
+		const small = partyOf(2);
+		expect(() => rooms.handle(small.host.session, { type: 'start', gameId })).toThrow(
+			'at least 3 players'
+		);
+		const { host } = partyOf(3);
+		rooms.handle(host.session, { type: 'start', gameId });
+		expect(views.get(host.code)).toMatchObject({ phase: 'playing', gameId });
+	});
+
+	test('the room’s family filter setting reaches the game', () => {
+		const { host, players } = partyOf(3);
+		rooms.handle(host.session, { type: 'settings', familyFilter: false });
+		rooms.handle(host.session, { type: 'start', gameId: 'icebreakers' });
+		const snap = rooms.snapshot().rooms[0]!;
+		expect((snap.game!.state as { config: { familyFilter: boolean } }).config.familyFilter).toBe(
+			false
+		);
+		void players;
+	});
+
+	test('doodle strokes from the drawer are relayed; others are ignored', () => {
+		const relayed: unknown[] = [];
+		const fresh = new RoomManager(
+			{
+				roomChanged() {},
+				youChanged() {},
+				sessionEnded() {},
+				gameChanged: (updates) => {
+					for (const { session, update } of updates) games.set(session, update);
+				},
+				streamed: (_code, from, event) => relayed.push({ from, event })
+			},
+			() => clock
+		);
+		const host = fresh.create({ mode: 'party' });
+		const ps = ['A', 'B', 'C'].map((n) => fresh.join(host.code, { name: n, avatar: '🦊' }));
+		fresh.handle(host.session, { type: 'start', gameId: 'doodle' });
+		fresh.handle(host.session, { type: 'action', action: { type: 'next' } }); // skip intro
+		const drawerSession = ps.find(
+			(p) => (games.get(p.session)?.view as { choices: unknown }).choices
+		)!;
+		fresh.handle(drawerSession.session, { type: 'action', action: { type: 'choose', index: 0 } });
+
+		const stroke = { t: 'stroke', id: 's1', c: 0, w: 1, p: [0.1, 0.2] };
+		const other = ps.find((p) => p !== drawerSession)!;
+		fresh.handle(other.session, { type: 'stream', event: stroke });
+		expect(relayed).toHaveLength(0);
+		fresh.handle(drawerSession.session, { type: 'stream', event: stroke });
+		expect(relayed).toEqual([{ from: drawerSession.you.id, event: stroke }]);
+
+		// A reconnecting client gets the strokes so far.
+		const { game } = fresh.connect(other.session);
+		expect(game?.stream).toMatchObject({ strokes: [{ id: 's1' }] });
 	});
 });

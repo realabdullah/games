@@ -1,24 +1,14 @@
 <script lang="ts">
-	import type { TriviaAction, TriviaView } from '@games/trivia';
+	import type { TriviaView } from '@games/trivia';
 	import Timer from '$lib/components/Timer.svelte';
+	import type { PlayerViewProps } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import AnswerGrid from './AnswerGrid.svelte';
-	import Leaderboard from './Leaderboard.svelte';
+	import Leaderboard from '$lib/components/Leaderboard.svelte';
 
 	/** A player's own screen: phone controller (party), online play, or solo. */
-	interface Props {
-		view: TriviaView;
-		clockOffset: number;
-		youId: string | null;
-		audience?: boolean;
-		/** Whether this viewer runs the game (online VIP, solo player). */
-		canControl: boolean;
-		onaction: (action: TriviaAction) => void;
-		onplayagain?: () => void;
-		onendgame?: () => void;
-	}
 	let {
-		view,
+		view: raw,
 		clockOffset,
 		youId,
 		audience = false,
@@ -26,7 +16,8 @@
 		onaction,
 		onplayagain,
 		onendgame
-	}: Props = $props();
+	}: PlayerViewProps = $props();
+	const view = $derived(raw as TriviaView);
 
 	const m = t.trivia;
 	const you = $derived(view.you);

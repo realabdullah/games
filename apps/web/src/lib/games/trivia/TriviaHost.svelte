@@ -1,19 +1,14 @@
 <script lang="ts">
-	import type { TriviaAction, TriviaView } from '@games/trivia';
+	import type { TriviaView } from '@games/trivia';
 	import Timer from '$lib/components/Timer.svelte';
+	import type { HostViewProps } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import AnswerGrid from './AnswerGrid.svelte';
-	import Leaderboard from './Leaderboard.svelte';
+	import Leaderboard from '$lib/components/Leaderboard.svelte';
 
 	/** The shared big screen in party mode. Built to be read from across a room. */
-	interface Props {
-		view: TriviaView;
-		clockOffset: number;
-		onaction: (action: TriviaAction) => void;
-		onplayagain: () => void;
-		onendgame: () => void;
-	}
-	let { view, clockOffset, onaction, onplayagain, onendgame }: Props = $props();
+	let { view: raw, clockOffset, onaction, onplayagain, onendgame }: HostViewProps = $props();
+	const view = $derived(raw as TriviaView);
 
 	const m = t.trivia;
 </script>

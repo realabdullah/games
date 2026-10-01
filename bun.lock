@@ -16,9 +16,12 @@
       "dependencies": {
         "@anthropic-ai/sdk": "^0.131.0",
         "@games/content": "workspace:*",
+        "@games/doodle": "workspace:*",
         "@games/engine": "workspace:*",
+        "@games/icebreakers": "workspace:*",
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
+        "@games/wit": "workspace:*",
         "drizzle-orm": "^0.45.3",
         "zod": "^4.6.5",
       },
@@ -33,9 +36,12 @@
       "dependencies": {
         "@fontsource-variable/bricolage-grotesque": "^5.3.0",
         "@games/content": "workspace:*",
+        "@games/doodle": "workspace:*",
         "@games/engine": "workspace:*",
+        "@games/icebreakers": "workspace:*",
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
+        "@games/wit": "workspace:*",
       },
       "devDependencies": {
         "@sveltejs/adapter-static": "^3.0.10",
@@ -65,8 +71,38 @@
         "@types/bun": "latest",
       },
     },
+    "packages/games/doodle": {
+      "name": "@games/doodle",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/icebreakers": {
+      "name": "@games/icebreakers",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
     "packages/games/trivia": {
       "name": "@games/trivia",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/wit": {
+      "name": "@games/wit",
       "dependencies": {
         "@games/content": "workspace:*",
         "@games/engine": "workspace:*",
@@ -153,11 +189,17 @@
 
     "@games/content": ["@games/content@workspace:packages/content"],
 
+    "@games/doodle": ["@games/doodle@workspace:packages/games/doodle"],
+
     "@games/engine": ["@games/engine@workspace:packages/engine"],
+
+    "@games/icebreakers": ["@games/icebreakers@workspace:packages/games/icebreakers"],
 
     "@games/protocol": ["@games/protocol@workspace:packages/protocol"],
 
     "@games/trivia": ["@games/trivia@workspace:packages/games/trivia"],
+
+    "@games/wit": ["@games/wit@workspace:packages/games/wit"],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 

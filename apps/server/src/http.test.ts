@@ -41,7 +41,7 @@ function setup({ withAi = true, perClient = 2 } = {}) {
 	packs = new PackStore(db);
 	generator = new FakeGenerator();
 	rooms = new RoomManager(
-		{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {} },
+		{ roomChanged() {}, youChanged() {}, sessionEnded() {}, gameChanged() {}, streamed() {} },
 		Date.now,
 		Math.random,
 		() => crypto.randomUUID(),

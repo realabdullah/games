@@ -192,7 +192,9 @@ export const ClientMessage = v.variant('type', [
 	v.object({ type: v.literal('action'), action: v.unknown() }),
 	/** Leave the current game and go back to the lobby. */
 	v.object({ type: v.literal('endGame') }),
-	v.object({ type: v.literal('settings'), familyFilter: v.boolean() })
+	v.object({ type: v.literal('settings'), familyFilter: v.boolean() }),
+	/** High-frequency game events (drawing strokes); relayed to the room as-is. */
+	v.object({ type: v.literal('stream'), event: v.unknown() })
 ]);
 export type ClientMessage = v.InferOutput<typeof ClientMessage>;
 
@@ -201,11 +203,14 @@ export interface GameUpdate {
 	gameId: string;
 	view: unknown;
 	now: number;
+	/** Catch-up state for the game's stream (e.g. strokes so far). Sent on connect only. */
+	stream?: unknown;
 }
 
 export type ServerMessage =
 	| { type: 'welcome'; you: You; room: RoomView; game: GameUpdate | null }
 	| ({ type: 'game' } & GameUpdate)
+	| { type: 'stream'; from: string | null; event: unknown }
 	| { type: 'room'; room: RoomView }
 	| { type: 'you'; you: You }
 	| { type: 'kicked' }

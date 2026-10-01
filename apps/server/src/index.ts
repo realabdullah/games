@@ -53,6 +53,12 @@ const rooms = new RoomManager(
 			for (const { session, update } of updates)
 				send(sockets.get(session), { type: 'game', ...update });
 		},
+		streamed(code, from, event) {
+			server?.publish(
+				roomTopic(code),
+				JSON.stringify({ type: 'stream', from, event } satisfies ServerMessage)
+			);
+		},
 		sessionEnded(session, reason) {
 			const ws = sockets.get(session);
 			if (!ws) return;
@@ -128,6 +134,8 @@ server = Bun.serve({
 	websocket: {
 		data: {} as WsData,
 		idleTimeout: 60,
+		// Stroke batches and answers are small; refuse anything large.
+		maxPayloadLength: 64 * 1024,
 		sendPings: true,
 		open(ws) {
 			const { session } = ws.data;
