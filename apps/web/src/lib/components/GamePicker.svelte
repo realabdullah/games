@@ -71,7 +71,7 @@
 	<fieldset class="games">
 		<legend class="label">{t.picker.title}</legend>
 		{#each games as g (g.id)}
-			<label class="game card" class:selected={g.id === gameId} style:--accent={g.color}>
+			<label class="game card option" class:selected={g.id === gameId} style:--accent={g.color}>
 				<input type="radio" name="game" value={g.id} bind:group={gameId} class="sr-only" />
 				<span class="emoji" aria-hidden="true">{g.emoji}</span>
 				<span>
@@ -87,7 +87,7 @@
 			<legend class="label">{t.picker.pack}</legend>
 			<span class="group">{p.curated}</span>
 			{#each curated as pack (pack.id)}
-				<label class="pack" class:selected={pack.id === packId}>
+				<label class="pack option" class:selected={pack.id === packId}>
 					<input
 						type="radio"
 						name="{uid}-pack"
@@ -102,7 +102,7 @@
 			{#if myPacks.list.length > 0 || codePack}
 				<span class="group">{p.myPacks}</span>
 				{#each myPacks.list as pack (pack.code)}
-					<label class="pack" class:selected={pack.code === packId}>
+					<label class="pack option" class:selected={pack.code === packId}>
 						<input
 							type="radio"
 							name="{uid}-pack"
@@ -115,7 +115,7 @@
 					</label>
 				{/each}
 				{#if codePack && !myPacks.get(codePack.code)}
-					<label class="pack" class:selected={codePack.code === packId}>
+					<label class="pack option" class:selected={codePack.code === packId}>
 						<input
 							type="radio"
 							name="{uid}-pack"
@@ -169,6 +169,7 @@
 		<label class="toggle">
 			<input
 				type="checkbox"
+				class="switch"
 				checked={settings.familyFilter}
 				onchange={(e) => onsettings({ ...settings, familyFilter: e.currentTarget.checked })}
 			/>
@@ -262,15 +263,9 @@
 	}
 	.toggle {
 		display: flex;
-		align-items: flex-start;
+		align-items: center;
 		gap: 12px;
 		cursor: pointer;
-	}
-	.toggle input {
-		width: 22px;
-		height: 22px;
-		margin-top: 2px;
-		accent-color: var(--ink);
 	}
 	.toggle > span {
 		display: grid;
@@ -289,11 +284,6 @@
 	.pack.selected {
 		background: var(--yellow);
 		box-shadow: 3px 3px 0 var(--line);
-	}
-	.game:has(:focus-visible),
-	.pack:has(:focus-visible) {
-		outline: 3px solid var(--violet);
-		outline-offset: 2px;
 	}
 	.settings {
 		display: grid;

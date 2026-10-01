@@ -106,9 +106,15 @@
 		transform: translate(3px, 3px);
 		box-shadow: 1px 1px 0 var(--line);
 	}
+	/* Your pick: a thick ink ring, distinct from the violet focus lift. */
 	.picked {
-		outline: 4px solid var(--ink);
-		outline-offset: 3px;
+		box-shadow:
+			0 0 0 3px var(--bg),
+			0 0 0 7px var(--ink);
+	}
+	.choice:focus-visible {
+		transform: translate(-2px, -2px);
+		box-shadow: var(--focus-shadow);
 	}
 	.dim {
 		opacity: 0.4;

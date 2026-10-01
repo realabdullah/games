@@ -243,11 +243,6 @@
 	.choice.correct {
 		background: color-mix(in oklch, var(--teal) 45%, transparent);
 	}
-	.choice input[type='radio'] {
-		width: 22px;
-		height: 22px;
-		accent-color: var(--ink);
-	}
 	.x {
 		width: 36px;
 		height: 36px;

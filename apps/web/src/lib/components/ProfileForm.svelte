@@ -48,7 +48,7 @@
 	<fieldset class="avatars">
 		<legend class="field">{t.join.avatarLabel}</legend>
 		{#each AVATARS as a (a)}
-			<label class="avatar" class:selected={a === avatar}>
+			<label class="avatar option" class:selected={a === avatar}>
 				<input type="radio" name="avatar" value={a} bind:group={avatar} class="sr-only" />
 				<span aria-hidden="true">{a}</span>
 			</label>
@@ -93,16 +93,14 @@
 		background: var(--surface);
 		font-size: clamp(1.75rem, 8vw, 2.25rem);
 		cursor: pointer;
-		transition: transform 120ms ease-out;
+		transition:
+			transform 120ms ease-out,
+			box-shadow 120ms ease-out;
 	}
 	.avatar.selected {
 		background: var(--yellow);
 		box-shadow: 3px 3px 0 var(--line);
 		transform: translate(-2px, -2px);
-	}
-	.avatar:has(:focus-visible) {
-		outline: 3px solid var(--violet);
-		outline-offset: 2px;
 	}
 	.btn {
 		justify-self: stretch;

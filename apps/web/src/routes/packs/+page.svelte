@@ -76,6 +76,16 @@
 		text-decoration: none;
 		box-shadow: 3px 3px 0 var(--line);
 	}
+	.pack {
+		transition:
+			transform 120ms ease-out,
+			box-shadow 120ms ease-out;
+	}
+	.pack:focus-visible {
+		background: var(--surface);
+		transform: translate(-2px, -2px);
+		box-shadow: var(--focus-shadow);
+	}
 	.emoji {
 		font-size: 2rem;
 	}
