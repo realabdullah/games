@@ -24,6 +24,11 @@ export class SnapshotStore {
 			.run({ data: JSON.stringify(snapshot), savedAt: Date.now() });
 	}
 
+	/** Remove any saved snapshot (e.g. every room has closed). */
+	clear() {
+		this.db.run('DELETE FROM room_snapshot');
+	}
+
 	/** Returns the saved snapshot (if any) and clears it so it's only restored once. */
 	take(maxAgeMs: number): RoomSnapshot | null {
 		const row = this.db
@@ -33,7 +38,12 @@ export class SnapshotStore {
 			.get();
 		this.db.run('DELETE FROM room_snapshot');
 		if (!row || Date.now() - row.saved_at > maxAgeMs) return null;
-		return JSON.parse(row.data) as RoomSnapshot;
+		try {
+			return JSON.parse(row.data) as RoomSnapshot;
+		} catch (err) {
+			console.error('room snapshot is corrupt; starting empty', err);
+			return null;
+		}
 	}
 
 	close() {

@@ -18,6 +18,7 @@ export class TestServer {
 				...process.env,
 				PORT: String(this.port),
 				DATA_DIR: this.dataDir,
+				SNAPSHOT_EVERY_MS: '500',
 				ANTHROPIC_API_KEY: ''
 			},
 			stdio: ['ignore', 'pipe', 'pipe']
@@ -32,6 +33,16 @@ export class TestServer {
 		if (!proc || proc.exitCode !== null) return;
 		const exited = new Promise((resolve) => proc.once('exit', resolve));
 		proc.kill('SIGTERM');
+		await exited;
+		this.proc = null;
+	}
+
+	/** SIGKILL, like a crash or the OOM killer: no chance to save on the way out. */
+	async crash() {
+		const proc = this.proc;
+		if (!proc || proc.exitCode !== null) return;
+		const exited = new Promise((resolve) => proc.once('exit', resolve));
+		proc.kill('SIGKILL');
 		await exited;
 		this.proc = null;
 	}

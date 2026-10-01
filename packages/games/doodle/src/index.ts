@@ -240,6 +240,15 @@ export const doodle = defineGame<DoodleState, DoodleAction, DoodleConfig, Prompt
 		return hint !== undefined ? Math.min(hint, state.phaseEndsAt) : state.phaseEndsAt;
 	},
 
+	shiftTime(state, ms) {
+		return {
+			...state,
+			phaseEndsAt: state.phaseEndsAt + ms,
+			drawStartedAt: state.drawStartedAt + ms,
+			hintTimes: state.hintTimes.map((t) => t + ms)
+		};
+	},
+
 	isOver(state) {
 		return state.phase === 'final';
 	},

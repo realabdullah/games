@@ -1,6 +1,7 @@
 import {
 	startGame,
 	stepFromClient,
+	resumeSession,
 	stepSystem,
 	streamFromClient,
 	streamSnapshot,
@@ -27,6 +28,7 @@ import {
 import { isProfane } from '@games/content';
 import { ApiError } from './errors.ts';
 import { createRegistry, type Registry } from './games.ts';
+import { Metrics } from './metrics.ts';
 
 /** How long a disconnected VIP keeps their crown before it passes on. */
 export const VIP_GRACE_MS = 30_000;
@@ -55,6 +57,8 @@ interface Room {
 	audience: Member[];
 	vipId: string | null;
 	game: GameSession | null;
+	/** Whether the current game's finish has been counted in metrics. */
+	gameFinished?: boolean;
 	settings: RoomSettings;
 }
 
@@ -77,6 +81,8 @@ export interface RoomEvents {
 
 export interface RoomSnapshot {
 	version: 1;
+	/** When it was taken, so restored games can make up for the downtime. */
+	savedAt?: number;
 	rooms: Room[];
 }
 
@@ -89,8 +95,20 @@ export class RoomManager {
 		private now: () => number = Date.now,
 		private random: () => number = Math.random,
 		private newId: () => string = () => crypto.randomUUID(),
-		private registry: Registry = createRegistry()
+		private registry: Registry = createRegistry(),
+		readonly metrics: Metrics = new Metrics()
 	) {}
+
+	/** Live counts for gauges. */
+	stats() {
+		const playing = new Map<string, number>();
+		let players = 0;
+		for (const room of this.rooms.values()) {
+			players += room.players.length + room.audience.length;
+			if (room.game) playing.set(room.game.gameId, (playing.get(room.game.gameId) ?? 0) + 1);
+		}
+		return { rooms: this.rooms.size, players, playing };
+	}
 
 	get roomCount() {
 		return this.rooms.size;
@@ -117,6 +135,8 @@ export class RoomManager {
 			settings: { familyFilter: true }
 		};
 		this.rooms.set(code, room);
+		this.revision++;
+		this.metrics.roomsCreated.inc({ mode: body.mode });
 
 		if (body.mode === 'party') {
 			const session = this.newId();
@@ -227,7 +247,10 @@ export class RoomManager {
 					now: this.now(),
 					active: this.activeIds(room)
 				});
-				if (event !== null) this.events.streamed(room.code, s.id, event);
+				if (event !== null) {
+					this.revision++;
+					this.events.streamed(room.code, s.id, event);
+				}
 				return;
 			}
 			case 'endGame': {
@@ -273,8 +296,11 @@ export class RoomManager {
 		}
 	}
 
+	/** Bumped on every change, so periodic snapshots can skip when nothing happened. */
+	revision = 0;
+
 	snapshot(): RoomSnapshot {
-		return { version: 1, rooms: structuredClone([...this.rooms.values()]) };
+		return { version: 1, savedAt: this.now(), rooms: structuredClone([...this.rooms.values()]) };
 	}
 
 	/**
@@ -282,29 +308,62 @@ export class RoomManager {
 	 * and reconnects with their session token; the restart counts as activity
 	 * so rooms don't instantly expire.
 	 */
-	restore(snapshot: RoomSnapshot) {
-		if (snapshot.version !== 1) return;
+	restore(snapshot: RoomSnapshot): { restored: number; skipped: number; gamesDropped: number } {
+		const result = { restored: 0, skipped: 0, gamesDropped: 0 };
+		if (snapshot?.version !== 1 || !Array.isArray(snapshot.rooms)) return result;
 		const t = this.now();
+		const downtime = snapshot.savedAt ? Math.max(0, t - snapshot.savedAt) : 0;
 		for (const room of snapshot.rooms) {
-			room.lastSeenAt = t;
-			room.game ??= null;
-			room.settings ??= { familyFilter: true };
-			if (room.host) {
-				room.host.connected = false;
-				this.sessions.set(room.host.session, { code: room.code, role: 'host', id: null });
+			// One bad room must never stop the others from coming back.
+			try {
+				if (this.restoreRoom(room, t, downtime)) result.gamesDropped++;
+				result.restored++;
+			} catch (err) {
+				result.skipped++;
+				console.error(`skipped room ${room?.code} on restore`, err);
 			}
-			for (const [list, role] of [
-				[room.players, 'player'],
-				[room.audience, 'audience']
-			] as const) {
-				for (const m of list) {
-					m.connected = false;
-					m.disconnectedAt = t;
-					this.sessions.set(m.session, { code: room.code, role, id: m.id });
-				}
-			}
-			this.rooms.set(room.code, room);
 		}
+		return result;
+	}
+
+	/** Returns true if the room's game had to be dropped. */
+	private restoreRoom(room: Room, t: number, downtime: number): boolean {
+		if (typeof room.code !== 'string' || !Array.isArray(room.players))
+			throw new Error('malformed room');
+		room.lastSeenAt = t;
+		room.game ??= null;
+		room.audience ??= [];
+		room.settings ??= { familyFilter: true };
+
+		let dropped = false;
+		if (room.game) {
+			const entry = this.registry[room.game.gameId];
+			const resumed = entry ? resumeSession(entry.game, room.game, downtime) : null;
+			if (resumed) room.game = resumed;
+			else {
+				// The game changed shape (or no longer exists) since the snapshot: back to the lobby.
+				room.game = null;
+				room.phase = 'lobby';
+				dropped = true;
+			}
+		}
+
+		if (room.host) {
+			room.host.connected = false;
+			this.sessions.set(room.host.session, { code: room.code, role: 'host', id: null });
+		}
+		for (const [list, role] of [
+			[room.players, 'player'],
+			[room.audience, 'audience']
+		] as const) {
+			for (const m of list) {
+				m.connected = false;
+				m.disconnectedAt = t;
+				this.sessions.set(m.session, { code: room.code, role, id: m.id });
+			}
+		}
+		this.rooms.set(room.code, room);
+		return dropped;
 	}
 
 	// ---------- internals ----------
@@ -344,6 +403,8 @@ export class RoomManager {
 			now: this.now()
 		});
 		room.phase = 'playing';
+		room.gameFinished = false;
+		this.metrics.gamesStarted.inc({ game: msg.gameId });
 		if (loaded.customCode) this.onCustomPackPlayed?.(loaded.customCode);
 		this.changed(room);
 		this.gameChanged(room);
@@ -385,6 +446,15 @@ export class RoomManager {
 	}
 
 	private gameChanged(room: Room) {
+		this.revision++;
+		if (
+			room.game &&
+			!room.gameFinished &&
+			this.registry[room.game.gameId]!.game.isOver(room.game.state)
+		) {
+			room.gameFinished = true;
+			this.metrics.gamesFinished.inc({ game: room.game.gameId });
+		}
 		const updates = [...this.sessions.entries()]
 			.filter(([, s]) => s.code === room.code)
 			.map(([session, s]) => ({ session, update: this.gameUpdate(room, s)! }));
@@ -404,6 +474,7 @@ export class RoomManager {
 		};
 		(role === 'player' ? room.players : room.audience).push(member);
 		const s: Session = { code: room.code, role, id: member.id };
+		this.metrics.playersJoined.inc({ role });
 		this.sessions.set(member.session, s);
 		if (role === 'player' && room.mode === 'online' && room.vipId === null) room.vipId = member.id;
 		this.changed(room);
@@ -441,6 +512,7 @@ export class RoomManager {
 
 	private close(room: Room, reason: 'left' | 'expired') {
 		this.rooms.delete(room.code);
+		this.revision++;
 		const sessions = [
 			room.host?.session,
 			...room.players.map((p) => p.session),
@@ -495,6 +567,7 @@ export class RoomManager {
 	}
 
 	private changed(room: Room) {
+		this.revision++;
 		if (this.rooms.has(room.code)) this.events.roomChanged(room.code, this.view(room));
 	}
 

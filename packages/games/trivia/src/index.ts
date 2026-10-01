@@ -219,6 +219,17 @@ export const trivia = defineGame<TriviaState, TriviaAction, TriviaConfig, Trivia
 		return state.phase === 'final' ? null : state.phaseEndsAt;
 	},
 
+	shiftTime(state, ms) {
+		return {
+			...state,
+			phaseEndsAt: state.phaseEndsAt + ms,
+			questionStartedAt: state.questionStartedAt + ms,
+			answers: Object.fromEntries(
+				Object.entries(state.answers).map(([id, a]) => [id, { ...a, at: a.at + ms }])
+			)
+		};
+	},
+
 	isOver(state) {
 		return state.phase === 'final';
 	}

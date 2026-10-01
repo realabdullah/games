@@ -232,6 +232,10 @@ export const wit = defineGame<WitState, WitAction, WitConfig, PromptPack, WitVie
 		return state.phase === 'final' ? null : state.phaseEndsAt;
 	},
 
+	shiftTime(state, ms) {
+		return { ...state, phaseEndsAt: state.phaseEndsAt + ms };
+	},
+
 	isOver(state) {
 		return state.phase === 'final';
 	}

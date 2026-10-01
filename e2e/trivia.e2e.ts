@@ -107,6 +107,26 @@ test('a server restart mid-game picks up where it left off', async ({ browser })
 	await expect(host.getByRole('button', { name: 'Next question' })).toBeVisible();
 });
 
+test('a crash (no shutdown) recovers from the periodic snapshot', async ({ browser }) => {
+	const { host, code } = await hostRoom(browser);
+	const ada = await joinRoom(browser, code, 'Ada');
+	await joinRoom(browser, code, 'Bob');
+	await startTrivia(host, 2);
+
+	await choices(ada).first().click();
+	await expect(host.getByText('1 of 2 answered')).toBeVisible();
+	const question = await host.locator('.q').textContent();
+	// Give the periodic snapshot (every 500ms in tests) a moment to catch the answer.
+	await host.waitForTimeout(1200);
+
+	await server.crash();
+	await server.start();
+
+	await expect(host.locator('.q')).toHaveText(question!, { timeout: 15_000 });
+	await expect(host.getByText('1 of 2 answered')).toBeVisible({ timeout: 15_000 });
+	await expect(ada.getByText('Locked in!')).toBeVisible({ timeout: 15_000 });
+});
+
 test('solo trivia runs entirely in the browser', async ({ browser }) => {
 	const page = await (await browser.newContext(PHONE)).newPage();
 	await page.goto('/solo/trivia');

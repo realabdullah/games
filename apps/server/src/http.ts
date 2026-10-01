@@ -11,6 +11,7 @@ import {
 } from '@games/protocol';
 import { topicKey, type AiQuota, type PackGenerator } from './ai.ts';
 import { ApiError } from './errors.ts';
+import { Metrics } from './metrics.ts';
 import type { PackStore } from './packs.ts';
 import type { RateLimiter } from './rate-limit.ts';
 import type { RoomManager } from './rooms.ts';
@@ -21,6 +22,7 @@ export interface ApiDeps {
 	limiter: RateLimiter;
 	/** Null when AI generation isn't configured (no API key). */
 	ai: { generator: PackGenerator; quota: AiQuota } | null;
+	metrics?: Metrics;
 }
 
 type Handler = (ctx: {
@@ -45,7 +47,7 @@ const STATUS: Record<ErrorCode, number> = {
  * The HTTP API (everything under /api). Returns a plain `(Request, ip) => Response`
  * so it's easy to test without a running server.
  */
-export function createApi({ rooms, packs, limiter, ai }: ApiDeps) {
+export function createApi({ rooms, packs, limiter, ai, metrics = new Metrics() }: ApiDeps) {
 	const limited = (ip: string) => {
 		if (!limiter.allow(ip)) throw new ApiError('rate_limited', 'Slow down a little');
 	};
@@ -77,6 +79,7 @@ export function createApi({ rooms, packs, limiter, ai }: ApiDeps) {
 			async ({ req, ip }) => {
 				limited(ip);
 				const body = v.parse(SavePackBody, await readJson(req));
+				metrics.packsCreated.inc({ source: 'custom' });
 				return json(packs.create(body.pack) satisfies CreatedPackResponse, 201);
 			}
 		],
@@ -125,14 +128,20 @@ export function createApi({ rooms, packs, limiter, ai }: ApiDeps) {
 
 				// Same request as before: copy the earlier result, no AI call, no quota used.
 				const cached = packs.findGenerated(key);
-				if (cached) return json(packs.create(cached, { source: 'ai', topicKey: key }), 201);
+				if (cached) {
+					metrics.aiGenerations.inc({ result: 'cached' });
+					return json(packs.create(cached, { source: 'ai', topicKey: key }), 201);
+				}
 
 				ai.quota.take(ip);
 				try {
 					const draft = await ai.generator.generate(body);
+					metrics.aiGenerations.inc({ result: 'generated' });
+					metrics.packsCreated.inc({ source: 'ai' });
 					return json(packs.create(draft, { source: 'ai', topicKey: key }), 201);
 				} catch (err) {
 					ai.quota.release(ip);
+					metrics.aiGenerations.inc({ result: err instanceof ApiError ? err.code : 'error' });
 					throw err;
 				}
 			}
@@ -155,7 +164,7 @@ export function createApi({ rooms, packs, limiter, ai }: ApiDeps) {
 			const params = route.regex.exec(pathname)!.groups ?? {};
 			return await route.handler({ req, params, ip });
 		} catch (err) {
-			return handleError(err);
+			return handleError(err, () => metrics.errors.inc({ where: 'http' }));
 		}
 	};
 }
@@ -168,7 +177,7 @@ function fail(code: ErrorCode, message: string) {
 	return json({ error: { code, message } } satisfies ErrorResponse, STATUS[code]);
 }
 
-function handleError(err: unknown) {
+function handleError(err: unknown, onUnexpected?: () => void) {
 	if (err instanceof ApiError) return fail(err.code, err.message);
 	if (err instanceof v.ValiError) {
 		const issue = err.issues[0];
@@ -179,6 +188,7 @@ function handleError(err: unknown) {
 		);
 	}
 	console.error(err);
+	onUnexpected?.();
 	return json({ error: { code: 'bad_request', message: 'Something went wrong' } }, 500);
 }
 

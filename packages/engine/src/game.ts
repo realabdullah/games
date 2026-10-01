@@ -86,6 +86,17 @@ export interface GameDefinition<
 	nextDeadline(state: State): number | null;
 	isOver(state: State): boolean;
 	/**
+	 * Bump when the state's shape changes in a way old snapshots can't load.
+	 * Restored games with a different version are dropped (room returns to
+	 * the lobby) instead of crashing. Defaults to 1.
+	 */
+	stateVersion?: number;
+	/**
+	 * Move every absolute time in the state forward by `ms`. Used after a
+	 * restart so the downtime doesn't eat into players' timers.
+	 */
+	shiftTime?(state: State, ms: number): State;
+	/**
 	 * Optional high-frequency channel (e.g. drawing strokes). Stream events
 	 * update state like actions, but instead of re-sending every viewer's full
 	 * view, the runner relays the event itself to the room. `snapshot` is sent

@@ -10,6 +10,8 @@ export interface GameSession {
 	mode: GameMode;
 	state: unknown;
 	rngState: number;
+	/** The game's stateVersion when this session was created. */
+	stateVersion: number;
 }
 
 export function startGame(
@@ -33,7 +35,13 @@ export function startGame(
 		},
 		{ rng, now: opts.now, active: opts.players.map((p) => p.id) }
 	);
-	return { gameId: game.meta.id, mode: opts.mode, state, rngState: rng.state };
+	return {
+		gameId: game.meta.id,
+		mode: opts.mode,
+		state,
+		rngState: rng.state,
+		stateVersion: game.stateVersion ?? 1
+	};
 }
 
 /** Apply one action. Returns true if the state changed. */
@@ -107,4 +115,20 @@ export function streamFromClient(
 
 export function streamSnapshot(game: AnyGame, session: GameSession): unknown {
 	return game.stream ? game.stream.snapshot(session.state) : null;
+}
+
+/**
+ * Prepare a snapshotted session to run again after `downtimeMs` offline.
+ * Returns null if it can't be resumed (state from an incompatible version).
+ */
+export function resumeSession(
+	game: AnyGame,
+	session: GameSession,
+	downtimeMs: number
+): GameSession | null {
+	if ((session.stateVersion ?? 1) !== (game.stateVersion ?? 1)) return null;
+	if (downtimeMs > 0 && game.shiftTime) {
+		return { ...session, state: game.shiftTime(session.state, downtimeMs) };
+	}
+	return session;
 }

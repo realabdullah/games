@@ -323,3 +323,107 @@ describe('phase 4 games', () => {
 		expect(game?.stream).toMatchObject({ strokes: [{ id: 's1' }] });
 	});
 });
+
+describe('restore hardening', () => {
+	const noEvents = {
+		roomChanged() {},
+		youChanged() {},
+		sessionEnded() {},
+		gameChanged() {},
+		streamed() {}
+	};
+
+	function triviaInQuestion() {
+		const host = rooms.create({ mode: 'party' });
+		const ada = join(host.code, 'Ada');
+		rooms.handle(host.session, {
+			type: 'start',
+			gameId: 'trivia',
+			config: { secondsPerQuestion: 20 }
+		});
+		clock += INTRO_MS;
+		rooms.tick();
+		return { host, ada };
+	}
+
+	test('downtime is added back to game timers', () => {
+		const { ada } = triviaInQuestion();
+		const before = (games.get(ada.session)!.view as TriviaView).endsAt;
+		const snapshot = JSON.parse(JSON.stringify(rooms.snapshot()));
+
+		clock += 60_000; // a minute offline: without shifting, the question would be long over
+		const fresh = new RoomManager(noEvents, () => clock);
+		expect(fresh.restore(snapshot)).toEqual({ restored: 1, skipped: 0, gamesDropped: 0 });
+		const { game } = fresh.connect(ada.session);
+		const view = game!.view as TriviaView;
+		expect(view.phase).toBe('question');
+		expect(view.endsAt).toBe(before + 60_000);
+	});
+
+	test('a game saved by an incompatible version goes back to the lobby', () => {
+		const { ada } = triviaInQuestion();
+		const snapshot = JSON.parse(JSON.stringify(rooms.snapshot()));
+		snapshot.rooms[0].game.stateVersion = 999;
+
+		const fresh = new RoomManager(noEvents, () => clock);
+		expect(fresh.restore(snapshot)).toMatchObject({ restored: 1, gamesDropped: 1 });
+		const { room, game } = fresh.connect(ada.session);
+		expect(room.phase).toBe('lobby');
+		expect(game).toBeNull();
+	});
+
+	test('a malformed room is skipped without losing the others', () => {
+		const a = rooms.create({ mode: 'party' });
+		rooms.create({ mode: 'party' });
+		const snapshot = JSON.parse(JSON.stringify(rooms.snapshot()));
+		snapshot.rooms[1] = { code: 42 };
+
+		const fresh = new RoomManager(noEvents, () => clock);
+		const origError = console.error;
+		console.error = () => {};
+		try {
+			expect(fresh.restore(snapshot)).toMatchObject({ restored: 1, skipped: 1 });
+		} finally {
+			console.error = origError;
+		}
+		expect(fresh.info(a.code).code).toBe(a.code);
+	});
+
+	test('garbage snapshots are ignored', () => {
+		const fresh = new RoomManager(noEvents, () => clock);
+		expect(fresh.restore({ version: 2 } as never)).toMatchObject({ restored: 0 });
+		expect(fresh.restore(null as never)).toMatchObject({ restored: 0 });
+	});
+
+	test('the revision only moves when something changes', () => {
+		const r0 = rooms.revision;
+		rooms.sweep();
+		expect(rooms.revision).toBe(r0);
+		rooms.create({ mode: 'party' });
+		expect(rooms.revision).toBeGreaterThan(r0);
+	});
+});
+
+describe('metrics', () => {
+	test('counts rooms, joins, starts and finishes', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia', config: { questionCount: 3 } });
+		const m = rooms.metrics;
+		expect(m.roomsCreated.get({ mode: 'party' })).toBe(1);
+		expect(m.playersJoined.get({ role: 'player' })).toBe(1);
+		expect(m.gamesStarted.get({ game: 'trivia' })).toBe(1);
+
+		// Skip to the end: intro, then each question and reveal.
+		for (let i = 0; i < 7; i++)
+			rooms.handle(host.session, { type: 'action', action: { type: 'next' } });
+		expect(m.gamesFinished.get({ game: 'trivia' })).toBe(1);
+		// Further updates don't double count.
+		rooms.handle(host.session, { type: 'action', action: { type: 'next' } });
+		expect(m.gamesFinished.get({ game: 'trivia' })).toBe(1);
+
+		const text = m.render();
+		expect(text).toContain('games_started_total{game="trivia"} 1');
+		expect(text).toContain('# TYPE games_rooms_created_total counter');
+	});
+});

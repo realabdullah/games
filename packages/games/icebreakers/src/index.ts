@@ -228,6 +228,10 @@ export const icebreakers = defineGame<
 		return state.phase === 'final' ? null : state.phaseEndsAt;
 	},
 
+	shiftTime(state, ms) {
+		return { ...state, phaseEndsAt: state.phaseEndsAt + ms };
+	},
+
 	isOver(state) {
 		return state.phase === 'final';
 	}

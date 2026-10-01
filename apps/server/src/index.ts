@@ -6,6 +6,7 @@ import { openDb } from './db/index.ts';
 import { ApiError } from './errors.ts';
 import { createRegistry } from './games.ts';
 import { createApi } from './http.ts';
+import { Metrics } from './metrics.ts';
 import { PackStore } from './packs.ts';
 import { RateLimiter } from './rate-limit.ts';
 import { RoomManager } from './rooms.ts';
@@ -14,6 +15,10 @@ import { SnapshotStore } from './snapshot.ts';
 const PORT = Number(process.env.PORT ?? 3001);
 const DATA_DIR = process.env.DATA_DIR ?? './data';
 const SNAPSHOT_MAX_AGE_MS = 15 * 60_000;
+/** Snapshot live rooms this often (when anything changed), so a crash loses seconds, not games. */
+const SNAPSHOT_EVERY_MS = Number(process.env.SNAPSHOT_EVERY_MS ?? 15_000);
+const startedAt = Date.now();
+const metrics = new Metrics();
 const AI_DAILY_PER_CLIENT = Number(process.env.AI_DAILY_PER_CLIENT ?? 5);
 const AI_DAILY_TOTAL = Number(process.env.AI_DAILY_TOTAL ?? 100);
 
@@ -70,15 +75,20 @@ const rooms = new RoomManager(
 	Date.now,
 	Math.random,
 	() => crypto.randomUUID(),
-	createRegistry(packs)
+	createRegistry(packs),
+	metrics
 );
 rooms.onCustomPackPlayed = (code) => packs.recordPlay(code);
 
 const store = new SnapshotStore(`${DATA_DIR}/server.sqlite`);
 const restored = store.take(SNAPSHOT_MAX_AGE_MS);
 if (restored) {
-	rooms.restore(restored);
-	console.log(`restored ${restored.rooms.length} room(s) from snapshot`);
+	const r = rooms.restore(restored);
+	console.log(
+		`restored ${r.restored} room(s) from snapshot` +
+			(r.skipped ? `, skipped ${r.skipped} unreadable` : '') +
+			(r.gamesDropped ? `, ${r.gamesDropped} game(s) reset to lobby after an update` : '')
+	);
 }
 
 const limiter = new RateLimiter({ windowMs: 60_000, max: 30 });
@@ -87,6 +97,7 @@ const api = createApi({
 	rooms,
 	packs,
 	limiter,
+	metrics,
 	// AI packs are on when an API key is configured.
 	ai: process.env.ANTHROPIC_API_KEY
 		? {
@@ -108,19 +119,17 @@ function clientIp(req: Request, srv: Server<WsData>) {
 server = Bun.serve({
 	port: PORT,
 	routes: {
-		'/health': new Response('ok'),
+		'/health': () =>
+			Response.json({
+				ok: true,
+				rooms: rooms.roomCount,
+				uptimeSeconds: Math.round((Date.now() - startedAt) / 1000)
+			}),
+		// Not routed publicly: scrape it on the internal Docker network.
 		'/metrics': () =>
-			new Response(
-				[
-					'# TYPE games_rooms gauge',
-					`games_rooms ${rooms.roomCount}`,
-					'# TYPE games_connections gauge',
-					`games_connections ${sockets.size}`,
-					'# TYPE process_resident_memory_bytes gauge',
-					`process_resident_memory_bytes ${process.memoryUsage().rss}`
-				].join('\n') + '\n',
-				{ headers: { 'content-type': 'text/plain; version=0.0.4' } }
-			),
+			new Response(metrics.render(), {
+				headers: { 'content-type': 'text/plain; version=0.0.4' }
+			}),
 		'/api/*': (req, srv) => api(req, clientIp(req, srv)),
 		'/ws': (req, srv) => {
 			const session = new URL(req.url).searchParams.get('session') ?? '';
@@ -153,6 +162,7 @@ server = Bun.serve({
 		},
 		message(ws, raw) {
 			const msg = parseClientMessage(String(raw));
+			metrics.wsMessages.inc({ type: msg?.type ?? 'invalid' });
 			if (!msg) {
 				send(ws, { type: 'error', code: 'bad_request', message: 'Unknown message' });
 				return;
@@ -162,7 +172,10 @@ server = Bun.serve({
 			} catch (err) {
 				if (err instanceof ApiError)
 					send(ws, { type: 'error', code: err.code, message: err.message });
-				else console.error(err);
+				else {
+					console.error(err);
+					metrics.errors.inc({ where: 'ws' });
+				}
 			}
 		},
 		close(ws) {
@@ -178,6 +191,35 @@ server = Bun.serve({
 // Game timers: 4 checks a second is plenty for countdowns and costs nothing when idle.
 const ticker = setInterval(() => rooms.tick(), 250);
 
+metrics.gauge('games_rooms', 'Open rooms', () => rooms.stats().rooms);
+metrics.gauge('games_members', 'Players and audience in rooms', () => rooms.stats().players);
+metrics.gauge('games_playing', 'Rooms playing, by game', () =>
+	[...rooms.stats().playing].map(([game, n]) => [{ game }, n])
+);
+metrics.gauge('games_connections', 'Open WebSocket connections', () => sockets.size);
+metrics.gauge('process_resident_memory_bytes', 'Resident memory', () => process.memoryUsage().rss);
+metrics.gauge('process_uptime_seconds', 'Seconds since start', () =>
+	Math.round((Date.now() - startedAt) / 1000)
+);
+
+/** Write a snapshot if anything changed since the last one. */
+let savedRevision = rooms.revision;
+function saveSnapshot(reason: 'periodic' | 'shutdown') {
+	if (reason === 'periodic' && rooms.revision === savedRevision) return 0;
+	const snapshot = rooms.snapshot();
+	try {
+		if (snapshot.rooms.length > 0) store.save(snapshot);
+		else store.clear();
+		savedRevision = rooms.revision;
+		metrics.snapshots.inc({ reason });
+	} catch (err) {
+		console.error('snapshot failed', err);
+		metrics.errors.inc({ where: 'snapshot' });
+	}
+	return snapshot.rooms.length;
+}
+const snapshotter = setInterval(() => saveSnapshot('periodic'), SNAPSHOT_EVERY_MS);
+
 const sweeper = setInterval(() => {
 	rooms.sweep();
 	limiter.sweep();
@@ -189,10 +231,10 @@ function shutdown(signal: string) {
 	shuttingDown = true;
 	clearInterval(sweeper);
 	clearInterval(ticker);
-	const snapshot = rooms.snapshot();
-	if (snapshot.rooms.length > 0) store.save(snapshot);
+	clearInterval(snapshotter);
+	const count = saveSnapshot('shutdown');
 	store.close();
-	console.log(`${signal}: saved ${snapshot.rooms.length} room(s), shutting down`);
+	console.log(`${signal}: saved ${count} room(s), shutting down`);
 	server.stop(true);
 	process.exit(0);
 }
