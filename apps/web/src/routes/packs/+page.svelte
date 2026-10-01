@@ -1,11 +1,18 @@
 <script lang="ts">
+	import Seo from '$lib/components/Seo.svelte';
 	import { t } from '$lib/i18n';
 	import { myPacks } from '$lib/my-packs.svelte';
 
 	const m = t.packs;
+
+	// Saved packs live in this browser, so the server can't render them; show them once hydrated.
+	let mounted = $state(false);
+	$effect(() => {
+		mounted = true;
+	});
 </script>
 
-<svelte:head><title>{m.title} · {t.appName}</title></svelte:head>
+<Seo title="{m.title} · {t.appName}" description={m.intro} path="/packs" />
 
 <main>
 	<a href="/" class="back">← {t.appName}</a>
@@ -15,7 +22,9 @@
 
 	<section aria-labelledby="mine">
 		<h2 id="mine">{m.mine}</h2>
-		{#if myPacks.list.length === 0}
+		{#if !mounted}
+			<!-- Filled in on the client. -->
+		{:else if myPacks.list.length === 0}
 			<p class="muted">{m.none}</p>
 		{:else}
 			<ul class="list">

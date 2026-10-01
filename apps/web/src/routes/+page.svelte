@@ -2,7 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/api';
 	import { catalog } from '$lib/catalog';
+	import Seo from '$lib/components/Seo.svelte';
 	import { t } from '$lib/i18n';
+	import { DEFAULT_SEO } from '$lib/seo';
 	import { saveSession } from '$lib/sessions';
 
 	let creating = $state(false);
@@ -25,10 +27,7 @@
 	const modeLabel = { party: 'Big screen', online: 'Online', solo: 'Solo' };
 </script>
 
-<svelte:head>
-	<title>{t.appName}: party games for any group</title>
-	<meta name="description" content={t.tagline} />
-</svelte:head>
+<Seo {...DEFAULT_SEO} path="/" />
 
 <main>
 	<header class="hero">

@@ -21,11 +21,14 @@ export const t = {
 		codeLabel: 'Room code',
 		nameLabel: 'Your name',
 		avatarLabel: 'Pick an avatar',
+		description: 'Got a room code? Join the game on your phone. No app or account needed.',
 		submit: 'Join',
 		submitting: 'Joining…'
 	},
 	online: {
 		title: 'Start an online room',
+		description:
+			'Start a room and invite friends to play party games together, each on their own screen.',
 		submit: 'Create room',
 		submitting: 'Creating…'
 	},
@@ -100,6 +103,8 @@ export const t = {
 		none: 'You haven’t made any packs yet.',
 		newPack: 'Write a pack',
 		newTitle: 'New pack',
+		newDescription:
+			'Write a trivia pack question by question, or describe a topic and let AI draft it.',
 		create: 'Create pack',
 		save: 'Save changes',
 		shareTitle: 'Play it',
