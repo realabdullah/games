@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
 import type { TriviaPackDraft } from '@games/content';
 import type { CreatedPackResponse, EditPackResponse, PackSummary } from '@games/protocol';
-import { AiQuota, toDraft, topicKey, type GenerateRequest, type PackGenerator } from './ai.ts';
+import { AiQuota, toDraft, type GenerateRequest, type PackGenerator } from './ai.ts';
 import { openDb } from './db/index.ts';
 import { createRegistry } from './games.ts';
 import { createApi } from './http.ts';
@@ -189,13 +189,11 @@ describe('AI packs', () => {
 		]);
 	});
 
-	test('repeat requests reuse the earlier generation without spending quota', async () => {
-		const first = await gen('Space exploration');
-		const second = await gen('  space  EXPLORATION! ', '2.2.2.2');
-		expect(generator.calls).toHaveLength(1);
-		expect(second.body.summary.code).not.toBe(first.body.summary.code);
-		expect(second.body.editToken).not.toBe(first.body.editToken);
-		expect((await call('GET', '/api/ai', { ip: '2.2.2.2' })).body).toMatchObject({ remaining: 2 });
+	test('repeat requests generate fresh questions every time', async () => {
+		await gen('Space exploration');
+		await gen('  space  EXPLORATION! ');
+		expect(generator.calls).toHaveLength(2);
+		expect((await call('GET', '/api/ai')).body).toMatchObject({ remaining: 0 });
 	});
 
 	test('enforces the daily per-client limit', async () => {
@@ -224,11 +222,29 @@ describe('model output handling', () => {
 		description: 'Stars and such',
 		emoji: '🚀',
 		questions: [
-			{ q: 'Closest star?', choices: ['Sun', 'Sirius', 'Vega', 'Rigel'], answer: 0, fact: '' },
-			{ q: 'Red planet?', choices: ['Mars', 'Venus', 'Earth', 'Jupiter'], answer: 0, fact: 'Rust' },
-			{ q: 'Broken', choices: ['a', 'b'], answer: 7, fact: '' },
-			{ q: 'Moons of Mars?', choices: ['1', '2', '3', '4'], answer: 1, fact: 'Phobos, Deimos' },
-			{ q: 'Extra', choices: ['a', 'b', 'c', 'd'], answer: 2, fact: '' }
+			{
+				q: 'Closest star?',
+				choices: ['Sun', 'Sirius', 'Vega', 'Rigel'],
+				answer: 0,
+				fact: '',
+				source: 2
+			},
+			{
+				q: 'Red planet?',
+				choices: ['Mars', 'Venus', 'Earth', 'Jupiter'],
+				answer: 0,
+				fact: 'Rust',
+				source: 0
+			},
+			{ q: 'Broken', choices: ['a', 'b'], answer: 7, fact: '', source: 1 },
+			{
+				q: 'Moons of Mars?',
+				choices: ['1', '2', '3', '4'],
+				answer: 1,
+				fact: 'Phobos, Deimos',
+				source: 9
+			},
+			{ q: 'Extra', choices: ['a', 'b', 'c', 'd'], answer: 2, fact: '', source: 0 }
 		]
 	};
 
@@ -246,11 +262,17 @@ describe('model output handling', () => {
 		expect(() => toDraft({ ...out, title: 'Shit space' }, 3)).toThrow('family filter');
 	});
 
-	test('topic keys ignore case, spacing and punctuation', () => {
-		const a = topicKey({ topic: 'Space Exploration!', count: 5, difficulty: 'easy' });
-		const b = topicKey({ topic: '  space   exploration ', count: 5, difficulty: 'easy' });
-		expect(a).toBe(b);
-		expect(a).not.toBe(topicKey({ topic: 'space exploration', count: 10, difficulty: 'easy' }));
+	test('keeps only sources from the research list', () => {
+		const sources = ['https://a.example/stars', `https://b.example/${'x'.repeat(600)}`];
+		const pack = toDraft(out, 3, sources);
+		// The first cites a page too long to store, the rest cite none or one that wasn't returned.
+		expect(pack.questions.map((q) => q.source)).toEqual([undefined, undefined, undefined]);
+		const short = toDraft(out, 3, ['https://a.example/stars', 'https://b.example/sun']);
+		expect(short.questions[0]!.source).toBe('https://b.example/sun');
+	});
+
+	test('an unsuitable topic is filtered, not retried', () => {
+		expect(() => toDraft({ ...out, suitable: false }, 3)).toThrow('family-friendly');
 	});
 });
 

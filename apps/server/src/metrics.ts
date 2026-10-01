@@ -68,6 +68,10 @@ export class Metrics {
 		'Content packs created, by source'
 	);
 	readonly aiGenerations = new Counter('games_ai_generations_total', 'AI pack requests, by result');
+	readonly aiProviderCalls = new Counter(
+		'games_ai_provider_calls_total',
+		'AI provider attempts, by provider and result'
+	);
 	readonly snapshots = new Counter('games_snapshots_total', 'Room snapshots written, by reason');
 	readonly errors = new Counter('games_errors_total', 'Unexpected server errors, by where');
 	private gauges: Gauge[] = [];
@@ -85,6 +89,7 @@ export class Metrics {
 			this.wsMessages,
 			this.packsCreated,
 			this.aiGenerations,
+			this.aiProviderCalls,
 			this.snapshots,
 			this.errors
 		];

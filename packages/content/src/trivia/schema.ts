@@ -10,7 +10,11 @@ export const TriviaQuestion = v.object({
 	/** Index into `choices` of the right answer. */
 	answer: v.pipe(v.number(), v.integer(), v.minValue(0)),
 	/** Shown after the reveal. */
-	fact: v.optional(v.pipe(v.string(), v.trim(), v.maxLength(240)))
+	fact: v.optional(v.pipe(v.string(), v.trim(), v.maxLength(240))),
+	/** Where the answer can be checked. Rendered as a link, so web URLs only (never `javascript:`). */
+	source: v.optional(
+		v.pipe(v.string(), v.trim(), v.maxLength(500), v.url(), v.regex(/^https?:\/\//i))
+	)
 });
 
 const packFields = {

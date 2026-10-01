@@ -62,7 +62,11 @@ export const t = {
 		code: 'Pack code',
 		codePlaceholder: 'ABC123',
 		useCode: 'Use',
-		makePack: 'Make a pack',
+		makePack: 'Write a pack by hand',
+		generate: '✨ New questions on any topic',
+		generated: 'Your new pack is selected. Check the answers below, fix anything wrong, then save.',
+		saveChanges: 'Save changes',
+		doneReviewing: 'Done',
 		familyFilter: 'Family filter',
 		familyFilterHint: 'Blocks rude names and packs with swearing.'
 	},
@@ -128,9 +132,10 @@ export const t = {
 			medium: 'Medium',
 			hard: 'Hard',
 			generate: 'Generate',
-			generating: 'Writing questions… (about 15 seconds)',
+			generating: 'Researching and writing questions… (up to a minute)',
 			remaining: (n: number) => (n === 1 ? '1 left today' : `${n} left today`),
-			review: 'Check the questions before you play. AI can get facts wrong.',
+			review:
+				'Check the answers before you play. AI can get facts wrong, so questions link to where it found them.',
 			off: 'AI packs aren’t available on this server.'
 		},
 		editor: {
@@ -145,6 +150,7 @@ export const t = {
 			removeChoice: (n: number) => `Remove choice ${n}`,
 			addChoice: '+ Add a choice',
 			fact: 'Fun fact shown after the answer (optional)',
+			source: (site: string) => `Check the answer on ${site}`,
 			addQuestion: '+ Add a question',
 			remove: 'Remove',
 			saving: 'Saving…',

@@ -60,6 +60,8 @@ interface Room {
 	/** Whether the current game's finish has been counted in metrics. */
 	gameFinished?: boolean;
 	settings: RoomSettings;
+	/** Items each game-and-pack has used this cycle (e.g. trivia questions), so rematches stay fresh. */
+	played?: Record<string, string[]>;
 }
 
 interface Session {
@@ -394,14 +396,28 @@ export class RoomManager {
 			);
 		}
 
+		const config = {
+			...(entry.config(msg.config) as object),
+			familyFilter: room.settings.familyFilter
+		};
+		const playedKey = `${msg.gameId}:${msg.packId ?? ''}`;
+		const played = room.played?.[playedKey] ?? [];
+		const fresh = entry.fresh?.(loaded.content, config, played, this.random);
+
 		room.game = startGame(entry.game, {
 			mode: room.mode,
 			players: room.players.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar })),
-			content: loaded.content,
-			config: { ...(entry.config(msg.config) as object), familyFilter: room.settings.familyFilter },
+			content: fresh?.content ?? loaded.content,
+			config,
 			seed: Math.floor(this.random() * 2 ** 32),
 			now: this.now()
 		});
+		if (fresh) {
+			room.played = {
+				...room.played,
+				[playedKey]: fresh.cycled ? fresh.used : [...played, ...fresh.used]
+			};
+		}
 		room.phase = 'playing';
 		room.gameFinished = false;
 		this.metrics.gamesStarted.inc({ game: msg.gameId });

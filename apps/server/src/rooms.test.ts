@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { MAX_ROOM_PLAYERS, type GameUpdate, type RoomView, type You } from '@games/protocol';
 import type { TriviaView } from '@games/trivia';
 import { INTRO_MS } from '@games/trivia';
+import { findTriviaPack } from '@games/content';
 import { ApiError } from './errors.ts';
 import { IDLE_ROOM_TTL_MS, RoomManager, VIP_GRACE_MS, type RoomEvents } from './rooms.ts';
 
@@ -425,5 +426,60 @@ describe('metrics', () => {
 		const text = m.render();
 		expect(text).toContain('games_started_total{game="trivia"} 1');
 		expect(text).toContain('# TYPE games_rooms_created_total counter');
+	});
+});
+
+describe('fresh questions in a room', () => {
+	const playedQuestions = (code: string) => {
+		const room = rooms.snapshot().rooms.find((r) => r.code === code)!;
+		return (room.game!.state as { questions: { q: string }[] }).questions.map((q) => q.q);
+	};
+
+	test('a rematch on the same pack only asks questions the room hasn’t had', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		const pack = findTriviaPack('general')!;
+		const start = () =>
+			rooms.handle(host.session, {
+				type: 'start',
+				gameId: 'trivia',
+				packId: 'general',
+				config: { questionCount: 5 }
+			});
+
+		start();
+		const first = playedQuestions(host.code);
+		rooms.handle(host.session, { type: 'endGame' });
+		start();
+		const second = playedQuestions(host.code);
+		rooms.handle(host.session, { type: 'endGame' });
+		start();
+		const third = playedQuestions(host.code);
+
+		expect(first).toHaveLength(5);
+		expect(new Set([...first, ...second, ...third]).size).toBe(pack.questions.length);
+	});
+
+	test('once a pack runs out, the room starts a new cycle', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		const start = () =>
+			rooms.handle(host.session, {
+				type: 'start',
+				gameId: 'trivia',
+				packId: 'science',
+				config: { questionCount: 10 }
+			});
+		start();
+		const first = playedQuestions(host.code);
+		rooms.handle(host.session, { type: 'endGame' });
+		start();
+		const second = playedQuestions(host.code);
+		const science = findTriviaPack('science')!;
+		// 12 questions: the two unplayed ones, topped up with eight already played.
+		const unplayed = science.questions.map((q) => q.q).filter((q) => !first.includes(q));
+		expect(unplayed).toHaveLength(2);
+		expect(second).toEqual(expect.arrayContaining(unplayed));
+		expect(new Set(second).size).toBe(10);
 	});
 });

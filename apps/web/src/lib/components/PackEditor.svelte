@@ -14,7 +14,19 @@
 	let { initial, saveLabel, onsave }: Props = $props();
 
 	const m = t.packs.editor;
-	const blankQuestion = () => ({ q: '', choices: ['', '', '', ''], answer: 0, fact: '' });
+	const uid = $props.id();
+	const blankQuestion = (): {
+		q: string;
+		choices: string[];
+		answer: number;
+		fact: string;
+		source?: string;
+	} => ({
+		q: '',
+		choices: ['', '', '', ''],
+		answer: 0,
+		fact: ''
+	});
 
 	// Editable copy of the pack as it was when the editor opened; facts are ''
 	// rather than undefined so inputs can bind to them.
@@ -57,7 +69,8 @@
 				// Empty choice slots are fine while editing; drop them on save.
 				choices: q.choices.map((c) => c.trim()).filter(Boolean),
 				answer: q.choices.slice(0, q.answer).filter((c) => c.trim()).length,
-				fact: q.fact.trim() || undefined
+				fact: q.fact.trim() || undefined,
+				source: q.source
 			}))
 		};
 	}
@@ -134,7 +147,7 @@
 						<div class="choice" class:correct={q.answer === ci}>
 							<input
 								type="radio"
-								name="answer-{qi}"
+								name="{uid}-answer-{qi}"
 								value={ci}
 								bind:group={q.answer}
 								aria-label={m.markCorrect(ci + 1)}
@@ -166,6 +179,11 @@
 					<span class="hint">{m.fact}</span>
 					<input class="input small" bind:value={q.fact} maxlength="240" />
 				</label>
+				{#if q.source}
+					<a class="source" href={q.source} target="_blank" rel="noopener noreferrer nofollow">
+						{m.source(new URL(q.source).hostname)} ↗
+					</a>
+				{/if}
 			</li>
 		{/each}
 	</ol>
@@ -239,6 +257,11 @@
 		gap: 10px;
 		padding: 4px 8px;
 		border-radius: var(--radius-sm);
+	}
+	.source {
+		justify-self: start;
+		font-size: 0.9rem;
+		font-weight: 700;
 	}
 	.choice.correct {
 		background: color-mix(in oklch, var(--teal) 45%, transparent);
