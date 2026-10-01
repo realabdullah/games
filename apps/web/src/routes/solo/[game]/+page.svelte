@@ -6,6 +6,7 @@
 	import { trackEvent } from '$lib/analytics';
 	import { api } from '$lib/api';
 	import GamePicker from '$lib/components/GamePicker.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 	import { gameUi, noStream } from '$lib/games/registry';
 	import type { StartRequest } from '$lib/games/types';
 	import { t } from '$lib/i18n';
@@ -68,10 +69,12 @@
 	$effect(() => () => game?.destroy());
 </script>
 
-<svelte:head>
-	<title>{t.solo.title(entry.name)} · {t.appName}</title>
-	<meta name="description" content={t.solo.intro[entry.id] ?? entry.tagline} />
-</svelte:head>
+<Seo
+	title="{t.solo.title(entry.name)} · {t.appName}"
+	description={t.solo.intro[entry.id] ?? entry.tagline}
+	path="/solo/{entry.id}"
+	image="/og/{entry.id}.png"
+/>
 
 <main>
 	{#if game?.view}

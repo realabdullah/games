@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { api } from '$lib/api';
 	import ProfileForm from '$lib/components/ProfileForm.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 	import { t } from '$lib/i18n';
 	import { saveSession, type Profile } from '$lib/sessions';
 
@@ -12,7 +13,7 @@
 	}
 </script>
 
-<svelte:head><title>{t.online.title} · {t.appName}</title></svelte:head>
+<Seo title="{t.online.title} · {t.appName}" description={t.online.description} path="/online" />
 
 <main>
 	<a href="/" class="back">← {t.appName}</a>

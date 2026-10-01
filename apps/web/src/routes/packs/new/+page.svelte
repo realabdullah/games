@@ -3,6 +3,7 @@
 	import type { AiStatusResponse } from '@games/protocol';
 	import { api } from '$lib/api';
 	import PackEditor from '$lib/components/PackEditor.svelte';
+	import Seo from '$lib/components/Seo.svelte';
 	import { t } from '$lib/i18n';
 	import { myPacks } from '$lib/my-packs.svelte';
 
@@ -48,7 +49,7 @@
 	}
 </script>
 
-<svelte:head><title>{m.newTitle} · {t.appName}</title></svelte:head>
+<Seo title="{m.newTitle} · {t.appName}" description={m.newDescription} path="/packs/new" />
 
 <main>
 	<a href="/packs" class="back">← {m.title}</a>

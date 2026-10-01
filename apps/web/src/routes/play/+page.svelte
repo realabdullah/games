@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { ROOM_CODE_LENGTH } from '@games/protocol';
 	import { api } from '$lib/api';
+	import Seo from '$lib/components/Seo.svelte';
 	import { t } from '$lib/i18n';
 
 	let code = $state('');
@@ -24,7 +25,7 @@
 	}
 </script>
 
-<svelte:head><title>{t.join.title} · {t.appName}</title></svelte:head>
+<Seo title="{t.join.title} · {t.appName}" description={t.join.description} path="/play" />
 
 <main>
 	<a href="/" class="back">← {t.appName}</a>
