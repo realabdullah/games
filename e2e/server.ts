@@ -13,7 +13,13 @@ export class TestServer {
 	async start() {
 		this.proc = spawn('bun', ['src/index.ts'], {
 			cwd: join(import.meta.dirname, '../apps/server'),
-			env: { ...process.env, PORT: String(this.port), DATA_DIR: this.dataDir },
+			// No API key: tests never call the real AI.
+			env: {
+				...process.env,
+				PORT: String(this.port),
+				DATA_DIR: this.dataDir,
+				ANTHROPIC_API_KEY: ''
+			},
 			stdio: ['ignore', 'pipe', 'pipe']
 		});
 		this.proc.stderr?.on('data', (d) => process.stderr.write(`[server] ${d}`));

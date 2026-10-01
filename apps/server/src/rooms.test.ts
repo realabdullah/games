@@ -2,13 +2,8 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { MAX_ROOM_PLAYERS, type GameUpdate, type RoomView, type You } from '@games/protocol';
 import type { TriviaView } from '@games/trivia';
 import { INTRO_MS } from '@games/trivia';
-import {
-	IDLE_ROOM_TTL_MS,
-	RoomError,
-	RoomManager,
-	VIP_GRACE_MS,
-	type RoomEvents
-} from './rooms.ts';
+import { ApiError } from './errors.ts';
+import { IDLE_ROOM_TTL_MS, RoomManager, VIP_GRACE_MS, type RoomEvents } from './rooms.ts';
 
 let clock: number;
 let ids: number;
@@ -60,7 +55,7 @@ describe('party rooms', () => {
 	test('names are unique per room, case-insensitively', () => {
 		const { code } = rooms.create({ mode: 'party' });
 		join(code, 'Ada');
-		expect(() => join(code, 'ada')).toThrow(RoomError);
+		expect(() => join(code, 'ada')).toThrow(ApiError);
 	});
 
 	test('players beyond the cap join as audience', () => {
@@ -76,13 +71,13 @@ describe('party rooms', () => {
 		const ada = join(host.code, 'Ada');
 		const bob = join(host.code, 'Bob');
 		expect(() => rooms.handle(ada.session, { type: 'kick', playerId: bob.you.id! })).toThrow(
-			RoomError
+			ApiError
 		);
 
 		rooms.handle(host.session, { type: 'kick', playerId: bob.you.id! });
 		expect(ended.get(bob.session)).toBe('kicked');
 		expect(views.get(host.code)?.players.map((p) => p.name)).toEqual(['Ada']);
-		expect(() => rooms.connect(bob.session)).toThrow(RoomError);
+		expect(() => rooms.connect(bob.session)).toThrow(ApiError);
 	});
 
 	test('host leaving closes the room for everyone', () => {
@@ -90,7 +85,7 @@ describe('party rooms', () => {
 		const ada = join(host.code, 'Ada');
 		rooms.handle(host.session, { type: 'leave' });
 		expect(ended.get(ada.session)).toBe('left');
-		expect(() => rooms.info(host.code)).toThrow(RoomError);
+		expect(() => rooms.info(host.code)).toThrow(ApiError);
 	});
 });
 
@@ -141,7 +136,7 @@ describe('lifecycle', () => {
 
 		clock += IDLE_ROOM_TTL_MS + 1;
 		rooms.sweep();
-		expect(() => rooms.info(idle.code)).toThrow(RoomError);
+		expect(() => rooms.info(idle.code)).toThrow(ApiError);
 		expect(rooms.info(busy.code).code).toBe(busy.code);
 		expect(ended.get(idle.session)).toBe('expired');
 	});
@@ -189,17 +184,17 @@ describe('games', () => {
 	test('players cannot start games in party rooms', () => {
 		const { host, players } = partyWithPlayers(2);
 		expect(() => rooms.handle(players[0]!.session, { type: 'start', gameId: 'trivia' })).toThrow(
-			RoomError
+			ApiError
 		);
 		expect(views.get(host.code)?.phase).toBe('lobby');
 	});
 
 	test('rejects unknown games and packs', () => {
 		const { host } = partyWithPlayers(1);
-		expect(() => rooms.handle(host.session, { type: 'start', gameId: 'nope' })).toThrow(RoomError);
+		expect(() => rooms.handle(host.session, { type: 'start', gameId: 'nope' })).toThrow(ApiError);
 		expect(() =>
 			rooms.handle(host.session, { type: 'start', gameId: 'trivia', packId: 'nope' })
-		).toThrow(RoomError);
+		).toThrow(ApiError);
 	});
 
 	test('the online VIP starts the game', () => {

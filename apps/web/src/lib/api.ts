@@ -1,4 +1,10 @@
 import type {
+	AiStatusResponse,
+	CreatedPackResponse,
+	EditPackResponse,
+	GeneratePackBody,
+	PackSummary,
+	SavePackBody,
 	CreateRoomBody,
 	ErrorResponse,
 	JoinRoomBody,
@@ -25,6 +31,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 	} catch {
 		throw new ApiError('network', 'Can’t reach the game server. Check your connection.');
 	}
+	if (res.status === 204) return undefined as T;
 	const body = await res.json().catch(() => null);
 	if (!res.ok) {
 		const err = (body as ErrorResponse | null)?.error;
@@ -41,5 +48,28 @@ export const api = {
 			method: 'POST',
 			body: JSON.stringify(body)
 		}),
-	roomInfo: (code: string) => request<RoomInfoResponse>(`/api/rooms/${encodeURIComponent(code)}`)
+	roomInfo: (code: string) => request<RoomInfoResponse>(`/api/rooms/${encodeURIComponent(code)}`),
+
+	packSummary: (code: string) => request<PackSummary>(`/api/packs/${encodeURIComponent(code)}`),
+	createPack: (body: SavePackBody) =>
+		request<CreatedPackResponse>('/api/packs', { method: 'POST', body: JSON.stringify(body) }),
+	getPackForEdit: (code: string, token: string) =>
+		request<EditPackResponse>(`/api/packs/${encodeURIComponent(code)}/edit`, {
+			headers: { authorization: `Bearer ${token}` }
+		}),
+	updatePack: (code: string, token: string, body: SavePackBody) =>
+		request<PackSummary>(`/api/packs/${encodeURIComponent(code)}`, {
+			method: 'PUT',
+			body: JSON.stringify(body),
+			headers: { authorization: `Bearer ${token}` }
+		}),
+	deletePack: (code: string, token: string) =>
+		request<void>(`/api/packs/${encodeURIComponent(code)}`, {
+			method: 'DELETE',
+			headers: { authorization: `Bearer ${token}` }
+		}),
+
+	aiStatus: () => request<AiStatusResponse>('/api/ai'),
+	generatePack: (body: GeneratePackBody) =>
+		request<CreatedPackResponse>('/api/ai/packs', { method: 'POST', body: JSON.stringify(body) })
 };

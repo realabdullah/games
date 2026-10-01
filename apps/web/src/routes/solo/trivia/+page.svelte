@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { findTriviaPack } from '@games/content';
+	import { findTriviaPack, type TriviaPack } from '@games/content';
+	import { api } from '$lib/api';
+	import { myPacks } from '$lib/my-packs.svelte';
 	import { trivia, type TriviaView } from '@games/trivia';
 	import GamePicker from '$lib/components/GamePicker.svelte';
 	import TriviaPlayer from '$lib/games/trivia/TriviaPlayer.svelte';
@@ -11,8 +13,27 @@
 	let game = $state<LocalGame<TriviaView> | null>(null);
 	let lastStart: StartRequest | null = null;
 
-	function start(req: StartRequest) {
-		const content = findTriviaPack(req.packId ?? 'general');
+	let error = $state<string | null>(null);
+
+	/** Curated packs ship with the app; your own packs are fetched with their edit token. */
+	async function loadPack(packId: string): Promise<TriviaPack | null> {
+		const curated = findTriviaPack(packId);
+		if (curated) return curated;
+		const mine = myPacks.get(packId);
+		if (!mine) return null;
+		const { pack } = await api.getPackForEdit(mine.code, mine.editToken);
+		return { ...pack, id: mine.code };
+	}
+
+	async function start(req: StartRequest) {
+		error = null;
+		let content: TriviaPack | null;
+		try {
+			content = await loadPack(req.packId ?? 'general');
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Something went wrong';
+			return;
+		}
 		if (!content) return;
 		lastStart = req;
 		game?.destroy();
@@ -57,7 +78,8 @@
 		<h1>{t.solo.title}</h1>
 		<p class="muted">{t.solo.intro}</p>
 		<div class="card pick">
-			<GamePicker mode="solo" playerCount={1} onstart={start} />
+			<GamePicker mode="solo" playerCount={1} onstart={start} allowCode={false} />
+			{#if error}<p class="error" role="alert">{error}</p>{/if}
 		</div>
 	{/if}
 </main>

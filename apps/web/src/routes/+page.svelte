@@ -40,7 +40,9 @@
 			<button class="btn" onclick={hostParty} disabled={creating}>{t.home.hostParty}</button>
 			<a class="btn teal" href="/online">{t.home.playOnline}</a>
 		</div>
-		<p class="muted hint">{t.home.hostPartyHint}</p>
+		<p class="muted hint">
+			{t.home.hostPartyHint} <a href="/packs">{t.home.packs}</a>
+		</p>
 		{#if error}<p class="error" role="alert">{error}</p>{/if}
 	</header>
 

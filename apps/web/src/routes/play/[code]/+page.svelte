@@ -113,7 +113,13 @@
 
 				{#if you.vip}
 					<div class="card pick">
-						<GamePicker mode={room.mode} playerCount={room.players.length} onstart={start} />
+						<GamePicker
+							mode={room.mode}
+							playerCount={room.players.length}
+							onstart={start}
+							settings={room.settings}
+							onsettings={(st) => conn?.send({ type: 'settings', familyFilter: st.familyFilter })}
+						/>
 					</div>
 				{/if}
 				{#if conn.error}<p class="error" role="alert">{conn.error}</p>{/if}

@@ -13,30 +13,23 @@ import {
 	ROOM_CODE_LENGTH,
 	type ClientMessage,
 	type CreateRoomBody,
-	type ErrorCode,
 	type GameUpdate,
 	type JoinRoomBody,
 	type RoomInfoResponse,
 	type RoomMode,
+	type RoomSettings,
 	type RoomView,
 	type SessionResponse,
 	type You
 } from '@games/protocol';
-import { registry } from './games.ts';
+import { isProfane } from '@games/content';
+import { ApiError } from './errors.ts';
+import { createRegistry, type Registry } from './games.ts';
 
 /** How long a disconnected VIP keeps their crown before it passes on. */
 export const VIP_GRACE_MS = 30_000;
 /** Rooms with nobody connected are closed after this long. */
 export const IDLE_ROOM_TTL_MS = 10 * 60_000;
-
-export class RoomError extends Error {
-	constructor(
-		readonly code: ErrorCode,
-		message: string
-	) {
-		super(message);
-	}
-}
 
 interface Member {
 	id: string;
@@ -60,6 +53,7 @@ interface Room {
 	audience: Member[];
 	vipId: string | null;
 	game: GameSession | null;
+	settings: RoomSettings;
 }
 
 interface Session {
@@ -90,7 +84,8 @@ export class RoomManager {
 		private events: RoomEvents,
 		private now: () => number = Date.now,
 		private random: () => number = Math.random,
-		private newId: () => string = () => crypto.randomUUID()
+		private newId: () => string = () => crypto.randomUUID(),
+		private registry: Registry = createRegistry()
 	) {}
 
 	get roomCount() {
@@ -98,6 +93,10 @@ export class RoomManager {
 	}
 
 	create(body: CreateRoomBody): SessionResponse {
+		// New rooms start with the family filter on.
+		if (body.mode === 'online' && isProfane(body.name)) {
+			throw new ApiError('filtered', 'Please pick a different name');
+		}
 		const code = this.newCode();
 		const t = this.now();
 		const room: Room = {
@@ -110,7 +109,8 @@ export class RoomManager {
 			players: [],
 			audience: [],
 			vipId: null,
-			game: null
+			game: null,
+			settings: { familyFilter: true }
 		};
 		this.rooms.set(code, room);
 
@@ -127,8 +127,9 @@ export class RoomManager {
 		const room = this.mustGet(code);
 		const name = body.name.toLowerCase();
 		if ([...room.players, ...room.audience].some((m) => m.name.toLowerCase() === name)) {
-			throw new RoomError('name_taken', 'Someone in this room already has that name');
+			throw new ApiError('name_taken', 'Someone in this room already has that name');
 		}
+		this.checkName(room, body.name);
 		return this.addMember(room, body.name, body.avatar);
 	}
 
@@ -177,7 +178,7 @@ export class RoomManager {
 		const room = this.mustGet(s.code);
 		switch (msg.type) {
 			case 'kick': {
-				if (!this.canControl(room, s)) throw new RoomError('forbidden', 'Only the host can kick');
+				if (!this.canControl(room, s)) throw new ApiError('forbidden', 'Only the host can kick');
 				const target =
 					room.players.find((p) => p.id === msg.playerId) ??
 					room.audience.find((a) => a.id === msg.playerId);
@@ -194,7 +195,7 @@ export class RoomManager {
 				return this.startGame(room, s, msg);
 			case 'action': {
 				if (!room.game) return;
-				const { game } = registry[room.game.gameId]!;
+				const { game } = this.registry[room.game.gameId]!;
 				const actor = this.actor(room, s) as Exclude<Actor, { kind: 'system' }>;
 				const changed = stepFromClient(game, room.game, msg.action, actor, {
 					now: this.now(),
@@ -203,9 +204,16 @@ export class RoomManager {
 				if (changed) this.gameChanged(room);
 				return;
 			}
+			case 'settings': {
+				if (!this.canControl(room, s))
+					throw new ApiError('forbidden', 'Only the host can change settings');
+				room.settings = { familyFilter: msg.familyFilter };
+				this.changed(room);
+				return;
+			}
 			case 'endGame': {
 				if (!this.canControl(room, s))
-					throw new RoomError('forbidden', 'Only the host can end the game');
+					throw new ApiError('forbidden', 'Only the host can end the game');
 				if (!room.game) return;
 				room.game = null;
 				room.phase = 'lobby';
@@ -220,7 +228,7 @@ export class RoomManager {
 		const now = this.now();
 		for (const room of this.rooms.values()) {
 			if (!room.game) continue;
-			const { game } = registry[room.game.gameId]!;
+			const { game } = this.registry[room.game.gameId]!;
 			const deadline = game.nextDeadline(room.game.state);
 			if (deadline === null || now < deadline) continue;
 			if (stepSystem(game, room.game, { type: 'tick' }, { now, active: this.activeIds(room) })) {
@@ -261,6 +269,7 @@ export class RoomManager {
 		for (const room of snapshot.rooms) {
 			room.lastSeenAt = t;
 			room.game ??= null;
+			room.settings ??= { familyFilter: true };
 			if (room.host) {
 				room.host.connected = false;
 				this.sessions.set(room.host.session, { code: room.code, role: 'host', id: null });
@@ -283,35 +292,51 @@ export class RoomManager {
 
 	private startGame(room: Room, s: Session, msg: Extract<ClientMessage, { type: 'start' }>) {
 		if (!this.canControl(room, s))
-			throw new RoomError('forbidden', 'Only the host can start a game');
-		if (room.game && !registry[room.game.gameId]!.game.isOver(room.game.state)) {
-			throw new RoomError('bad_request', 'A game is already running');
+			throw new ApiError('forbidden', 'Only the host can start a game');
+		if (room.game && !this.registry[room.game.gameId]!.game.isOver(room.game.state)) {
+			throw new ApiError('bad_request', 'A game is already running');
 		}
-		const entry = registry[msg.gameId];
+		const entry = this.registry[msg.gameId];
 		if (!entry || !entry.game.meta.modes.includes(room.mode)) {
-			throw new RoomError('bad_request', 'That game isn’t available here');
+			throw new ApiError('bad_request', 'That game isn’t available here');
 		}
 		const { min, max } = entry.game.meta.players;
 		if (room.players.length < min) {
-			throw new RoomError('bad_request', `This game needs at least ${min} players`);
+			throw new ApiError('bad_request', `This game needs at least ${min} players`);
 		}
 		if (room.players.length > max) {
-			throw new RoomError('bad_request', `This game allows at most ${max} players`);
+			throw new ApiError('bad_request', `This game allows at most ${max} players`);
 		}
-		const content = entry.content(msg.packId);
-		if (!content) throw new RoomError('bad_request', 'That question pack doesn’t exist');
+		const loaded = entry.content(msg.packId);
+		if (!loaded) throw new ApiError('bad_request', 'That question pack doesn’t exist');
+		if (loaded.flagged && room.settings.familyFilter) {
+			throw new ApiError(
+				'filtered',
+				'This pack has words the family filter blocks. Turn the filter off to play it.'
+			);
+		}
 
 		room.game = startGame(entry.game, {
 			mode: room.mode,
 			players: room.players.map((p) => ({ id: p.id, name: p.name, avatar: p.avatar })),
-			content,
+			content: loaded.content,
 			config: entry.config(msg.config),
 			seed: Math.floor(this.random() * 2 ** 32),
 			now: this.now()
 		});
 		room.phase = 'playing';
+		if (loaded.customCode) this.onCustomPackPlayed?.(loaded.customCode);
 		this.changed(room);
 		this.gameChanged(room);
+	}
+
+	/** Hook for counting plays of custom packs. */
+	onCustomPackPlayed?: (code: string) => void;
+
+	private checkName(room: Room, name: string) {
+		if (room.settings.familyFilter && isProfane(name)) {
+			throw new ApiError('filtered', 'Please pick a different name');
+		}
 	}
 
 	private actor(room: Room, s: Session): Actor {
@@ -332,7 +357,7 @@ export class RoomManager {
 
 	private gameUpdate(room: Room, s: Session): GameUpdate | null {
 		if (!room.game) return null;
-		const { game } = registry[room.game.gameId]!;
+		const { game } = this.registry[room.game.gameId]!;
 		return {
 			gameId: room.game.gameId,
 			view: viewFor(game, room.game, this.viewer(s)),
@@ -374,7 +399,7 @@ export class RoomManager {
 		// Online rooms only exist for their players.
 		if (room.mode === 'online' && room.players.length === 0) return this.close(room, 'expired');
 		if (room.game) {
-			const { game } = registry[room.game.gameId]!;
+			const { game } = this.registry[room.game.gameId]!;
 			const ctx = { now: this.now(), active: this.activeIds(room) };
 			if (stepSystem(game, room.game, { type: 'roster' }, ctx)) this.gameChanged(room);
 		}
@@ -423,7 +448,7 @@ export class RoomManager {
 
 	private member(room: Room, s: Session): Member {
 		const m = (s.role === 'player' ? room.players : room.audience).find((x) => x.id === s.id);
-		if (!m) throw new RoomError('session_invalid', 'You are no longer in this room');
+		if (!m) throw new ApiError('session_invalid', 'You are no longer in this room');
 		return m;
 	}
 
@@ -445,7 +470,8 @@ export class RoomManager {
 				vip: p.id === room.vipId
 			})),
 			audienceCount: room.audience.length,
-			hostConnected: !!room.host?.connected
+			hostConnected: !!room.host?.connected,
+			settings: room.settings
 		};
 	}
 
@@ -455,13 +481,13 @@ export class RoomManager {
 
 	private mustGet(code: string): Room {
 		const room = this.rooms.get(code.toUpperCase());
-		if (!room) throw new RoomError('room_not_found', 'No room with that code');
+		if (!room) throw new ApiError('room_not_found', 'No room with that code');
 		return room;
 	}
 
 	private mustSession(session: string): Session {
 		const s = this.sessions.get(session);
-		if (!s || !this.rooms.has(s.code)) throw new RoomError('session_invalid', 'Session expired');
+		if (!s || !this.rooms.has(s.code)) throw new ApiError('session_invalid', 'Session expired');
 		return s;
 	}
 

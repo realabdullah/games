@@ -32,3 +32,4 @@ export function summarize(pack: TriviaPack): PackSummary {
 export function findTriviaPack(id: string): TriviaPack | undefined {
 	return triviaPacks.find((p) => p.id === id);
 }
+export * from './filter.ts';

@@ -1,26 +1,29 @@
 import { mkdirSync } from 'node:fs';
 import type { Server, ServerWebSocket } from 'bun';
-import {
-	CloseCode,
-	CreateRoomBody,
-	JoinRoomBody,
-	parseClientMessage,
-	v,
-	type ErrorCode,
-	type ErrorResponse,
-	type ServerMessage
-} from '@games/protocol';
-import { RoomError, RoomManager } from './rooms.ts';
-import { SnapshotStore } from './snapshot.ts';
+import { CloseCode, parseClientMessage, type ServerMessage } from '@games/protocol';
+import { AiQuota, ClaudePackGenerator } from './ai.ts';
+import { openDb } from './db/index.ts';
+import { ApiError } from './errors.ts';
+import { createRegistry } from './games.ts';
+import { createApi } from './http.ts';
+import { PackStore } from './packs.ts';
 import { RateLimiter } from './rate-limit.ts';
+import { RoomManager } from './rooms.ts';
+import { SnapshotStore } from './snapshot.ts';
 
 const PORT = Number(process.env.PORT ?? 3001);
 const DATA_DIR = process.env.DATA_DIR ?? './data';
 const SNAPSHOT_MAX_AGE_MS = 15 * 60_000;
+const AI_DAILY_PER_CLIENT = Number(process.env.AI_DAILY_PER_CLIENT ?? 5);
+const AI_DAILY_TOTAL = Number(process.env.AI_DAILY_TOTAL ?? 100);
 
 interface WsData {
 	session: string;
 }
+
+mkdirSync(DATA_DIR, { recursive: true });
+const db = openDb(`${DATA_DIR}/server.sqlite`);
+const packs = new PackStore(db);
 
 const sockets = new Map<string, ServerWebSocket<WsData>>();
 const roomTopic = (code: string) => `room:${code}`;
@@ -35,30 +38,36 @@ const closeCodeFor = {
 
 let server: Server<WsData>;
 
-const rooms = new RoomManager({
-	roomChanged(code, room) {
-		server?.publish(
-			roomTopic(code),
-			JSON.stringify({ type: 'room', room } satisfies ServerMessage)
-		);
+const rooms = new RoomManager(
+	{
+		roomChanged(code, room) {
+			server?.publish(
+				roomTopic(code),
+				JSON.stringify({ type: 'room', room } satisfies ServerMessage)
+			);
+		},
+		youChanged(session, you) {
+			send(sockets.get(session), { type: 'you', you });
+		},
+		gameChanged(updates) {
+			for (const { session, update } of updates)
+				send(sockets.get(session), { type: 'game', ...update });
+		},
+		sessionEnded(session, reason) {
+			const ws = sockets.get(session);
+			if (!ws) return;
+			send(ws, reason === 'kicked' ? { type: 'kicked' } : { type: 'closed', reason });
+			sockets.delete(session);
+			ws.close(closeCodeFor[reason], reason);
+		}
 	},
-	youChanged(session, you) {
-		send(sockets.get(session), { type: 'you', you });
-	},
-	gameChanged(updates) {
-		for (const { session, update } of updates)
-			send(sockets.get(session), { type: 'game', ...update });
-	},
-	sessionEnded(session, reason) {
-		const ws = sockets.get(session);
-		if (!ws) return;
-		send(ws, reason === 'kicked' ? { type: 'kicked' } : { type: 'closed', reason });
-		sockets.delete(session);
-		ws.close(closeCodeFor[reason], reason);
-	}
-});
+	Date.now,
+	Math.random,
+	() => crypto.randomUUID(),
+	createRegistry(packs)
+);
+rooms.onCustomPackPlayed = (code) => packs.recordPlay(code);
 
-mkdirSync(DATA_DIR, { recursive: true });
 const store = new SnapshotStore(`${DATA_DIR}/server.sqlite`);
 const restored = store.take(SNAPSHOT_MAX_AGE_MS);
 if (restored) {
@@ -68,29 +77,18 @@ if (restored) {
 
 const limiter = new RateLimiter({ windowMs: 60_000, max: 30 });
 
-function json(body: unknown, status = 200) {
-	return Response.json(body, { status });
-}
-
-function fail(code: ErrorCode, message: string) {
-	const status = {
-		bad_request: 400,
-		room_not_found: 404,
-		session_invalid: 401,
-		name_taken: 409,
-		forbidden: 403,
-		rate_limited: 429
-	}[code];
-	return json({ error: { code, message } } satisfies ErrorResponse, status);
-}
-
-function handleError(err: unknown) {
-	if (err instanceof RoomError) return fail(err.code, err.message);
-	if (err instanceof v.ValiError)
-		return fail('bad_request', err.issues[0]?.message ?? 'Invalid request');
-	console.error(err);
-	return json({ error: { code: 'bad_request', message: 'Something went wrong' } }, 500);
-}
+const api = createApi({
+	rooms,
+	packs,
+	limiter,
+	// AI packs are on when an API key is configured.
+	ai: process.env.ANTHROPIC_API_KEY
+		? {
+				generator: new ClaudePackGenerator(),
+				quota: new AiQuota(db, { perClient: AI_DAILY_PER_CLIENT, total: AI_DAILY_TOTAL })
+			}
+		: null
+});
 
 function clientIp(req: Request, srv: Server<WsData>) {
 	// Traefik sets X-Forwarded-For; the first entry is the original client.
@@ -99,14 +97,6 @@ function clientIp(req: Request, srv: Server<WsData>) {
 		srv.requestIP(req)?.address ??
 		'unknown'
 	);
-}
-
-async function readJson(req: Request) {
-	try {
-		return await req.json();
-	} catch {
-		throw new RoomError('bad_request', 'Expected a JSON body');
-	}
 }
 
 server = Bun.serve({
@@ -125,42 +115,16 @@ server = Bun.serve({
 				].join('\n') + '\n',
 				{ headers: { 'content-type': 'text/plain; version=0.0.4' } }
 			),
-		'/api/rooms': {
-			POST: async (req, srv) => {
-				try {
-					if (!limiter.allow(clientIp(req, srv))) return fail('rate_limited', 'Slow down a little');
-					return json(rooms.create(v.parse(CreateRoomBody, await readJson(req))), 201);
-				} catch (err) {
-					return handleError(err);
-				}
-			}
-		},
-		'/api/rooms/:code': {
-			GET: (req) => {
-				try {
-					return json(rooms.info(req.params.code));
-				} catch (err) {
-					return handleError(err);
-				}
-			}
-		},
-		'/api/rooms/:code/join': {
-			POST: async (req, srv) => {
-				try {
-					if (!limiter.allow(clientIp(req, srv))) return fail('rate_limited', 'Slow down a little');
-					return json(rooms.join(req.params.code, v.parse(JoinRoomBody, await readJson(req))), 201);
-				} catch (err) {
-					return handleError(err);
-				}
-			}
-		},
+		'/api/*': (req, srv) => api(req, clientIp(req, srv)),
 		'/ws': (req, srv) => {
 			const session = new URL(req.url).searchParams.get('session') ?? '';
 			if (srv.upgrade(req, { data: { session } })) return;
 			return new Response('Expected a WebSocket upgrade', { status: 426 });
 		}
 	},
-	fetch: () => fail('bad_request', 'Not found'),
+	fetch: () => new Response('Not found', { status: 404 }),
+	// Packs are small; anything bigger than this is a mistake or abuse.
+	maxRequestBodySize: 512 * 1024,
 	websocket: {
 		data: {} as WsData,
 		idleTimeout: 60,
@@ -188,7 +152,7 @@ server = Bun.serve({
 			try {
 				rooms.handle(ws.data.session, msg);
 			} catch (err) {
-				if (err instanceof RoomError)
+				if (err instanceof ApiError)
 					send(ws, { type: 'error', code: err.code, message: err.message });
 				else console.error(err);
 			}

@@ -12,6 +12,7 @@ export const t = {
 		playOnline: 'Play online',
 		playOnlineHint: 'Everyone plays on their own screen.',
 		join: 'Join a game',
+		packs: 'Make a question pack',
 		catalogTitle: 'The games',
 		catalogEmpty: 'The first games are on their way.'
 	},
@@ -52,7 +53,15 @@ export const t = {
 		start: 'Start game',
 		starting: 'Starting…',
 		needPlayers: (n: number) =>
-			n === 1 ? 'Waiting for a player to join' : `Needs at least ${n} players`
+			n === 1 ? 'Waiting for a player to join' : `Needs at least ${n} players`,
+		curated: 'Ready-made',
+		myPacks: 'Your packs',
+		code: 'Pack code',
+		codePlaceholder: 'ABC123',
+		useCode: 'Use',
+		makePack: 'Make a pack',
+		familyFilter: 'Family filter',
+		familyFilterHint: 'Blocks rude names and packs with swearing.'
 	},
 	trivia: {
 		getReady: 'Get ready!',
@@ -82,6 +91,61 @@ export const t = {
 		backToLobby: 'Back to lobby',
 		waitingForHost: 'Waiting for the host to pick what’s next.',
 		audienceGot: (pct: number) => `The audience got it ${pct}% right`
+	},
+	packs: {
+		title: 'Question packs',
+		intro:
+			'Write your own trivia, or describe a topic and let AI draft it. Packs are saved on this device, with a private link to edit them anywhere.',
+		mine: 'Your packs',
+		none: 'You haven’t made any packs yet.',
+		newPack: 'Write a pack',
+		newTitle: 'New pack',
+		create: 'Create pack',
+		save: 'Save changes',
+		shareTitle: 'Play it',
+		shareHow: 'In a room, pick “Pack code” and enter',
+		editLinkTitle: 'Private edit link',
+		editLinkHow: 'Anyone with this link can change or delete the pack. Keep it to yourself.',
+		copy: 'Copy',
+		copied: 'Copied!',
+		delete: 'Delete pack',
+		confirmDelete: 'Delete this pack for good? Rooms can’t use it after this.',
+		noToken: 'You need this pack’s private edit link to change it.',
+		flagged: 'Has words the family filter blocks. Hosts must turn the filter off to play it.',
+		questions: (n: number) => (n === 1 ? '1 question' : `${n} questions`),
+		ai: {
+			title: 'Generate with AI',
+			topic: 'Topic',
+			topicPlaceholder: 'e.g. 90s cartoons, the human body, Lagos',
+			count: 'Questions',
+			difficulty: 'Difficulty',
+			easy: 'Easy',
+			medium: 'Medium',
+			hard: 'Hard',
+			generate: 'Generate',
+			generating: 'Writing questions… (about 15 seconds)',
+			remaining: (n: number) => (n === 1 ? '1 left today' : `${n} left today`),
+			review: 'Check the questions before you play. AI can get facts wrong.',
+			off: 'AI packs aren’t available on this server.'
+		},
+		editor: {
+			emoji: 'Emoji',
+			title: 'Pack title',
+			description: 'Short description',
+			question: (n: number) => `Question ${n}`,
+			questionPlaceholder: 'Type the question',
+			choicesHint: 'Choices. Select the correct one.',
+			choice: (n: number) => `Choice ${n}`,
+			markCorrect: (n: number) => `Mark choice ${n} as correct`,
+			removeChoice: (n: number) => `Remove choice ${n}`,
+			addChoice: '+ Add a choice',
+			fact: 'Fun fact shown after the answer (optional)',
+			addQuestion: '+ Add a question',
+			remove: 'Remove',
+			saving: 'Saving…',
+			saved: 'Saved.',
+			correctBlank: (n: number) => `Question ${n}: the correct choice is empty`
+		}
 	},
 	solo: {
 		title: 'Solo trivia',

@@ -9,7 +9,8 @@
 		"check": "tsc -p ."
 	},
 	"dependencies": {
-		"valibot": "^1.1.0"
+		"valibot": "^1.1.0",
+		"@games/content": "workspace:*"
 	},
 	"devDependencies": {
 		"@types/bun": "latest"

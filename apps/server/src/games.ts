@@ -1,34 +1,54 @@
 import { findTriviaPack } from '@games/content';
 import type { AnyGame } from '@games/engine';
 import { trivia, type TriviaConfig } from '@games/trivia';
+import type { PackStore } from './packs.ts';
 
 type RawConfig = Record<string, string | number | boolean> | undefined;
+
+export interface LoadedContent {
+	content: unknown;
+	/** Contains words the family filter blocks. */
+	flagged: boolean;
+	/** Custom pack code, to count plays. */
+	customCode?: string;
+}
 
 export interface RegisteredGame {
 	game: AnyGame;
 	/** Load the content to play with, or null if the pack doesn't exist. */
-	content(packId: string | undefined): unknown | null;
+	content(packId: string | undefined): LoadedContent | null;
 	/** Turn client-supplied settings into safe values. */
 	config(raw: RawConfig): unknown;
 }
+
+export type Registry = Record<string, RegisteredGame>;
 
 const clamp = (n: unknown, min: number, max: number, fallback: number) =>
 	typeof n === 'number' && Number.isFinite(n)
 		? Math.min(max, Math.max(min, Math.round(n)))
 		: fallback;
 
-export const registry: Record<string, RegisteredGame> = {
-	trivia: {
-		game: trivia,
-		content: (packId) => findTriviaPack(packId ?? 'general') ?? null,
-		config: (raw): TriviaConfig => ({
-			questionCount: clamp(raw?.questionCount, 3, 20, trivia.defaultConfig.questionCount),
-			secondsPerQuestion: clamp(
-				raw?.secondsPerQuestion,
-				5,
-				60,
-				trivia.defaultConfig.secondsPerQuestion
-			)
-		})
-	}
-};
+/** Curated packs have lowercase ids ("science"); custom packs have uppercase share codes. */
+export function createRegistry(packs?: PackStore): Registry {
+	return {
+		trivia: {
+			game: trivia,
+			content(packId) {
+				const curated = findTriviaPack(packId ?? 'general');
+				if (curated) return { content: curated, flagged: false };
+				const custom = packId ? packs?.forPlay(packId) : null;
+				if (!custom) return null;
+				return { content: custom.pack, flagged: custom.flagged, customCode: custom.pack.id };
+			},
+			config: (raw): TriviaConfig => ({
+				questionCount: clamp(raw?.questionCount, 3, 20, trivia.defaultConfig.questionCount),
+				secondsPerQuestion: clamp(
+					raw?.secondsPerQuestion,
+					5,
+					60,
+					trivia.defaultConfig.secondsPerQuestion
+				)
+			})
+		}
+	};
+}
