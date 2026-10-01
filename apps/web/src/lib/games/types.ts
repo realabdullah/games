@@ -41,5 +41,16 @@ export interface GameUi {
 	Host: Component<HostViewProps>;
 	Player: Component<PlayerViewProps>;
 	/** Extra lobby settings (trivia's pack choice is handled separately). */
-	settings: { key: string; label: string; options: number[]; default: number }[];
+	settings: GameSetting[];
+	/** Settings when playing alone, if different. */
+	soloSettings?: GameSetting[];
+}
+
+export interface GameSetting {
+	key: string;
+	label: string;
+	options: number[];
+	default: number;
+	/** Display names for options, e.g. { 1: 'Easy' }. Defaults to the number. */
+	labels?: Record<number, string>;
 }

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { summarize, triviaPacks } from '@games/content';
 	import type { GameMode } from '@games/engine';
 	import type { PackSummary, RoomSettings } from '@games/protocol';
@@ -19,6 +20,8 @@
 		onsettings?: (settings: RoomSettings) => void;
 		/** Let hosts type someone else's pack code. Off in solo (it needs the full pack). */
 		allowCode?: boolean;
+		/** Only offer this game (solo pages are per game). */
+		onlyGame?: string;
 	}
 	let {
 		mode,
@@ -27,24 +30,32 @@
 		busy = false,
 		settings,
 		onsettings,
-		allowCode = true
+		allowCode = true,
+		onlyGame
 	}: Props = $props();
 	const uid = $props.id();
 	const p = t.picker;
 
-	const games = $derived(catalog.filter((g) => g.status === 'live' && g.modes.includes(mode)));
+	const games = $derived(
+		catalog.filter(
+			(g) => g.status === 'live' && g.modes.includes(mode) && (!onlyGame || g.id === onlyGame)
+		)
+	);
+	/** Solo can have its own settings (e.g. the computer's level). */
+	const settingsFor = (id: string) =>
+		(mode === 'solo' && gameUi[id]?.soloSettings) || gameUi[id]?.settings || [];
 	const curated = triviaPacks.map(summarize);
 
-	let gameId = $state('trivia');
+	let gameId = $state(untrack(() => onlyGame) ?? 'trivia');
 	let packId = $state(curated[0]!.id);
 	let questionCount = $state(10);
 	let secondsPerQuestion = $state(20);
 	/** Settings for the other games, keyed by game then setting. */
 	let extra = $state<Record<string, Record<string, number>>>(
 		Object.fromEntries(
-			Object.entries(gameUi).map(([id, ui]) => [
+			Object.keys(gameUi).map((id) => [
 				id,
-				Object.fromEntries(ui.settings.map((st) => [st.key, st.default]))
+				Object.fromEntries(untrack(() => settingsFor(id)).map((st) => [st.key, st.default]))
 			])
 		)
 	);
@@ -54,7 +65,8 @@
 	let codeError = $state<string | null>(null);
 
 	const game = $derived(games.find((g) => g.id === gameId));
-	const tooFew = $derived(!!game && playerCount < game.players.min);
+	// Solo games fill the other seats themselves (e.g. the computer in X-O).
+	const tooFew = $derived(mode !== 'solo' && !!game && playerCount < game.players.min);
 	const selectedFlagged = $derived(
 		(codePack?.code === packId && codePack.flagged) ||
 			!!myPacks.list.find((m) => m.code === packId)?.flagged
@@ -82,19 +94,21 @@
 </script>
 
 <div class="picker">
-	<fieldset class="games">
-		<legend class="label">{t.picker.title}</legend>
-		{#each games as g (g.id)}
-			<label class="game card option" class:selected={g.id === gameId} style:--accent={g.color}>
-				<input type="radio" name="{uid}-game" value={g.id} bind:group={gameId} class="sr-only" />
-				<span class="emoji" aria-hidden="true">{g.emoji}</span>
-				<span>
-					<strong>{g.name}</strong>
-					<span class="muted tagline">{g.tagline}</span>
-				</span>
-			</label>
-		{/each}
-	</fieldset>
+	{#if !onlyGame}
+		<fieldset class="games">
+			<legend class="label">{t.picker.title}</legend>
+			{#each games as g (g.id)}
+				<label class="game card option" class:selected={g.id === gameId} style:--accent={g.color}>
+					<input type="radio" name="{uid}-game" value={g.id} bind:group={gameId} class="sr-only" />
+					<span class="emoji" aria-hidden="true">{g.emoji}</span>
+					<span>
+						<strong>{g.name}</strong>
+						<span class="muted tagline">{g.tagline}</span>
+					</span>
+				</label>
+			{/each}
+		</fieldset>
+	{/if}
 
 	{#if gameId === 'trivia'}
 		<fieldset class="packs">
@@ -177,13 +191,13 @@
 				</select>
 			</div>
 		</div>
-	{:else if gameUi[gameId]?.settings.length}
+	{:else if settingsFor(gameId).length}
 		<div class="settings">
-			{#each gameUi[gameId]!.settings as st (st.key)}
-				<div class="field">
+			{#each settingsFor(gameId) as st (st.key)}
+				<div class="field" class:wide={!!st.labels}>
 					<label for="{uid}-{st.key}">{st.label}</label>
 					<select id="{uid}-{st.key}" class="input" bind:value={extra[gameId]![st.key]}>
-						{#each st.options as n (n)}<option value={n}>{n}</option>{/each}
+						{#each st.options as n (n)}<option value={n}>{st.labels?.[n] ?? n}</option>{/each}
 					</select>
 				</div>
 			{/each}
@@ -313,7 +327,17 @@
 	.settings {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
+		align-items: end;
 		gap: 12px;
+	}
+	/* Settings with word options (e.g. the computer's level) get the full row. */
+	.settings .wide {
+		grid-column: 1 / -1;
+	}
+	.settings .input {
+		min-height: 50px;
+		padding-left: 0.75em;
+		font-size: 1.05rem;
 	}
 	.hint {
 		text-align: center;

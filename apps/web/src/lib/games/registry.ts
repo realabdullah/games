@@ -40,6 +40,11 @@ export const gameUi: Record<string, GameUi> = {
 		settings: [
 			{ key: 'matches', label: s.matches, options: [3, 5, 7, 9], default: 5 },
 			{ key: 'turnSeconds', label: s.turnSeconds, options: [5, 10, 15], default: 10 }
+		],
+		soloSettings: [
+			{ key: 'botLevel', label: s.botLevel, options: [1, 2, 3], default: 2, labels: s.botLevels },
+			{ key: 'matches', label: s.matches, options: [1, 3, 5], default: 3 },
+			{ key: 'turnSeconds', label: s.turnSeconds, options: [10, 20, 30], default: 20 }
 		]
 	}
 };

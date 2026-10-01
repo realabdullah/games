@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import {
+	createRng,
 	startGame,
 	stepFromClient,
 	stepSystem,
@@ -8,12 +9,17 @@ import {
 	type GameSession
 } from '@games/engine';
 import {
+	BOT_ID,
+	BOT_THINK_MS,
 	DRAW_POINTS,
 	INTRO_MS,
 	RESULT_MS,
 	WIN_POINTS,
+	botMove,
 	lineOf,
 	xo,
+	type BotLevel,
+	type Mark,
 	type XoState,
 	type XoView
 } from './index.ts';
@@ -26,7 +32,7 @@ function setup(ids = ['ada', 'bob'], matches = 3): GameSession {
 		mode: 'online',
 		players: mk(ids),
 		content: null,
-		config: { matches, turnSeconds: 10, familyFilter: true },
+		config: { matches, turnSeconds: 10, botLevel: 0, familyFilter: true },
 		seed: 5,
 		now: 0
 	});
@@ -155,5 +161,119 @@ describe('king of the hill', () => {
 		const s = setup();
 		tick(s, INTRO_MS);
 		expect(send(s, { kind: 'host' }, { type: 'next' })).toBe(false);
+	});
+});
+
+describe('the computer', () => {
+	type Cell = Mark | null;
+	const E = null;
+
+	function solo(level: BotLevel, matches = 1): GameSession {
+		return startGame(xo, {
+			mode: 'solo',
+			players: mk(['me']),
+			content: null,
+			config: { matches, turnSeconds: 20, botLevel: level, familyFilter: true },
+			seed: 9,
+			now: 0
+		});
+	}
+
+	test('solo adds a computer opponent, and you move first', () => {
+		const s = solo(2);
+		expect(state(s).players.map((x) => x.id)).toEqual(['me', BOT_ID]);
+		stepSystem(xo, s, { type: 'tick' }, { now: INTRO_MS, active: ['me'] });
+		expect(state(s).x).toBe('me');
+		expect(view(s, { kind: 'player', playerId: 'me' }).you).toMatchObject({
+			mark: 'X',
+			yourTurn: true
+		});
+	});
+
+	test('the computer answers after a short pause, and you cannot move for it', () => {
+		const s = solo(3);
+		stepSystem(xo, s, { type: 'tick' }, { now: INTRO_MS, active: ['me'] });
+		stepFromClient(xo, s, { type: 'move', cell: 0 }, p('me'), { now: INTRO_MS, active: ['me'] });
+		expect(state(s).turn).toBe('O');
+		expect(state(s).phaseEndsAt).toBe(INTRO_MS + BOT_THINK_MS);
+		expect(
+			stepFromClient(xo, s, { type: 'move', cell: 4 }, p('me'), { now: INTRO_MS, active: ['me'] })
+		).toBe(false);
+		stepSystem(xo, s, { type: 'tick' }, { now: INTRO_MS + BOT_THINK_MS, active: ['me'] });
+		expect(state(s).board.filter(Boolean)).toHaveLength(2);
+		expect(state(s).turn).toBe('X');
+	});
+
+	test('the computer never counts as having left', () => {
+		const s = solo(1);
+		stepSystem(xo, s, { type: 'tick' }, { now: INTRO_MS, active: ['me'] });
+		stepSystem(xo, s, { type: 'roster' }, { now: INTRO_MS, active: ['me'] });
+		expect(state(s).phase).toBe('turn');
+	});
+
+	test('medium and hard take a win and block yours', () => {
+		const rng = createRng(1);
+		const canWin: Cell[] = ['O', 'O', E, 'X', 'X', E, E, E, E];
+		const mustBlock: Cell[] = ['X', 'X', E, E, 'O', E, E, E, E];
+		for (const level of [2, 3] as const) {
+			expect(botMove(canWin, 'O', level, rng)).toBe(2);
+		}
+		expect(botMove(mustBlock, 'O', 3, rng)).toBe(2);
+		// Medium blocks most of the time.
+		let blocked = 0;
+		for (let i = 0; i < 100; i++) if (botMove(mustBlock, 'O', 2, createRng(i)) === 2) blocked++;
+		expect(blocked).toBeGreaterThan(75);
+	});
+
+	test('every level only plays empty cells', () => {
+		const board: Cell[] = ['X', 'O', 'X', E, 'O', E, E, 'X', E];
+		for (const level of [1, 2, 3] as const) {
+			for (let i = 0; i < 50; i++)
+				expect(board[botMove(board, 'O', level, createRng(i))]).toBeNull();
+		}
+	});
+
+	/** Play a full game: `level` as O against a random X. Returns the winner's mark or null. */
+	function playOut(level: BotLevel, seed: number): Mark | null {
+		const rng = createRng(seed);
+		let board: Cell[] = Array(9).fill(null);
+		let turn: Mark = 'X';
+		while (!lineOf(board) && board.includes(null)) {
+			const empty = board.flatMap((c, i) => (c === null ? [i] : []));
+			const cell = turn === 'O' ? botMove(board, 'O', level, rng) : rng.pick(empty);
+			board = board.slice();
+			board[cell] = turn;
+			turn = turn === 'X' ? 'O' : 'X';
+		}
+		return lineOf(board)?.mark ?? null;
+	}
+
+	test('hard never loses; easy loses plenty', () => {
+		let hardLosses = 0;
+		let easyLosses = 0;
+		for (let seed = 0; seed < 300; seed++) {
+			if (playOut(3, seed) === 'X') hardLosses++;
+			if (playOut(1, seed) === 'X') easyLosses++;
+		}
+		expect(hardLosses).toBe(0);
+		expect(easyLosses).toBeGreaterThan(50);
+	});
+
+	test('a whole solo game plays out to the final screen', () => {
+		const s = solo(3, 3);
+		let now = INTRO_MS;
+		stepSystem(xo, s, { type: 'tick' }, { now, active: ['me'] });
+		for (let guard = 0; guard < 200 && state(s).phase !== 'final'; guard++) {
+			const st = state(s);
+			if (st.phase === 'turn' && (st.turn === 'X' ? st.x : st.o) === 'me') {
+				const empty = st.board.flatMap((c, i) => (c === null ? [i] : []));
+				stepFromClient(xo, s, { type: 'move', cell: empty[0] }, p('me'), { now, active: ['me'] });
+			} else {
+				now = Math.max(now, st.phaseEndsAt);
+				stepSystem(xo, s, { type: 'tick' }, { now, active: ['me'] });
+			}
+		}
+		expect(state(s).phase).toBe('final');
+		expect(view(s, { kind: 'player', playerId: 'me' }).leaderboard).toHaveLength(2);
 	});
 });

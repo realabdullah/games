@@ -226,3 +226,37 @@ test('X-O Battle — king of the hill, winner stays on', async ({ browser }) => 
 	await host.getByRole('button', { name: 'Next' }).click();
 	await expect(host.getByText('Final scores')).toBeVisible();
 });
+
+test('X-O solo against the computer, with a difficulty choice', async ({ browser }) => {
+	const page = await (await browser.newContext(PHONE)).newPage();
+	await page.goto('/');
+	await page
+		.locator('.game', { hasText: 'X-O Battle' })
+		.getByRole('link', { name: 'Play solo' })
+		.click();
+	await expect(page).toHaveURL(/\/solo\/xo$/);
+	await page.getByLabel('Computer', { exact: true }).selectOption({ label: 'Unbeatable' });
+	await page.getByLabel('Matches', { exact: true }).selectOption('1');
+	await shot(page, 'xo-solo-setup');
+	await page.getByRole('button', { name: 'Start game' }).click();
+	await page.getByRole('button', { name: 'Start now' }).click();
+
+	// You move first; keep taking the first open cell until the match ends.
+	for (let i = 0; i < 5; i++) {
+		const yourTurn = page.getByText('Your turn!');
+		const ended = page.getByText(/wins!|draw!/);
+		await expect(yourTurn.or(ended)).toBeVisible();
+		if (await ended.isVisible()) break;
+		const filled = await page.locator('.cell .mark').count();
+		await page.locator('.cell:not(:disabled)').first().click();
+		// Your move, then the computer's reply.
+		await expect(page.locator('.cell .mark'))
+			.toHaveCount(Math.min(9, filled + 2), { timeout: 5_000 })
+			.catch(() => {});
+		if (i === 1) await shot(page, 'xo-solo-play');
+	}
+	// The unbeatable computer never loses.
+	await expect(page.getByText(/Computer wins!|draw!/)).toBeVisible();
+	await page.getByRole('button', { name: 'Next' }).click();
+	await expect(page.getByText('Final scores')).toBeVisible();
+});

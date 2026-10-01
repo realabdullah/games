@@ -82,4 +82,14 @@
 	.large {
 		font-size: clamp(1.1rem, 2vw, 1.6rem);
 	}
+	@media (max-width: 420px) {
+		.versus:not(.large) {
+			gap: 6px;
+			font-size: 0.9rem;
+		}
+		.versus:not(.large) .side {
+			gap: 6px;
+			padding: 6px 10px;
+		}
+	}
 </style>

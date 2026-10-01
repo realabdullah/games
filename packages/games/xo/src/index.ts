@@ -1,5 +1,6 @@
 import {
 	addPoints,
+	type Rng,
 	defineGame,
 	isController,
 	rankPlayers,
@@ -19,10 +20,18 @@ export const INTRO_MS = 4_000;
 export const RESULT_MS = 4_000;
 export const WIN_POINTS = 100;
 export const DRAW_POINTS = 30;
+/** The computer "thinks" this long before moving, so its moves are easy to follow. */
+export const BOT_THINK_MS = 700;
+export const BOT_ID = 'bot';
+
+/** 0 = no computer player; 1 easy, 2 medium, 3 hard (unbeatable). */
+export type BotLevel = 0 | 1 | 2 | 3;
 
 export interface XoConfig {
 	matches: number;
 	turnSeconds: number;
+	/** Play against the computer (solo). Ignored when there are two or more people. */
+	botLevel: number;
 	familyFilter: boolean;
 }
 
@@ -58,6 +67,8 @@ export interface XoState {
 	scores: Record<string, number>;
 	lastPoints: Record<string, number>;
 	active: string[];
+	/** The computer opponent, if playing solo. */
+	bot: { id: string; level: BotLevel } | null;
 }
 
 export type XoAction = { type: 'move'; cell: number } | { type: 'next' };
@@ -87,17 +98,26 @@ export const xo = defineGame<XoState, XoAction, XoConfig, unknown, XoView>({
 		name: 'X-O Battle',
 		tagline: 'Tic-tac-toe, king of the hill. Winner stays on.',
 		tags: ['fun'],
-		modes: ['party', 'online'],
+		modes: ['party', 'online', 'solo'],
 		players: { min: 2, max: 12 },
 		audience: true,
 		durationMin: 6
 	},
 
-	defaultConfig: { matches: 5, turnSeconds: 10, familyFilter: true },
+	defaultConfig: { matches: 5, turnSeconds: 10, botLevel: 0, familyFilter: true },
 
-	setup({ config, players }, ctx) {
-		const queue = ctx.rng.shuffle(players.map((p) => p.id));
+	setup({ config, players: people, mode }, ctx) {
+		// Alone (solo mode, or one person): add the computer as the opponent.
+		const level = Math.min(3, Math.max(0, Math.round(config.botLevel))) as BotLevel;
+		const bot =
+			people.length === 1 && (mode === 'solo' || level > 0)
+				? { id: BOT_ID, level: (level || 2) as BotLevel }
+				: null;
+		const players = bot ? [...people, { id: bot.id, name: 'Computer', avatar: '🤖' }] : people;
+		// Against the computer, the person always gets the first move.
+		const queue = bot ? players.map((p) => p.id) : ctx.rng.shuffle(players.map((p) => p.id));
 		return {
+			bot,
 			phase: 'intro',
 			players,
 			queue,
@@ -136,7 +156,11 @@ export const xo = defineGame<XoState, XoAction, XoConfig, unknown, XoView>({
 			case 'tick':
 				return ctx.now >= state.phaseEndsAt ? advance(state, ctx) : state;
 			case 'roster':
-				return roster({ ...state, active: [...ctx.active] }, ctx);
+				// The computer never leaves.
+				return roster(
+					{ ...state, active: state.bot ? [...ctx.active, state.bot.id] : [...ctx.active] },
+					ctx
+				);
 			case 'next':
 				// Skipping only moves past the intro and results; turns belong to the players.
 				return isController(actor) && (state.phase === 'intro' || state.phase === 'result')
@@ -193,6 +217,9 @@ export const xo = defineGame<XoState, XoAction, XoConfig, unknown, XoView>({
 		return state.phase === 'final';
 	},
 
+	// 2: added the computer opponent (`bot`).
+	stateVersion: 2,
+
 	shiftTime(state, ms) {
 		return { ...state, phaseEndsAt: state.phaseEndsAt + ms };
 	}
@@ -213,9 +240,14 @@ function advance(state: XoState, ctx: GameContext): XoState {
 	switch (state.phase) {
 		case 'intro':
 			return startMatch(state, ctx);
-		case 'turn':
-			// Out of time: play a random empty cell so the game keeps moving.
+		case 'turn': {
+			// The computer's turn comes due after its thinking pause.
+			if (state.bot && mover(state) === state.bot.id) {
+				return place(state, botMove(state.board, state.turn, state.bot.level, ctx.rng), ctx);
+			}
+			// A person ran out of time: play a random empty cell so the game keeps moving.
 			return place(state, ctx.rng.pick(emptyCells(state.board)), ctx);
+		}
 		case 'result':
 			return state.match + 1 < state.config.matches
 				? startMatch({ ...state, match: state.match + 1 }, ctx)
@@ -231,18 +263,21 @@ function startMatch(state: XoState, ctx: GameContext): XoState {
 	if (present.length < 2) return { ...state, phase: 'final', phaseEndsAt: ctx.now };
 	const [champion, challenger] = present as [string, string];
 	const firstMatch = state.match === 0;
-	return {
-		...state,
-		phase: 'turn',
-		x: firstMatch ? champion : challenger,
-		o: firstMatch ? challenger : champion,
-		board: Array(9).fill(null),
-		turn: 'X',
-		winner: null,
-		winLine: null,
-		lastPoints: {},
-		phaseEndsAt: ctx.now + state.config.turnSeconds * 1000
-	};
+	return withTurnDeadline(
+		{
+			...state,
+			phase: 'turn',
+			x: firstMatch ? champion : challenger,
+			o: firstMatch ? challenger : champion,
+			board: Array(9).fill(null),
+			turn: 'X',
+			winner: null,
+			winLine: null,
+			lastPoints: {},
+			phaseEndsAt: 0
+		},
+		ctx
+	);
 }
 
 function move(state: XoState, cell: number, actor: Actor, ctx: GameContext): XoState {
@@ -259,12 +294,7 @@ function place(state: XoState, cell: number, ctx: GameContext): XoState {
 	if (won)
 		return finishMatch({ ...state, board }, won.mark === 'X' ? state.x : state.o, won.line, ctx);
 	if (emptyCells(board).length === 0) return finishMatch({ ...state, board }, null, null, ctx);
-	return {
-		...state,
-		board,
-		turn: state.turn === 'X' ? 'O' : 'X',
-		phaseEndsAt: ctx.now + state.config.turnSeconds * 1000
-	};
+	return withTurnDeadline({ ...state, board, turn: state.turn === 'X' ? 'O' : 'X' }, ctx);
 }
 
 /**
@@ -312,6 +342,95 @@ function roster(state: XoState, ctx: GameContext): XoState {
 	if (xHere && oHere) return next;
 	if (!xHere && !oHere) return finishMatch(next, null, null, ctx);
 	return finishMatch(next, xHere ? state.x : state.o, null, ctx);
+}
+
+/** Whose move it is. */
+function mover(state: XoState): string {
+	return state.turn === 'X' ? state.x : state.o;
+}
+
+/** People get the turn timer; the computer moves after a short pause. */
+function withTurnDeadline(state: XoState, ctx: GameContext): XoState {
+	const isBot = state.bot !== null && mover(state) === state.bot.id;
+	return {
+		...state,
+		phaseEndsAt: ctx.now + (isBot ? BOT_THINK_MS : state.config.turnSeconds * 1000)
+	};
+}
+
+// ---------- the computer ----------
+
+/**
+ * Pick a move for `mark`.
+ * - Easy: mostly random; takes a win only sometimes.
+ * - Medium: takes wins and blocks yours, but slips up now and then.
+ * - Hard: perfect play (minimax); it can't be beaten, only drawn.
+ */
+export function botMove(board: Cell[], mark: Mark, level: BotLevel, rng: Rng): number {
+	const empty = emptyCells(board);
+	const other: Mark = mark === 'X' ? 'O' : 'X';
+	const winningMove = (m: Mark) => empty.find((i) => lineOf(withMark(board, i, m)) !== null);
+
+	if (level <= 1) {
+		const win = winningMove(mark);
+		return win !== undefined && rng.next() < 0.3 ? win : rng.pick(empty);
+	}
+	if (level === 2) {
+		const win = winningMove(mark);
+		if (win !== undefined) return win;
+		const block = winningMove(other);
+		if (block !== undefined && rng.next() < 0.85) return block;
+		if (rng.next() < 0.25) return rng.pick(empty);
+		const preferred = [4, 0, 2, 6, 8].filter((i) => board[i] === null);
+		return preferred.length ? rng.pick(preferred) : rng.pick(empty);
+	}
+
+	// Hard: score every move by minimax and pick randomly among the best.
+	let best = -Infinity;
+	let bestMoves: number[] = [];
+	for (const i of empty) {
+		const score = -negamax(withMark(board, i, mark), other, 1);
+		if (score > best) {
+			best = score;
+			bestMoves = [i];
+		} else if (score === best) bestMoves.push(i);
+	}
+	return rng.pick(bestMoves);
+}
+
+/**
+ * Scores by position, shared across games. Tic-tac-toe has only ~5,500
+ * reachable positions, so after warming up every lookup is instant, even
+ * on a slow phone.
+ */
+const negamaxCache = new Map<string, number>();
+
+/** Score from the perspective of `toMove`: win soon > win later > draw > lose later > lose soon. */
+function negamax(board: Cell[], toMove: Mark, depth: number): number {
+	const key = board.map((c) => c ?? '-').join('') + toMove + depth;
+	const cached = negamaxCache.get(key);
+	if (cached !== undefined) return cached;
+	const score = negamaxUncached(board, toMove, depth);
+	negamaxCache.set(key, score);
+	return score;
+}
+
+function negamaxUncached(board: Cell[], toMove: Mark, depth: number): number {
+	const won = lineOf(board);
+	if (won) return won.mark === toMove ? 10 - depth : depth - 10;
+	const empty = emptyCells(board);
+	if (empty.length === 0) return 0;
+	const other: Mark = toMove === 'X' ? 'O' : 'X';
+	let best = -Infinity;
+	for (const i of empty)
+		best = Math.max(best, -negamax(withMark(board, i, toMove), other, depth + 1));
+	return best;
+}
+
+function withMark(board: Cell[], i: number, mark: Mark): Cell[] {
+	const next = board.slice();
+	next[i] = mark;
+	return next;
 }
 
 function nextChallenger(state: XoState): string | null {

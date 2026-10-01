@@ -85,7 +85,9 @@ export function createRegistry(packs?: PackStore): Registry {
 			content: () => ({ content: null, flagged: false }),
 			config: (raw): Omit<XoConfig, 'familyFilter'> => ({
 				matches: clamp(raw?.matches, 1, 15, xo.defaultConfig.matches),
-				turnSeconds: clamp(raw?.turnSeconds, 5, 30, xo.defaultConfig.turnSeconds)
+				turnSeconds: clamp(raw?.turnSeconds, 5, 30, xo.defaultConfig.turnSeconds),
+				// Rooms always have two or more people, so no computer player.
+				botLevel: 0
 			})
 		}
 	};

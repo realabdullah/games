@@ -161,7 +161,9 @@ export const t = {
 			rounds: 'Rounds',
 			drawSeconds: 'Seconds to draw',
 			matches: 'Matches',
-			turnSeconds: 'Seconds per move'
+			turnSeconds: 'Seconds per move',
+			botLevel: 'Computer',
+			botLevels: { 1: 'Easy', 2: 'Medium', 3: 'Unbeatable' } as Record<number, string>
 		}
 	},
 	icebreakers: {
@@ -230,8 +232,11 @@ export const t = {
 		cell: (i: number, mark: string | null) => `Cell ${i + 1}${mark ? `, ${mark}` : ', empty'}`
 	},
 	solo: {
-		title: 'Solo trivia',
-		intro: 'Play on your own. Same questions, same scoring, no room needed.',
+		title: (game: string) => `${game}: solo`,
+		intro: {
+			trivia: 'Play on your own. Same questions, same scoring, no room needed.',
+			xo: 'Take on the computer. Pick how tough it plays.'
+		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'
 	},

@@ -1,20 +1,30 @@
 <script lang="ts">
 	import { findTriviaPack, type TriviaPack } from '@games/content';
+	import type { AnyGame } from '@games/engine';
+	import { trivia } from '@games/trivia';
+	import { xo } from '@games/xo';
 	import { trackEvent } from '$lib/analytics';
 	import { api } from '$lib/api';
-	import { myPacks } from '$lib/my-packs.svelte';
-	import { trivia, type TriviaView } from '@games/trivia';
 	import GamePicker from '$lib/components/GamePicker.svelte';
-	import TriviaPlayer from '$lib/games/trivia/TriviaPlayer.svelte';
-	import { noStream } from '$lib/games/registry';
+	import { gameUi, noStream } from '$lib/games/registry';
 	import type { StartRequest } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import { LocalGame } from '$lib/local-game.svelte';
+	import { myPacks } from '$lib/my-packs.svelte';
 	import { loadProfile } from '$lib/sessions';
 
-	let game = $state<LocalGame<TriviaView> | null>(null);
-	let lastStart: StartRequest | null = null;
+	let { data } = $props();
+	const entry = $derived(data.game);
 
+	/** Games that can run in the browser, with how to load their content. */
+	const solo: Record<string, { game: AnyGame; content: (req: StartRequest) => Promise<unknown> }> =
+		{
+			trivia: { game: trivia, content: (req) => loadPack(req.packId ?? 'general') },
+			xo: { game: xo, content: async () => null }
+		};
+
+	let game = $state<LocalGame<unknown> | null>(null);
+	let lastStart: StartRequest | null = null;
 	let error = $state<string | null>(null);
 
 	/** Curated packs ship with the app; your own packs are fetched with their edit token. */
@@ -28,21 +38,23 @@
 	}
 
 	async function start(req: StartRequest) {
+		const def = solo[req.gameId];
+		if (!def) return;
 		error = null;
-		let content: TriviaPack | null;
+		let content: unknown;
 		try {
-			content = await loadPack(req.packId ?? 'general');
+			content = await def.content(req);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Something went wrong';
 			return;
 		}
-		if (!content) return;
+		if (content === null && req.gameId === 'trivia') return;
 		lastStart = req;
-		trackEvent('game-start', 'solo/trivia');
+		trackEvent('game-start', `solo/${req.gameId}`);
 		game?.destroy();
 		const profile = loadProfile();
-		game = new LocalGame<TriviaView>(
-			trivia,
+		game = new LocalGame(
+			def.game,
 			{ id: 'you', name: profile.name || 'You', avatar: profile.avatar },
 			{ content, config: req.config }
 		);
@@ -57,17 +69,18 @@
 </script>
 
 <svelte:head>
-	<title>{t.solo.title} · {t.appName}</title>
-	<meta name="description" content={t.solo.intro} />
+	<title>{t.solo.title(entry.name)} · {t.appName}</title>
+	<meta name="description" content={t.solo.intro[entry.id] ?? entry.tagline} />
 </svelte:head>
 
 <main>
 	{#if game?.view}
+		{@const Screen = gameUi[entry.id]!.Player}
 		<header class="top">
-			<span class="kicker">{t.solo.title}</span>
+			<span class="kicker">{t.solo.title(entry.name)}</span>
 			<button class="btn ghost small" onclick={quit}>{t.solo.quit}</button>
 		</header>
-		<TriviaPlayer
+		<Screen
 			view={game.view}
 			clockOffset={0}
 			youId="you"
@@ -82,10 +95,16 @@
 		/>
 	{:else}
 		<a href="/" class="back">← {t.appName}</a>
-		<h1>{t.solo.title}</h1>
-		<p class="muted">{t.solo.intro}</p>
+		<h1>{t.solo.title(entry.name)}</h1>
+		<p class="muted">{t.solo.intro[entry.id] ?? entry.tagline}</p>
 		<div class="card pick">
-			<GamePicker mode="solo" playerCount={1} onstart={start} allowCode={false} />
+			<GamePicker
+				mode="solo"
+				playerCount={1}
+				onstart={start}
+				allowCode={false}
+				onlyGame={entry.id}
+			/>
 			{#if error}<p class="error" role="alert">{error}</p>{/if}
 		</div>
 	{/if}
