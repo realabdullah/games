@@ -7,6 +7,8 @@ import TriviaPlayer from './trivia/TriviaPlayer.svelte';
 import type { GameStream, GameUi } from './types';
 import WitHost from './wit/WitHost.svelte';
 import WitPlayer from './wit/WitPlayer.svelte';
+import XoHost from './xo/XoHost.svelte';
+import XoPlayer from './xo/XoPlayer.svelte';
 import { t } from '$lib/i18n';
 
 const s = t.games.settings;
@@ -30,6 +32,14 @@ export const gameUi: Record<string, GameUi> = {
 		settings: [
 			{ key: 'rounds', label: s.rounds, options: [1, 2], default: 1 },
 			{ key: 'drawSeconds', label: s.drawSeconds, options: [60, 75, 90], default: 75 }
+		]
+	},
+	xo: {
+		Host: XoHost,
+		Player: XoPlayer,
+		settings: [
+			{ key: 'matches', label: s.matches, options: [3, 5, 7, 9], default: 5 },
+			{ key: 'turnSeconds', label: s.turnSeconds, options: [5, 10, 15], default: 10 }
 		]
 	}
 };

@@ -11,6 +11,7 @@ COPY packages/games/trivia/package.json packages/games/trivia/
 COPY packages/games/icebreakers/package.json packages/games/icebreakers/
 COPY packages/games/wit/package.json packages/games/wit/
 COPY packages/games/doodle/package.json packages/games/doodle/
+COPY packages/games/xo/package.json packages/games/xo/
 RUN bun install --frozen-lockfile
 COPY . .
 # Optional: your self-hosted GoatCounter, e.g. https://stats.example.com

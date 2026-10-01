@@ -2,6 +2,7 @@ import { doodlePack, findTriviaPack, icebreakerPack, witPack } from '@games/cont
 import { doodle, type DoodleConfig } from '@games/doodle';
 import { icebreakers, type IcebreakersConfig } from '@games/icebreakers';
 import { wit, type WitConfig } from '@games/wit';
+import { xo, type XoConfig } from '@games/xo';
 import type { AnyGame } from '@games/engine';
 import { trivia, type TriviaConfig } from '@games/trivia';
 import type { PackStore } from './packs.ts';
@@ -77,6 +78,14 @@ export function createRegistry(packs?: PackStore): Registry {
 			config: (raw): Omit<DoodleConfig, 'familyFilter'> => ({
 				rounds: clamp(raw?.rounds, 1, 3, doodle.defaultConfig.rounds),
 				drawSeconds: clamp(raw?.drawSeconds, 30, 120, doodle.defaultConfig.drawSeconds)
+			})
+		},
+		xo: {
+			game: xo,
+			content: () => ({ content: null, flagged: false }),
+			config: (raw): Omit<XoConfig, 'familyFilter'> => ({
+				matches: clamp(raw?.matches, 1, 15, xo.defaultConfig.matches),
+				turnSeconds: clamp(raw?.turnSeconds, 5, 30, xo.defaultConfig.turnSeconds)
 			})
 		}
 	};

@@ -181,3 +181,48 @@ test('Doodle Dash — choose, draw, strokes reach everyone, guess, reveal', asyn
 	await guessers[1]!.reload();
 	await expect(guessers[1]!.getByText('The word was')).toBeVisible();
 });
+
+test('X-O Battle — king of the hill, winner stays on', async ({ browser }) => {
+	const { host, phones } = await setupRoom(browser, ['Ada', 'Bob', 'Cy']);
+	await start(host, 'X-O Battle', { Matches: '3' });
+	await expect(host.getByText('Match 1 of 3')).toBeVisible();
+	await shot(host, 'xo-host-turn');
+
+	/** Whoever's turn it is plays the next cell from the list. */
+	async function playMoves(cells: number[]) {
+		for (const cell of cells) {
+			let mover: Page | null = null;
+			await expect
+				.poll(async () => {
+					for (const phone of phones) {
+						if (await phone.getByText('Your turn!').isVisible()) {
+							mover = phone;
+							return true;
+						}
+					}
+					return false;
+				})
+				.toBe(true);
+			const filled = await mover!.locator('.cell .mark').count();
+			await mover!.locator('.cell').nth(cell).click();
+			// Wait for the move to land before looking for the next player.
+			await expect(mover!.locator('.cell .mark')).toHaveCount(filled + 1);
+		}
+	}
+
+	// X takes the top row.
+	await playMoves([0, 3, 1, 4, 2]);
+	await expect(host.getByText(/wins!/)).toBeVisible();
+	await shot(host, 'xo-host-result');
+	await shot(phones[0]!, 'xo-phone-result');
+
+	// The third player is up next and gets a turn in match 2.
+	await host.getByRole('button', { name: 'Next' }).click();
+	await expect(host.getByText('Match 2 of 3')).toBeVisible();
+	await playMoves([0, 1, 2, 4, 3, 5, 7, 6, 8]);
+	await expect(host.getByText('It’s a draw!')).toBeVisible();
+	await host.getByRole('button', { name: 'Next' }).click();
+	await playMoves([0, 3, 1, 4, 2]);
+	await host.getByRole('button', { name: 'Next' }).click();
+	await expect(host.getByText('Final scores')).toBeVisible();
+});

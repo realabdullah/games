@@ -19,7 +19,8 @@
 		"@games/icebreakers": "workspace:*",
 		"@games/protocol": "workspace:*",
 		"@games/trivia": "workspace:*",
-		"@games/wit": "workspace:*"
+		"@games/wit": "workspace:*",
+		"@games/xo": "workspace:*"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-static": "^3.0.10",

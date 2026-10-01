@@ -3,6 +3,7 @@ import type { GameMeta, GameMode, GameTag } from '@games/engine';
 import { icebreakers } from '@games/icebreakers';
 import { trivia } from '@games/trivia';
 import { wit } from '@games/wit';
+import { xo } from '@games/xo';
 
 /** Catalog entries: each game's own `meta`, plus its card art. */
 export interface CatalogEntry {
@@ -32,5 +33,6 @@ export const catalog: CatalogEntry[] = [
 	live(trivia.meta, { emoji: '🧠', color: 'var(--yellow)' }),
 	live(icebreakers.meta, { emoji: '🧊', color: 'var(--teal)' }),
 	live(wit.meta, { emoji: '✍️', color: 'var(--pink)' }),
-	live(doodle.meta, { emoji: '🎨', color: 'var(--violet)' })
+	live(doodle.meta, { emoji: '🎨', color: 'var(--violet)' }),
+	live(xo.meta, { emoji: '⭕', color: 'var(--teal)' })
 ];

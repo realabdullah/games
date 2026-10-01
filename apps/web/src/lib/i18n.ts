@@ -159,7 +159,9 @@ export const t = {
 		points: (n: number) => `+${n}`,
 		settings: {
 			rounds: 'Rounds',
-			drawSeconds: 'Seconds to draw'
+			drawSeconds: 'Seconds to draw',
+			matches: 'Matches',
+			turnSeconds: 'Seconds per move'
 		}
 	},
 	icebreakers: {
@@ -212,6 +214,20 @@ export const t = {
 		color: (n: number) => `Color ${n}`,
 		size: (n: number) => `Brush size ${n}`,
 		canvas: 'Drawing canvas'
+	},
+	xo: {
+		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
+		matchOf: (i: number, n: number) => `Match ${i} of ${n}`,
+		vs: 'vs',
+		yourTurn: 'Your turn!',
+		theirTurn: (name: string) => `${name}’s turn`,
+		youAre: (mark: string) => `You’re ${mark}`,
+		watching: 'Watching this one.',
+		upNext: (name: string) => `Up next: ${name}`,
+		youreNext: 'You’re up next!',
+		wins: (name: string) => `${name} wins!`,
+		draw: 'It’s a draw!',
+		cell: (i: number, mark: string | null) => `Cell ${i + 1}${mark ? `, ${mark}` : ', empty'}`
 	},
 	solo: {
 		title: 'Solo trivia',

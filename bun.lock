@@ -22,6 +22,7 @@
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
         "@games/wit": "workspace:*",
+        "@games/xo": "workspace:*",
         "drizzle-orm": "^0.45.3",
         "zod": "^4.6.5",
       },
@@ -42,6 +43,7 @@
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
         "@games/wit": "workspace:*",
+        "@games/xo": "workspace:*",
       },
       "devDependencies": {
         "@sveltejs/adapter-static": "^3.0.10",
@@ -104,6 +106,16 @@
     },
     "packages/games/wit": {
       "name": "@games/wit",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/xo": {
+      "name": "@games/xo",
       "dependencies": {
         "@games/content": "workspace:*",
         "@games/engine": "workspace:*",
@@ -201,6 +213,8 @@
     "@games/trivia": ["@games/trivia@workspace:packages/games/trivia"],
 
     "@games/wit": ["@games/wit@workspace:packages/games/wit"],
+
+    "@games/xo": ["@games/xo@workspace:packages/games/xo"],
 
     "@jridgewell/gen-mapping": ["@jridgewell/gen-mapping@0.3.13", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.0", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA=="],
 
