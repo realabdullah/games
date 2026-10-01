@@ -13,6 +13,9 @@ COPY packages/games/wit/package.json packages/games/wit/
 COPY packages/games/doodle/package.json packages/games/doodle/
 RUN bun install --frozen-lockfile
 COPY . .
+# Optional: your self-hosted GoatCounter, e.g. https://stats.example.com
+ARG VITE_GOATCOUNTER_URL
+ENV VITE_GOATCOUNTER_URL=$VITE_GOATCOUNTER_URL
 RUN bun run --filter web build
 
 FROM caddy:2-alpine

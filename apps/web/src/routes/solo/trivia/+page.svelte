@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { findTriviaPack, type TriviaPack } from '@games/content';
+	import { trackEvent } from '$lib/analytics';
 	import { api } from '$lib/api';
 	import { myPacks } from '$lib/my-packs.svelte';
 	import { trivia, type TriviaView } from '@games/trivia';
@@ -37,6 +38,7 @@
 		}
 		if (!content) return;
 		lastStart = req;
+		trackEvent('game-start', 'solo/trivia');
 		game?.destroy();
 		const profile = loadProfile();
 		game = new LocalGame<TriviaView>(

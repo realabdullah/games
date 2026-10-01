@@ -4,6 +4,7 @@
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
 	import GamePicker from '$lib/components/GamePicker.svelte';
 	import type { StartRequest } from '$lib/games/types';
+	import { trackEvent } from '$lib/analytics';
 	import { gameUi } from '$lib/games/registry';
 	import PlayerList from '$lib/components/PlayerList.svelte';
 	import { t } from '$lib/i18n';
@@ -24,6 +25,7 @@
 	let lastStart: StartRequest | null = null;
 	function start(req: StartRequest) {
 		lastStart = req;
+		trackEvent('game-start', `party/${req.gameId}`);
 		conn?.send({ type: 'start', ...req });
 	}
 
