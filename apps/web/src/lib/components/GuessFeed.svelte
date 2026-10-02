@@ -1,9 +1,15 @@
 <script lang="ts">
-	import type { DoodleView } from '@games/doodle';
 	import { t } from '$lib/i18n';
 
-	/** Live guesses. Correct guesses show as "Ada guessed it!", never the word. */
-	let { feed, large = false }: { feed: DoodleView['feed']; large?: boolean } = $props();
+	interface FeedItem {
+		n: number;
+		player: { name: string } | null;
+		kind: 'guess' | 'correct' | 'close';
+		text: string;
+	}
+
+	/** Live guesses. Correct guesses show as "Ada guessed it!", never the answer. */
+	let { feed, large = false }: { feed: FeedItem[]; large?: boolean } = $props();
 
 	let list: HTMLOListElement;
 	$effect(() => {
@@ -13,11 +19,11 @@
 </script>
 
 <ol class="feed" class:large bind:this={list} aria-live="polite">
-	{#if feed.length === 0}<li class="empty">{t.doodle.feedEmpty}</li>{/if}
+	{#if feed.length === 0}<li class="empty">{t.games.feedEmpty}</li>{/if}
 	{#each feed as f (f.n)}
 		<li class={f.kind}>
 			{#if f.kind === 'correct'}
-				<strong>{t.doodle.guessedIt(f.player?.name ?? '')}</strong>
+				<strong>{t.games.guessedIt(f.player?.name ?? '')}</strong>
 			{:else if f.kind === 'close'}
 				{f.text}
 			{:else}

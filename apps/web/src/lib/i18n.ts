@@ -173,9 +173,15 @@ export const t = {
 		next: 'Next',
 		lockedIn: 'Locked in! Waiting for the others…',
 		points: (n: number) => `+${n}`,
+		feedEmpty: 'Guesses show up here.',
+		guessedIt: (name: string) => `${name} guessed it!`,
 		settings: {
 			rounds: 'Rounds',
+			words: 'Words',
+			puzzles: 'Puzzles',
 			drawSeconds: 'Seconds to draw',
+			secondsPerWord: 'Seconds per word',
+			secondsPerPuzzle: 'Seconds per puzzle',
 			matches: 'Matches',
 			turnSeconds: 'Seconds per move',
 			botLevel: 'Computer',
@@ -221,8 +227,6 @@ export const t = {
 		drawing: (name: string) => `${name} is drawing`,
 		guessPlaceholder: 'Type your guess',
 		guess: 'Guess',
-		feedEmpty: 'Guesses show up here.',
-		guessedIt: (name: string) => `${name} guessed it!`,
 		youGotIt: 'You got it! 🎉',
 		guessed: (d: number, n: number) => `${d} of ${n} guessed`,
 		theWordWas: 'The word was',
@@ -232,6 +236,75 @@ export const t = {
 		color: (n: number) => `Color ${n}`,
 		size: (n: number) => `Brush size ${n}`,
 		canvas: 'Drawing canvas'
+	},
+	wordrace: {
+		howTo:
+			'Everyone gets the same secret five-letter word and six tries. Fewer tries, more points.',
+		legend: 'Green: right letter, right spot. Yellow: in the word, wrong spot.',
+		wordOf: (i: number, n: number) => `Word ${i} of ${n}`,
+		done: (d: number, n: number) => `${d} of ${n} done`,
+		guessOnPhone: 'Guess on your phone',
+		enter: 'Enter',
+		backspace: 'Delete letter',
+		notAWord: (word: string) => `“${word.toUpperCase()}” isn’t in the word list`,
+		tooShort: 'Five letters, please',
+		solvedIn: (n: number) => (n === 1 ? 'First try! 🤯' : `Solved in ${n}!`),
+		out: 'Out of guesses',
+		waiting: 'Waiting for the others…',
+		theWordWas: 'The word was',
+		tile: (letter: string, mark: string) => `${letter.toUpperCase()}, ${mark}`,
+		marks: { hit: 'right spot', near: 'wrong spot', miss: 'not in the word' } as Record<
+			string,
+			string
+		>,
+		row: (n: number) => `Guess ${n}`,
+		board: (name: string) => `${name}’s tiles`,
+		yourBoard: 'Your guesses'
+	},
+	hangman: {
+		howTo: 'Take turns picking letters. Six wrong letters and the word wins.',
+		wordOf: (i: number, n: number) => `Word ${i} of ${n}`,
+		turn: (name: string) => `${name}’s turn`,
+		yourTurn: 'Your turn! Pick a letter.',
+		youreNext: 'You’re up next!',
+		upNext: (name: string) => `Up next: ${name}`,
+		solve: 'Solve it',
+		solvePlaceholder: 'The whole word or phrase',
+		cancel: 'Back to letters',
+		lives: (left: number) => (left === 1 ? '1 life left' : `${left} lives left`),
+		letters: 'Letters',
+		letter: (ch: string, state: string) => `${ch.toUpperCase()}${state ? `, ${state}` : ''}`,
+		hitState: 'in the word',
+		missState: 'not in the word',
+		hit: (name: string, letter: string, count: number) =>
+			count === 1
+				? `${name} found ${article(letter)} ${letter.toUpperCase()}`
+				: `${name} found ${count} ${letter.toUpperCase()}s`,
+		miss: (name: string, letter: string) => `${name} picked ${letter.toUpperCase()}. Not there!`,
+		timeout: (name: string) => `${name} ran out of time`,
+		wrongSolve: (name: string, text: string) => `${name} guessed “${text}”. Nope!`,
+		you: {
+			hit: (letter: string, count: number) =>
+				count === 1
+					? `You found ${article(letter)} ${letter.toUpperCase()}`
+					: `You found ${count} ${letter.toUpperCase()}s`,
+			miss: (letter: string) => `No ${letter.toUpperCase()} in this one`,
+			timeout: 'Out of time',
+			wrongSolve: (text: string) => `“${text}”? Nope!`,
+			solved: 'You solved it!'
+		},
+		solvedBy: (name: string) => `${name} solved it!`,
+		wordWins: 'The word wins this time',
+		gallows: (misses: number, max: number) => `${misses} of ${max} wrong`
+	},
+	emoji: {
+		howTo: 'Read the emojis and type what they spell: a word, a film or a saying.',
+		puzzleOf: (i: number, n: number) => `Puzzle ${i} of ${n}`,
+		guessPlaceholder: 'Your guess',
+		guess: 'Guess',
+		youGotIt: 'You got it! 🎉',
+		got: (d: number, n: number) => `${d} of ${n} got it`,
+		answerWas: 'It was'
 	},
 	xo: {
 		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
@@ -251,7 +324,10 @@ export const t = {
 		title: (game: string) => `${game}: solo`,
 		intro: {
 			trivia: 'Play on your own. Same questions, same scoring, no room needed.',
-			xo: 'Take on the computer. Pick how tough it plays.'
+			xo: 'Take on the computer. Pick how tough it plays.',
+			wordrace: 'A secret five-letter word and six tries. Same rules, no room needed.',
+			hangman: 'Pick letters and solve the word before you run out of lives.',
+			emoji: 'Decode emoji riddles against the clock. Faster answers score more.'
 		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'
@@ -266,6 +342,11 @@ export const t = {
 		backHome: 'Back to home'
 	}
 } as const;
+
+/** "an A", "a B": by how the letter's name sounds. */
+function article(letter: string): string {
+	return 'aefhilmnorsx'.includes(letter.toLowerCase()) ? 'an' : 'a';
+}
 
 function ordinal(n: number): string {
 	const s = ['th', 'st', 'nd', 'rd'];

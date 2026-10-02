@@ -32,13 +32,19 @@ const tile = (game: Pick<CatalogEntry, 'emoji' | 'color'>, size: number) =>
 
 const live = catalog.filter((g) => g.status === 'live');
 
+/** Up to three rows of tiles, so the grid stays inside the card as games are added. */
+const gridCols = Math.max(2, Math.ceil(live.length / 3));
+const gridTile = live.length > 6 ? 112 : 130;
+
 const cards: Card[] = [
 	{
 		file: 'default.png',
 		kicker: t.appName,
 		title: 'Party games for any group',
 		text: t.tagline,
-		art: `<div class="grid">${live.map((g) => tile(g, 130)).join('')}</div>`
+		art: `<div class="grid" style="--cols:${gridCols};--tile:${gridTile}px">${live
+			.map((g) => tile(g, gridTile))
+			.join('')}</div>`
 	},
 	...live
 		.filter((g) => g.modes.includes('solo'))
@@ -97,8 +103,14 @@ const page = (card: Card, styles: string) => `<!doctype html>
 	.kicker svg { width: 60px; height: 60px; }
 	h1 { font-size: 84px; line-height: 0.98; font-weight: 800; letter-spacing: -0.02em; }
 	p { font-size: 32px; line-height: 1.3; color: var(--ink-soft); font-weight: 500; }
-	.grid { display: grid; grid-template-columns: repeat(2, auto); gap: 24px; }
-	.grid .tile:last-child:nth-child(odd) { grid-column: span 2; justify-self: center; }
+	/* Wrapping flex rows keep a short last row centred. */
+	.grid {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 24px;
+		width: calc(var(--cols) * var(--tile) + (var(--cols) - 1) * 24px);
+	}
 	.tile {
 		width: var(--size);
 		height: var(--size);

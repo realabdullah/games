@@ -11,6 +11,9 @@ One person opens the game on a big screen (a TV, or a shared screen on a video c
 - **Quick Wit**: two players answer the same funny prompt, and the room votes for the best one.
 - **Doodle Dash**: one player draws a word on their phone while everyone else races to guess it.
 - **X-O Battle**: tic-tac-toe where the winner stays on, or play alone against the computer.
+- **Word Race**: everyone gets the same secret five-letter word and six tries to find it.
+- **Hangman**: take turns picking letters before the room runs out of lives.
+- **Emoji Riddles**: read a row of emojis and race to name the word, film or saying.
 
 Most games also work with everyone on their own screen, and some can be played solo.
 

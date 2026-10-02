@@ -6,7 +6,7 @@
 	import type { HostViewProps } from '$lib/games/types';
 	import { t } from '$lib/i18n';
 	import DoodleCanvas from './DoodleCanvas.svelte';
-	import GuessFeed from './GuessFeed.svelte';
+	import GuessFeed from '$lib/components/GuessFeed.svelte';
 
 	let {
 		view: raw,

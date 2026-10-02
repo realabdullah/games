@@ -1,8 +1,11 @@
 import { doodle } from '@games/doodle';
+import { emoji } from '@games/emoji';
 import type { GameMeta, GameMode, GameTag } from '@games/engine';
+import { hangman } from '@games/hangman';
 import { icebreakers } from '@games/icebreakers';
 import { trivia } from '@games/trivia';
 import { wit } from '@games/wit';
+import { wordRace } from '@games/wordrace';
 import { xo } from '@games/xo';
 
 /** Catalog entries: each game's own `meta`, plus its card art. */
@@ -34,5 +37,8 @@ export const catalog: CatalogEntry[] = [
 	live(icebreakers.meta, { emoji: '🧊', color: 'var(--teal)' }),
 	live(wit.meta, { emoji: '✍️', color: 'var(--pink)' }),
 	live(doodle.meta, { emoji: '🎨', color: 'var(--violet)' }),
-	live(xo.meta, { emoji: '⭕', color: 'var(--teal)' })
+	live(xo.meta, { emoji: '⭕', color: 'var(--teal)' }),
+	live(wordRace.meta, { emoji: '🟩', color: 'var(--yellow)' }),
+	live(hangman.meta, { emoji: '🪢', color: 'var(--violet)' }),
+	live(emoji.meta, { emoji: '🤔', color: 'var(--pink)' })
 ];

@@ -1,0 +1,666 @@
+{
+	"id": "hangman",
+	"title": "Everyday things",
+	"items": [
+		{
+			"word": "giraffe",
+			"category": "Animals"
+		},
+		{
+			"word": "elephant",
+			"category": "Animals"
+		},
+		{
+			"word": "kangaroo",
+			"category": "Animals"
+		},
+		{
+			"word": "penguin",
+			"category": "Animals"
+		},
+		{
+			"word": "octopus",
+			"category": "Animals"
+		},
+		{
+			"word": "dolphin",
+			"category": "Animals"
+		},
+		{
+			"word": "cheetah",
+			"category": "Animals"
+		},
+		{
+			"word": "hedgehog",
+			"category": "Animals"
+		},
+		{
+			"word": "flamingo",
+			"category": "Animals"
+		},
+		{
+			"word": "crocodile",
+			"category": "Animals"
+		},
+		{
+			"word": "butterfly",
+			"category": "Animals"
+		},
+		{
+			"word": "squirrel",
+			"category": "Animals"
+		},
+		{
+			"word": "tortoise",
+			"category": "Animals"
+		},
+		{
+			"word": "jellyfish",
+			"category": "Animals"
+		},
+		{
+			"word": "chameleon",
+			"category": "Animals"
+		},
+		{
+			"word": "gorilla",
+			"category": "Animals"
+		},
+		{
+			"word": "porcupine",
+			"category": "Animals"
+		},
+		{
+			"word": "rhinoceros",
+			"category": "Animals"
+		},
+		{
+			"word": "zebra",
+			"category": "Animals"
+		},
+		{
+			"word": "panther",
+			"category": "Animals"
+		},
+		{
+			"word": "hamster",
+			"category": "Animals"
+		},
+		{
+			"word": "peacock",
+			"category": "Animals"
+		},
+		{
+			"word": "walrus",
+			"category": "Animals"
+		},
+		{
+			"word": "lobster",
+			"category": "Animals"
+		},
+		{
+			"word": "spaghetti",
+			"category": "Food"
+		},
+		{
+			"word": "pancake",
+			"category": "Food"
+		},
+		{
+			"word": "avocado",
+			"category": "Food"
+		},
+		{
+			"word": "broccoli",
+			"category": "Food"
+		},
+		{
+			"word": "pineapple",
+			"category": "Food"
+		},
+		{
+			"word": "sandwich",
+			"category": "Food"
+		},
+		{
+			"word": "chocolate",
+			"category": "Food"
+		},
+		{
+			"word": "cucumber",
+			"category": "Food"
+		},
+		{
+			"word": "popcorn",
+			"category": "Food"
+		},
+		{
+			"word": "pretzel",
+			"category": "Food"
+		},
+		{
+			"word": "lasagna",
+			"category": "Food"
+		},
+		{
+			"word": "doughnut",
+			"category": "Food"
+		},
+		{
+			"word": "blueberry",
+			"category": "Food"
+		},
+		{
+			"word": "strawberry",
+			"category": "Food"
+		},
+		{
+			"word": "watermelon",
+			"category": "Food"
+		},
+		{
+			"word": "cinnamon",
+			"category": "Food"
+		},
+		{
+			"word": "omelette",
+			"category": "Food"
+		},
+		{
+			"word": "burrito",
+			"category": "Food"
+		},
+		{
+			"word": "cupcake",
+			"category": "Food"
+		},
+		{
+			"word": "meatball",
+			"category": "Food"
+		},
+		{
+			"word": "jollof rice",
+			"category": "Food"
+		},
+		{
+			"word": "fried plantain",
+			"category": "Food"
+		},
+		{
+			"word": "ice cream",
+			"category": "Food"
+		},
+		{
+			"word": "apple pie",
+			"category": "Food"
+		},
+		{
+			"word": "toothbrush",
+			"category": "Around the house"
+		},
+		{
+			"word": "umbrella",
+			"category": "Around the house"
+		},
+		{
+			"word": "refrigerator",
+			"category": "Around the house"
+		},
+		{
+			"word": "microwave",
+			"category": "Around the house"
+		},
+		{
+			"word": "pillow",
+			"category": "Around the house"
+		},
+		{
+			"word": "blanket",
+			"category": "Around the house"
+		},
+		{
+			"word": "wardrobe",
+			"category": "Around the house"
+		},
+		{
+			"word": "staircase",
+			"category": "Around the house"
+		},
+		{
+			"word": "doorbell",
+			"category": "Around the house"
+		},
+		{
+			"word": "bathtub",
+			"category": "Around the house"
+		},
+		{
+			"word": "curtain",
+			"category": "Around the house"
+		},
+		{
+			"word": "teapot",
+			"category": "Around the house"
+		},
+		{
+			"word": "kettle",
+			"category": "Around the house"
+		},
+		{
+			"word": "mirror",
+			"category": "Around the house"
+		},
+		{
+			"word": "candle",
+			"category": "Around the house"
+		},
+		{
+			"word": "bookshelf",
+			"category": "Around the house"
+		},
+		{
+			"word": "toaster",
+			"category": "Around the house"
+		},
+		{
+			"word": "washing machine",
+			"category": "Around the house"
+		},
+		{
+			"word": "remote control",
+			"category": "Around the house"
+		},
+		{
+			"word": "alarm clock",
+			"category": "Around the house"
+		},
+		{
+			"word": "library",
+			"category": "Places"
+		},
+		{
+			"word": "hospital",
+			"category": "Places"
+		},
+		{
+			"word": "airport",
+			"category": "Places"
+		},
+		{
+			"word": "museum",
+			"category": "Places"
+		},
+		{
+			"word": "bakery",
+			"category": "Places"
+		},
+		{
+			"word": "stadium",
+			"category": "Places"
+		},
+		{
+			"word": "lighthouse",
+			"category": "Places"
+		},
+		{
+			"word": "castle",
+			"category": "Places"
+		},
+		{
+			"word": "volcano",
+			"category": "Places"
+		},
+		{
+			"word": "island",
+			"category": "Places"
+		},
+		{
+			"word": "desert",
+			"category": "Places"
+		},
+		{
+			"word": "jungle",
+			"category": "Places"
+		},
+		{
+			"word": "waterfall",
+			"category": "Places"
+		},
+		{
+			"word": "pyramid",
+			"category": "Places"
+		},
+		{
+			"word": "supermarket",
+			"category": "Places"
+		},
+		{
+			"word": "playground",
+			"category": "Places"
+		},
+		{
+			"word": "train station",
+			"category": "Places"
+		},
+		{
+			"word": "swimming pool",
+			"category": "Places"
+		},
+		{
+			"word": "outer space",
+			"category": "Places"
+		},
+		{
+			"word": "astronaut",
+			"category": "Jobs"
+		},
+		{
+			"word": "firefighter",
+			"category": "Jobs"
+		},
+		{
+			"word": "detective",
+			"category": "Jobs"
+		},
+		{
+			"word": "plumber",
+			"category": "Jobs"
+		},
+		{
+			"word": "dentist",
+			"category": "Jobs"
+		},
+		{
+			"word": "journalist",
+			"category": "Jobs"
+		},
+		{
+			"word": "architect",
+			"category": "Jobs"
+		},
+		{
+			"word": "magician",
+			"category": "Jobs"
+		},
+		{
+			"word": "carpenter",
+			"category": "Jobs"
+		},
+		{
+			"word": "librarian",
+			"category": "Jobs"
+		},
+		{
+			"word": "scientist",
+			"category": "Jobs"
+		},
+		{
+			"word": "photographer",
+			"category": "Jobs"
+		},
+		{
+			"word": "electrician",
+			"category": "Jobs"
+		},
+		{
+			"word": "pilot",
+			"category": "Jobs"
+		},
+		{
+			"word": "chef",
+			"category": "Jobs"
+		},
+		{
+			"word": "farmer",
+			"category": "Jobs"
+		},
+		{
+			"word": "police officer",
+			"category": "Jobs"
+		},
+		{
+			"word": "bus driver",
+			"category": "Jobs"
+		},
+		{
+			"word": "basketball",
+			"category": "Sports & games"
+		},
+		{
+			"word": "volleyball",
+			"category": "Sports & games"
+		},
+		{
+			"word": "badminton",
+			"category": "Sports & games"
+		},
+		{
+			"word": "skateboard",
+			"category": "Sports & games"
+		},
+		{
+			"word": "marathon",
+			"category": "Sports & games"
+		},
+		{
+			"word": "gymnastics",
+			"category": "Sports & games"
+		},
+		{
+			"word": "karate",
+			"category": "Sports & games"
+		},
+		{
+			"word": "archery",
+			"category": "Sports & games"
+		},
+		{
+			"word": "bowling",
+			"category": "Sports & games"
+		},
+		{
+			"word": "cricket",
+			"category": "Sports & games"
+		},
+		{
+			"word": "snooker",
+			"category": "Sports & games"
+		},
+		{
+			"word": "surfing",
+			"category": "Sports & games"
+		},
+		{
+			"word": "chess",
+			"category": "Sports & games"
+		},
+		{
+			"word": "dominoes",
+			"category": "Sports & games"
+		},
+		{
+			"word": "table tennis",
+			"category": "Sports & games"
+		},
+		{
+			"word": "hide and seek",
+			"category": "Sports & games"
+		},
+		{
+			"word": "musical chairs",
+			"category": "Sports & games"
+		},
+		{
+			"word": "guitar",
+			"category": "Music"
+		},
+		{
+			"word": "trumpet",
+			"category": "Music"
+		},
+		{
+			"word": "saxophone",
+			"category": "Music"
+		},
+		{
+			"word": "violin",
+			"category": "Music"
+		},
+		{
+			"word": "harmonica",
+			"category": "Music"
+		},
+		{
+			"word": "xylophone",
+			"category": "Music"
+		},
+		{
+			"word": "accordion",
+			"category": "Music"
+		},
+		{
+			"word": "orchestra",
+			"category": "Music"
+		},
+		{
+			"word": "microphone",
+			"category": "Music"
+		},
+		{
+			"word": "headphones",
+			"category": "Music"
+		},
+		{
+			"word": "drummer",
+			"category": "Music"
+		},
+		{
+			"word": "concert",
+			"category": "Music"
+		},
+		{
+			"word": "rock and roll",
+			"category": "Music"
+		},
+		{
+			"word": "karaoke night",
+			"category": "Music"
+		},
+		{
+			"word": "rainbow",
+			"category": "Nature"
+		},
+		{
+			"word": "thunderstorm",
+			"category": "Nature"
+		},
+		{
+			"word": "avalanche",
+			"category": "Nature"
+		},
+		{
+			"word": "earthquake",
+			"category": "Nature"
+		},
+		{
+			"word": "tornado",
+			"category": "Nature"
+		},
+		{
+			"word": "sunflower",
+			"category": "Nature"
+		},
+		{
+			"word": "mushroom",
+			"category": "Nature"
+		},
+		{
+			"word": "cactus",
+			"category": "Nature"
+		},
+		{
+			"word": "seashell",
+			"category": "Nature"
+		},
+		{
+			"word": "snowflake",
+			"category": "Nature"
+		},
+		{
+			"word": "glacier",
+			"category": "Nature"
+		},
+		{
+			"word": "meadow",
+			"category": "Nature"
+		},
+		{
+			"word": "galaxy",
+			"category": "Nature"
+		},
+		{
+			"word": "shooting star",
+			"category": "Nature"
+		},
+		{
+			"word": "full moon",
+			"category": "Nature"
+		},
+		{
+			"word": "sunglasses",
+			"category": "Things you wear"
+		},
+		{
+			"word": "sneakers",
+			"category": "Things you wear"
+		},
+		{
+			"word": "raincoat",
+			"category": "Things you wear"
+		},
+		{
+			"word": "pyjamas",
+			"category": "Things you wear"
+		},
+		{
+			"word": "necklace",
+			"category": "Things you wear"
+		},
+		{
+			"word": "bracelet",
+			"category": "Things you wear"
+		},
+		{
+			"word": "earrings",
+			"category": "Things you wear"
+		},
+		{
+			"word": "backpack",
+			"category": "Things you wear"
+		},
+		{
+			"word": "wristwatch",
+			"category": "Things you wear"
+		},
+		{
+			"word": "slippers",
+			"category": "Things you wear"
+		},
+		{
+			"word": "sweater",
+			"category": "Things you wear"
+		},
+		{
+			"word": "scarf",
+			"category": "Things you wear"
+		},
+		{
+			"word": "bow tie",
+			"category": "Things you wear"
+		},
+		{
+			"word": "baseball cap",
+			"category": "Things you wear"
+		}
+	]
+}

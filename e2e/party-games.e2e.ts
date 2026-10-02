@@ -48,7 +48,14 @@ async function setupRoom(browser: Browser, names: string[]) {
 }
 
 async function start(host: Page, gameName: string, settings: Record<string, string> = {}) {
-	await host.locator('.game', { hasText: gameName }).click();
+	// With players in the room the game list is collapsed behind "Change".
+	const games = host.getByRole('region', { name: 'Pick a game' });
+	const change = games.getByRole('button', { name: 'Change' });
+	if (await change.isVisible()) await change.click();
+	await games
+		.getByRole('group', { name: 'Pick a game' })
+		.getByRole('button', { name: new RegExp(gameName.replace(/[?.]/g, '\\$&')) })
+		.click();
 	for (const [label, value] of Object.entries(settings)) {
 		await host.getByLabel(label, { exact: true }).selectOption(value);
 	}

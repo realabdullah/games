@@ -1,0 +1,586 @@
+{
+	"id": "emoji",
+	"title": "Emoji riddles",
+	"items": [
+		{
+			"emoji": "☀️🌸",
+			"answer": "sunflower",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "⭐🐟",
+			"answer": "starfish",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🔥🪰",
+			"answer": "firefly",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🌧️🧥",
+			"answer": "raincoat",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "❄️👨",
+			"answer": "snowman",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "☕🎂",
+			"answer": "cupcake",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🦶⚽",
+			"answer": "football",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🌙💡",
+			"answer": "moonlight",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "☀️👓",
+			"answer": "sunglasses",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "💡🏠",
+			"answer": "lighthouse",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🔑🕳️",
+			"answer": "keyhole",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐎👞",
+			"answer": "horseshoe",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🧈🪰",
+			"answer": "butterfly",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🌧️🎀",
+			"answer": "rainbow",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐶🏠",
+			"answer": "doghouse",
+			"category": "Compound words",
+			"also": ["kennel"]
+		},
+		{
+			"emoji": "🐟🥣",
+			"answer": "fishbowl",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🍯🌙",
+			"answer": "honeymoon",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🦷🖌️",
+			"answer": "toothbrush",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "👂💍",
+			"answer": "earring",
+			"category": "Compound words",
+			"also": ["earrings"]
+		},
+		{
+			"emoji": "🧠🌪️",
+			"answer": "brainstorm",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🛏️🐛",
+			"answer": "bedbug",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐉🪰",
+			"answer": "dragonfly",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🌊🐴",
+			"answer": "seahorse",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐱🐟",
+			"answer": "catfish",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🦶🖨️",
+			"answer": "footprint",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "✋👜",
+			"answer": "handbag",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "☀️⬆️",
+			"answer": "sunrise",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐦🏠",
+			"answer": "birdhouse",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🍯🐝",
+			"answer": "honeybee",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐛📚",
+			"answer": "bookworm",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🌙🚶",
+			"answer": "moonwalk",
+			"category": "Compound words"
+		},
+		{
+			"emoji": "🐂👁️",
+			"answer": "bullseye",
+			"category": "Compound words",
+			"also": ["bulls eye"]
+		},
+		{
+			"emoji": "🔥🐕",
+			"answer": "hot dog",
+			"category": "Food & drink",
+			"also": ["hotdog"]
+		},
+		{
+			"emoji": "🍊🧃",
+			"answer": "orange juice",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🥜🧈",
+			"answer": "peanut butter",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🍳🎂",
+			"answer": "pancake",
+			"category": "Food & drink",
+			"also": ["pancakes"]
+		},
+		{
+			"emoji": "🌽💥",
+			"answer": "popcorn",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🌲🍎",
+			"answer": "pineapple",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "💧🍈",
+			"answer": "watermelon",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🧀🍔",
+			"answer": "cheeseburger",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🐟🍟",
+			"answer": "fish and chips",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🥚🍆",
+			"answer": "eggplant",
+			"category": "Food & drink",
+			"also": ["aubergine"]
+		},
+		{
+			"emoji": "🍬🌽",
+			"answer": "candy corn",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🍌🍞",
+			"answer": "banana bread",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🇫🇷🍟",
+			"answer": "french fries",
+			"category": "Food & drink",
+			"also": ["fries"]
+		},
+		{
+			"emoji": "🌽🐕",
+			"answer": "corn dog",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🧊🍵",
+			"answer": "iced tea",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🍫🥛",
+			"answer": "chocolate milk",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🍎🥧",
+			"answer": "apple pie",
+			"category": "Food & drink"
+		},
+		{
+			"emoji": "🦁👑",
+			"answer": "the lion king",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🕷️👨",
+			"answer": "spider-man",
+			"category": "Movies",
+			"also": ["spiderman"]
+		},
+		{
+			"emoji": "❄️👸",
+			"answer": "frozen",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🦈🏖️😱",
+			"answer": "jaws",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🚢🧊💔",
+			"answer": "titanic",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🔍🐠",
+			"answer": "finding nemo",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🧸🤠🚀",
+			"answer": "toy story",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🦖🌴🏞️",
+			"answer": "jurassic park",
+			"category": "Movies",
+			"also": ["jurassic world"]
+		},
+		{
+			"emoji": "👻🚫",
+			"answer": "ghostbusters",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🏠🎈👴",
+			"answer": "up",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐀👨‍🍳",
+			"answer": "ratatouille",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🧙‍♂️💍🌋",
+			"answer": "the lord of the rings",
+			"category": "Movies",
+			"also": ["lord of the rings"]
+		},
+		{
+			"emoji": "⚡👓🧙",
+			"answer": "harry potter",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐼🥋",
+			"answer": "kung fu panda",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🦇👨",
+			"answer": "batman",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🍫🏭",
+			"answer": "charlie and the chocolate factory",
+			"category": "Movies",
+			"also": ["willy wonka", "wonka"]
+		},
+		{
+			"emoji": "👸🐸",
+			"answer": "the princess and the frog",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐝🎬",
+			"answer": "bee movie",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🏎️🏁⚡",
+			"answer": "cars",
+			"category": "Movies"
+		},
+		{
+			"emoji": "👽📞🏠",
+			"answer": "e.t.",
+			"category": "Movies",
+			"also": ["et the extra terrestrial"]
+		},
+		{
+			"emoji": "🦍🏙️",
+			"answer": "king kong",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🤏🧜‍♀️",
+			"answer": "the little mermaid",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐕🍝❤️",
+			"answer": "lady and the tramp",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🤖❤️🌱",
+			"answer": "wall-e",
+			"category": "Movies",
+			"also": ["walle"]
+		},
+		{
+			"emoji": "👹👾🏢",
+			"answer": "monsters inc",
+			"category": "Movies",
+			"also": ["monsters, inc."]
+		},
+		{
+			"emoji": "⭐⚔️🌌",
+			"answer": "star wars",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🏫🎸",
+			"answer": "school of rock",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐧🕺",
+			"answer": "happy feet",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🌪️👠🦁",
+			"answer": "the wizard of oz",
+			"category": "Movies",
+			"also": ["wizard of oz"]
+		},
+		{
+			"emoji": "🔙🚗⏰",
+			"answer": "back to the future",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🧞🪔",
+			"answer": "aladdin",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐘👂🎪",
+			"answer": "dumbo",
+			"category": "Movies"
+		},
+		{
+			"emoji": "👸💤🌹",
+			"answer": "sleeping beauty",
+			"category": "Movies"
+		},
+		{
+			"emoji": "👠🎃🕛",
+			"answer": "cinderella",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🍎👸🪞",
+			"answer": "snow white",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🐉🧑🏋️",
+			"answer": "how to train your dragon",
+			"category": "Movies"
+		},
+		{
+			"emoji": "🦸🏠🏠",
+			"answer": "the incredibles",
+			"category": "Movies",
+			"also": ["incredibles"]
+		},
+		{
+			"emoji": "🌧️🐱🐶",
+			"answer": "raining cats and dogs",
+			"category": "Sayings",
+			"also": ["it's raining cats and dogs"]
+		},
+		{
+			"emoji": "🧩🍰",
+			"answer": "piece of cake",
+			"category": "Sayings",
+			"also": ["a piece of cake"]
+		},
+		{
+			"emoji": "🐘🛋️",
+			"answer": "elephant in the room",
+			"category": "Sayings",
+			"also": ["the elephant in the room"]
+		},
+		{
+			"emoji": "🚶🥚",
+			"answer": "walking on eggshells",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "2️⃣🐦1️⃣🪨",
+			"answer": "two birds one stone",
+			"category": "Sayings",
+			"also": ["kill two birds with one stone", "two birds with one stone"]
+		},
+		{
+			"emoji": "🍎👁️",
+			"answer": "apple of my eye",
+			"category": "Sayings",
+			"also": ["the apple of my eye"]
+		},
+		{
+			"emoji": "🐱👅",
+			"answer": "cat got your tongue",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "⏰💰",
+			"answer": "time is money",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "💙🌕",
+			"answer": "once in a blue moon",
+			"category": "Sayings",
+			"also": ["blue moon"]
+		},
+		{
+			"emoji": "🔨🧊",
+			"answer": "break the ice",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "☁️9️⃣",
+			"answer": "cloud nine",
+			"category": "Sayings",
+			"also": ["on cloud nine"]
+		},
+		{
+			"emoji": "🥔🛋️",
+			"answer": "couch potato",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "🐟🚫💧",
+			"answer": "fish out of water",
+			"category": "Sayings",
+			"also": ["a fish out of water"]
+		},
+		{
+			"emoji": "⛈️☕",
+			"answer": "storm in a teacup",
+			"category": "Sayings",
+			"also": ["a storm in a teacup"]
+		},
+		{
+			"emoji": "🍞🧈",
+			"answer": "bread and butter",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "🐱🐭",
+			"answer": "cat and mouse",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "✋🐴🐴",
+			"answer": "hold your horses",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "🐌📬",
+			"answer": "snail mail",
+			"category": "Sayings"
+		},
+		{
+			"emoji": "🌍🔝",
+			"answer": "top of the world",
+			"category": "Sayings",
+			"also": ["on top of the world"]
+		},
+		{
+			"emoji": "🔥🍳",
+			"answer": "out of the frying pan",
+			"category": "Sayings",
+			"also": ["out of the frying pan into the fire"]
+		},
+		{
+			"emoji": "🍋🍋🍋🥤",
+			"answer": "lemonade",
+			"category": "Sayings",
+			"also": ["when life gives you lemons"]
+		},
+		{
+			"emoji": "🙈🙉🙊",
+			"answer": "see no evil",
+			"category": "Sayings",
+			"also": ["hear no evil", "speak no evil"]
+		},
+		{
+			"emoji": "🐦⏰🪱",
+			"answer": "the early bird catches the worm",
+			"category": "Sayings",
+			"also": ["early bird", "the early bird"]
+		},
+		{
+			"emoji": "🐍🪜",
+			"answer": "snakes and ladders",
+			"category": "Sayings"
+		}
+	]
+}

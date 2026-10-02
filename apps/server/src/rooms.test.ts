@@ -325,6 +325,45 @@ describe('phase 4 games', () => {
 	});
 });
 
+describe('word games', () => {
+	const start = (session: string, gameId: string, config: Record<string, number> = {}) =>
+		rooms.handle(session, { type: 'start', gameId, config });
+	const gameState = <T>() => rooms.snapshot().rooms[0]!.game!.state as T;
+
+	test.each(['wordrace', 'hangman', 'emoji'])('%s starts with one player', (gameId) => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		start(host.session, gameId, { rounds: 3 });
+		expect(views.get(host.code)).toMatchObject({ phase: 'playing', gameId });
+	});
+
+	test('rematches pick words the room hasn’t had yet', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		start(host.session, 'wordrace', { rounds: 5 });
+		const first = gameState<{ words: string[] }>().words;
+		expect(first).toHaveLength(5);
+		rooms.handle(host.session, { type: 'endGame' });
+		start(host.session, 'wordrace', { rounds: 5 });
+		const second = gameState<{ words: string[] }>().words;
+		expect(second.filter((w) => first.includes(w))).toEqual([]);
+	});
+
+	test('Word Race checks guesses against the dictionary', () => {
+		const host = rooms.create({ mode: 'party' });
+		const ada = join(host.code, 'Ada');
+		start(host.session, 'wordrace', { rounds: 1 });
+		rooms.handle(host.session, { type: 'action', action: { type: 'next' } }); // skip intro
+		const answer = gameState<{ words: string[] }>().words[0]!;
+		const guess = answer === 'house' ? 'mouse' : 'house';
+		rooms.handle(ada.session, { type: 'action', action: { type: 'guess', word: 'zzzzz' } });
+		rooms.handle(ada.session, { type: 'action', action: { type: 'guess', word: guess } });
+		expect(gameState<{ guesses: Record<string, string[]> }>().guesses[ada.you.id!]).toEqual([
+			guess
+		]);
+	});
+});
+
 describe('restore hardening', () => {
 	const noEvents = {
 		roomChanged() {},

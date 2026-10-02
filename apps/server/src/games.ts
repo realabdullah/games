@@ -1,12 +1,19 @@
 import {
 	doodlePack,
+	emojiPack,
 	findTriviaPack,
+	hangmanPack,
 	icebreakerPack,
 	witPack,
+	wordRacePack,
 	type TriviaPack
 } from '@games/content';
+import { isWord } from '@games/content/dictionary';
 import { doodle, type DoodleConfig } from '@games/doodle';
+import { emoji, type EmojiConfig } from '@games/emoji';
+import { hangman, type HangmanConfig } from '@games/hangman';
 import { icebreakers, type IcebreakersConfig } from '@games/icebreakers';
+import { createWordRace, type WordRaceConfig } from '@games/wordrace';
 import { wit, type WitConfig } from '@games/wit';
 import { xo, type XoConfig } from '@games/xo';
 import type { AnyGame } from '@games/engine';
@@ -54,29 +61,61 @@ function sample<T>(items: readonly T[], n: number, random: () => number): T[] {
 	return pool.slice(0, n);
 }
 
-/** Unplayed questions first; when too few are left, top up from played ones and start over. */
+/**
+ * Unplayed items first; when too few are left, top up from played ones and
+ * start over. `key` names an item in `played`.
+ */
+export function freshItems<T>(
+	items: readonly T[],
+	wanted: number,
+	played: readonly string[],
+	random: () => number,
+	key: (item: T) => string
+): { items: T[]; used: string[]; cycled: boolean } {
+	const seen = new Set(played);
+	const unplayed = items.filter((item) => !seen.has(key(item)));
+	const n = Math.min(wanted, items.length);
+	const cycled = unplayed.length < n;
+	const picked = cycled
+		? [
+				...unplayed,
+				...sample(
+					items.filter((item) => seen.has(key(item))),
+					n - unplayed.length,
+					random
+				)
+			]
+		: sample(unplayed, n, random);
+	return { items: picked, used: picked.map(key), cycled };
+}
+
 export function freshTrivia(
 	pack: TriviaPack,
 	questionCount: number,
 	played: readonly string[],
 	random: () => number
 ): Fresh {
-	const seen = new Set(played);
-	const unplayed = pack.questions.filter((q) => !seen.has(q.q));
-	const wanted = Math.min(questionCount, pack.questions.length);
-	const cycled = unplayed.length < wanted;
-	const questions = cycled
-		? [
-				...unplayed,
-				...sample(
-					pack.questions.filter((q) => seen.has(q.q)),
-					wanted - unplayed.length,
-					random
-				)
-			]
-		: sample(unplayed, wanted, random);
-	return { content: { ...pack, questions }, used: questions.map((q) => q.q), cycled };
+	const { items, used, cycled } = freshItems(
+		pack.questions,
+		questionCount,
+		played,
+		random,
+		(q) => q.q
+	);
+	return { content: { ...pack, questions: items }, used, cycled };
 }
+
+/** For packs shaped `{ items }`: only this game's picks go into the game state. */
+function freshPack<T>(key: (item: T) => string) {
+	return (content: unknown, config: unknown, played: readonly string[], random: () => number) => {
+		const pack = content as { items: T[] };
+		const { rounds } = config as { rounds: number };
+		const { items, used, cycled } = freshItems(pack.items, rounds, played, random, key);
+		return { content: { ...pack, items }, used, cycled };
+	};
+}
+
+const wordRace = createWordRace(isWord);
 
 export type Registry = Record<string, RegisteredGame>;
 
@@ -134,6 +173,38 @@ export function createRegistry(packs?: PackStore): Registry {
 				rounds: clamp(raw?.rounds, 1, 3, doodle.defaultConfig.rounds),
 				drawSeconds: clamp(raw?.drawSeconds, 30, 120, doodle.defaultConfig.drawSeconds)
 			})
+		},
+		wordrace: {
+			game: wordRace,
+			content: () => ({ content: wordRacePack, flagged: false }),
+			config: (raw): Omit<WordRaceConfig, 'familyFilter'> => ({
+				rounds: clamp(raw?.rounds, 1, 10, wordRace.defaultConfig.rounds),
+				secondsPerWord: clamp(raw?.secondsPerWord, 30, 300, wordRace.defaultConfig.secondsPerWord)
+			}),
+			fresh: freshPack<string>((w) => w)
+		},
+		hangman: {
+			game: hangman,
+			content: () => ({ content: hangmanPack, flagged: false }),
+			config: (raw): Omit<HangmanConfig, 'familyFilter'> => ({
+				rounds: clamp(raw?.rounds, 1, 10, hangman.defaultConfig.rounds),
+				turnSeconds: clamp(raw?.turnSeconds, 5, 60, hangman.defaultConfig.turnSeconds)
+			}),
+			fresh: freshPack<{ word: string }>((w) => w.word)
+		},
+		emoji: {
+			game: emoji,
+			content: () => ({ content: emojiPack, flagged: false }),
+			config: (raw): Omit<EmojiConfig, 'familyFilter'> => ({
+				rounds: clamp(raw?.rounds, 3, 15, emoji.defaultConfig.rounds),
+				secondsPerPuzzle: clamp(
+					raw?.secondsPerPuzzle,
+					15,
+					120,
+					emoji.defaultConfig.secondsPerPuzzle
+				)
+			}),
+			fresh: freshPack<{ answer: string }>((p) => p.answer)
 		},
 		xo: {
 			game: xo,

@@ -2,13 +2,18 @@ import { censorText, type PromptPack } from '@games/content';
 import {
 	addPoints,
 	defineGame,
+	editDistance,
 	isController,
+	maskWord,
+	normalize,
 	rankPlayers,
 	type Actor,
 	type GameContext,
 	type GamePlayer,
 	type LeaderboardEntry
 } from '@games/engine';
+
+export { editDistance, maskWord, normalize };
 
 /**
  * Doodle Dash. Players take turns drawing a word on their own screen while
@@ -470,33 +475,6 @@ function addFeed(state: DoodleState, item: Omit<FeedItem, 'n'>): DoodleState {
 function guessers(state: DoodleState) {
 	const drawerId = state.turns[state.turn];
 	return state.players.filter((p) => p.id !== drawerId && state.active.includes(p.id));
-}
-
-export function normalize(s: string): string {
-	return s
-		.toLowerCase()
-		.normalize('NFKD')
-		.replace(/[̀-ͯ]/g, '')
-		.replace(/[^\p{L}\p{N}]+/gu, '');
-}
-
-export function maskWord(word: string, revealed: number[]): string[] {
-	return [...word].map((ch, i) => (ch === ' ' ? ' ' : revealed.includes(i) ? ch : '_'));
-}
-
-/** Levenshtein distance, for "so close!" hints. */
-export function editDistance(a: string, b: string): number {
-	const dp = Array.from({ length: b.length + 1 }, (_, i) => i);
-	for (let i = 1; i <= a.length; i++) {
-		let prev = dp[0]!;
-		dp[0] = i;
-		for (let j = 1; j <= b.length; j++) {
-			const tmp = dp[j]!;
-			dp[j] = Math.min(dp[j]! + 1, dp[j - 1]! + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
-			prev = tmp;
-		}
-	}
-	return dp[b.length]!;
 }
 
 function phaseDuration(state: DoodleState): number {

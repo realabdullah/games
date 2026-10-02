@@ -6,6 +6,16 @@ const server = new TestServer(E2E_SERVER_PORT);
 test.beforeAll(() => server.start());
 test.afterAll(() => server.dispose());
 
+/** Open the host's pack chooser and pick a pack by its share code. */
+async function useCode(host: Page, code: string) {
+	await host
+		.getByRole('region', { name: 'Question pack' })
+		.getByRole('button', { name: 'Change' })
+		.click();
+	await host.getByLabel('Pack code').fill(code);
+	await host.getByRole('button', { name: 'Use', exact: true }).click();
+}
+
 const questions = [
 	['Which city is our office in?', ['Lagos', 'Abuja', 'Accra', 'Nairobi'], 0],
 	['What do we drink most?', ['Coffee', 'Tea', 'Zobo', 'Water'], 2],
@@ -46,9 +56,8 @@ test('write a pack, then host a game with it by code from another device', async
 	await phone.getByLabel('Your name').fill('Ada');
 	await phone.getByRole('button', { name: 'Join' }).click();
 
-	await host.getByLabel('Pack code').fill(code);
-	await host.getByRole('button', { name: 'Use', exact: true }).click();
-	await expect(host.getByText('Your packs')).toBeVisible();
+	await useCode(host, code);
+	await expect(host.locator('.pack.chosen')).toContainText('Team Trivia');
 	await host.getByRole('button', { name: 'Start game' }).click();
 	await expect(host.getByText('Team Trivia')).toBeVisible();
 	await host.getByRole('button', { name: 'Start now' }).click();
@@ -104,8 +113,7 @@ test('flagged packs are blocked until the host turns the family filter off', asy
 	await phone.getByLabel('Your name').fill('Ada');
 	await phone.getByRole('button', { name: 'Join' }).click();
 
-	await host.getByLabel('Pack code').fill(summary.code);
-	await host.getByRole('button', { name: 'Use', exact: true }).click();
+	await useCode(host, summary.code);
 	await expect(host.getByText('Has words the family filter blocks')).toBeVisible();
 	await expect(host.getByRole('button', { name: 'Start game' })).toBeDisabled();
 

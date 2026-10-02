@@ -16,11 +16,14 @@
 		"@fontsource-variable/bricolage-grotesque": "^5.3.0",
 		"@games/content": "workspace:*",
 		"@games/doodle": "workspace:*",
+		"@games/emoji": "workspace:*",
 		"@games/engine": "workspace:*",
+		"@games/hangman": "workspace:*",
 		"@games/icebreakers": "workspace:*",
 		"@games/protocol": "workspace:*",
 		"@games/trivia": "workspace:*",
 		"@games/wit": "workspace:*",
+		"@games/wordrace": "workspace:*",
 		"@games/xo": "workspace:*"
 	},
 	"devDependencies": {

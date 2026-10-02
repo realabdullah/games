@@ -17,11 +17,14 @@
         "@anthropic-ai/sdk": "^0.131.0",
         "@games/content": "workspace:*",
         "@games/doodle": "workspace:*",
+        "@games/emoji": "workspace:*",
         "@games/engine": "workspace:*",
+        "@games/hangman": "workspace:*",
         "@games/icebreakers": "workspace:*",
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
         "@games/wit": "workspace:*",
+        "@games/wordrace": "workspace:*",
         "@games/xo": "workspace:*",
         "drizzle-orm": "^0.45.3",
         "zod": "^4.6.5",
@@ -38,11 +41,14 @@
         "@fontsource-variable/bricolage-grotesque": "^5.3.0",
         "@games/content": "workspace:*",
         "@games/doodle": "workspace:*",
+        "@games/emoji": "workspace:*",
         "@games/engine": "workspace:*",
+        "@games/hangman": "workspace:*",
         "@games/icebreakers": "workspace:*",
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
         "@games/wit": "workspace:*",
+        "@games/wordrace": "workspace:*",
         "@games/xo": "workspace:*",
       },
       "devDependencies": {
@@ -84,6 +90,26 @@
         "@types/bun": "latest",
       },
     },
+    "packages/games/emoji": {
+      "name": "@games/emoji",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/hangman": {
+      "name": "@games/hangman",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
     "packages/games/icebreakers": {
       "name": "@games/icebreakers",
       "dependencies": {
@@ -106,6 +132,16 @@
     },
     "packages/games/wit": {
       "name": "@games/wit",
+      "dependencies": {
+        "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/wordrace": {
+      "name": "@games/wordrace",
       "dependencies": {
         "@games/content": "workspace:*",
         "@games/engine": "workspace:*",
@@ -204,7 +240,11 @@
 
     "@games/doodle": ["@games/doodle@workspace:packages/games/doodle"],
 
+    "@games/emoji": ["@games/emoji@workspace:packages/games/emoji"],
+
     "@games/engine": ["@games/engine@workspace:packages/engine"],
+
+    "@games/hangman": ["@games/hangman@workspace:packages/games/hangman"],
 
     "@games/icebreakers": ["@games/icebreakers@workspace:packages/games/icebreakers"],
 
@@ -213,6 +253,8 @@
     "@games/trivia": ["@games/trivia@workspace:packages/games/trivia"],
 
     "@games/wit": ["@games/wit@workspace:packages/games/wit"],
+
+    "@games/wordrace": ["@games/wordrace@workspace:packages/games/wordrace"],
 
     "@games/xo": ["@games/xo@workspace:packages/games/xo"],
 

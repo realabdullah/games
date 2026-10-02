@@ -1,7 +1,16 @@
 <script lang="ts">
-	import { findTriviaPack, type TriviaPack } from '@games/content';
+	import {
+		emojiPack,
+		findTriviaPack,
+		hangmanPack,
+		wordRacePack,
+		type TriviaPack
+	} from '@games/content';
+	import { emoji } from '@games/emoji';
 	import type { AnyGame } from '@games/engine';
+	import { hangman } from '@games/hangman';
 	import { trivia } from '@games/trivia';
+	import { createWordRace } from '@games/wordrace';
 	import { xo } from '@games/xo';
 	import { trackEvent } from '$lib/analytics';
 	import { api } from '$lib/api';
@@ -17,12 +26,21 @@
 	let { data } = $props();
 	const entry = $derived(data.game);
 
-	/** Games that can run in the browser, with how to load their content. */
-	const solo: Record<string, { game: AnyGame; content: (req: StartRequest) => Promise<unknown> }> =
-		{
-			trivia: { game: trivia, content: (req) => loadPack(req.packId ?? 'general') },
-			xo: { game: xo, content: async () => null }
-		};
+	/** Games that can run in the browser, with how to load them and their content. */
+	const solo: Record<
+		string,
+		{ game: () => Promise<AnyGame>; content: (req: StartRequest) => Promise<unknown> }
+	> = {
+		trivia: { game: async () => trivia, content: (req) => loadPack(req.packId ?? 'general') },
+		xo: { game: async () => xo, content: async () => null },
+		// The dictionary is big, so it only loads when you play.
+		wordrace: {
+			game: async () => createWordRace((await import('@games/content/dictionary')).isWord),
+			content: async () => wordRacePack
+		},
+		hangman: { game: async () => hangman, content: async () => hangmanPack },
+		emoji: { game: async () => emoji, content: async () => emojiPack }
+	};
 
 	let game = $state<LocalGame<unknown> | null>(null);
 	let lastStart: StartRequest | null = null;
@@ -43,8 +61,9 @@
 		if (!def) return;
 		error = null;
 		let content: unknown;
+		let definition: AnyGame;
 		try {
-			content = await def.content(req);
+			[definition, content] = await Promise.all([def.game(), def.content(req)]);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Something went wrong';
 			return;
@@ -55,7 +74,7 @@
 		game?.destroy();
 		const profile = loadProfile();
 		game = new LocalGame(
-			def.game,
+			definition,
 			{ id: 'you', name: profile.name || 'You', avatar: profile.avatar },
 			{ content, config: req.config }
 		);
