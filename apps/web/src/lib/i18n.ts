@@ -51,6 +51,11 @@ export const t = {
 	picker: {
 		title: 'Pick a game',
 		pack: 'Question pack',
+		change: 'Change',
+		close: 'Close',
+		searchGames: 'Search games',
+		searchPacks: 'Search packs',
+		noMatches: 'Nothing matches that.',
 		questions: 'Questions',
 		seconds: 'Seconds per question',
 		start: 'Start game',

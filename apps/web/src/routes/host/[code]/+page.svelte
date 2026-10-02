@@ -72,6 +72,7 @@
 				{/if}
 			</main>
 		{:else}
+			{@const empty = room.players.length === 0}
 			<main class="host">
 				<header class="join card">
 					<p class="how">
@@ -81,7 +82,8 @@
 					<p class="code" aria-label="Room code {code.split('').join(' ')}">{code}</p>
 				</header>
 
-				<div class="split">
+				<!-- Until someone joins, the game picker gets the whole width. -->
+				<div class="split" class:empty>
 					<section class="lobby" aria-live="polite">
 						<div class="count">
 							<h2>{t.lobby.players(room.players.length)}</h2>
@@ -99,8 +101,9 @@
 							/>
 						{/if}
 					</section>
-					<aside class="card pick">
+					<aside class="pick" class:card={!empty}>
 						<GamePicker
+							wide={empty}
 							mode={room.mode}
 							playerCount={room.players.length}
 							onstart={start}
@@ -201,13 +204,21 @@
 		align-items: start;
 	}
 	@media (min-width: 960px) {
-		.split {
+		.split:not(.empty) {
 			grid-template-columns: 1fr minmax(340px, 420px);
 		}
+	}
+	.empty .lobby {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 8px 20px;
 	}
 	.pick {
 		display: grid;
 		gap: 12px;
+	}
+	.pick.card {
 		padding: 20px;
 	}
 	.playing {
