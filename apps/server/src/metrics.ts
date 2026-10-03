@@ -74,6 +74,10 @@ export class Metrics {
 	);
 	readonly snapshots = new Counter('games_snapshots_total', 'Room snapshots written, by reason');
 	readonly errors = new Counter('games_errors_total', 'Unexpected server errors, by where');
+	readonly logLines = new Counter(
+		'games_log_lines_total',
+		'Log lines shipped to Loki, by result (ok, error = will retry, dropped)'
+	);
 	private gauges: Gauge[] = [];
 
 	gauge(name: string, help: string, read: () => number | [Labels, number][]) {

@@ -7,7 +7,8 @@ import { openDb } from './db/index.ts';
 import { ApiError } from './errors.ts';
 import { createRegistry } from './games.ts';
 import { createApi } from './http.ts';
-import { stdoutLogger } from './log.ts';
+import { errorMessage, jsonLogger } from './log.ts';
+import { LokiShipper } from './loki.ts';
 import { Metrics, metricsAllowed } from './metrics.ts';
 import { PackStore } from './packs.ts';
 import { RateLimiter } from './rate-limit.ts';
@@ -25,6 +26,14 @@ const AI_DAILY_PER_CLIENT = Number(process.env.AI_DAILY_PER_CLIENT ?? 5);
 const AI_DAILY_TOTAL = Number(process.env.AI_DAILY_TOTAL ?? 100);
 /** If set, /metrics needs `Authorization: Bearer <token>` (e.g. for Grafana Cloud to scrape it publicly). */
 const METRICS_TOKEN = process.env.METRICS_TOKEN || null;
+
+/**
+ * Grafana Cloud Loki. With all three set, event logs go there instead of
+ * stdout, so nothing piles up on the VPS disk.
+ */
+const LOKI_URL = process.env.LOKI_URL || null;
+const LOKI_USER = process.env.LOKI_USER || null;
+const LOKI_TOKEN = process.env.LOKI_TOKEN || null;
 
 interface WsData {
 	session: string;
@@ -83,7 +92,19 @@ const rooms = new RoomManager(
 	metrics
 );
 rooms.onCustomPackPlayed = (code) => packs.recordPlay(code);
-rooms.log = stdoutLogger;
+const loki =
+	LOKI_URL && LOKI_USER && LOKI_TOKEN
+		? new LokiShipper({
+				url: LOKI_URL,
+				user: LOKI_USER,
+				token: LOKI_TOKEN,
+				labels: { app: 'games', service: 'server' },
+				onResult: (result, lines) => metrics.logLines.inc({ result }, lines)
+			})
+		: null;
+loki?.start();
+const logEvent = jsonLogger(loki ? (line) => loki.push(line) : console.log);
+rooms.log = logEvent;
 
 const store = new SnapshotStore(`${DATA_DIR}/server.sqlite`);
 const restored = store.take(SNAPSHOT_MAX_AGE_MS);
@@ -113,7 +134,8 @@ const api = createApi({
 				generator: aiGenerator,
 				quota: new AiQuota(db, { perClient: AI_DAILY_PER_CLIENT, total: AI_DAILY_TOTAL })
 			}
-		: null
+		: null,
+	onError: (err) => logEvent({ event: 'server_error', where: 'http', message: errorMessage(err) })
 });
 
 function clientIp(req: Request, srv: Server<WsData>) {
@@ -170,7 +192,7 @@ server = Bun.serve({
 				const prev = sockets.get(session);
 				if (prev && prev !== ws) {
 					prev.close(CloseCode.Replaced, 'replaced');
-					stdoutLogger({ event: 'replaced', room: welcome.room.code, player: welcome.you.id });
+					logEvent({ event: 'replaced', room: welcome.room.code, player: welcome.you.id });
 				}
 				sockets.set(session, ws);
 				ws.subscribe(roomTopic(welcome.room.code));
@@ -194,6 +216,7 @@ server = Bun.serve({
 				else {
 					console.error(err);
 					metrics.errors.inc({ where: 'ws' });
+					logEvent({ event: 'server_error', where: 'ws', message: errorMessage(err) });
 				}
 			}
 		},
@@ -233,6 +256,7 @@ function saveSnapshot(reason: 'periodic' | 'shutdown') {
 		metrics.snapshots.inc({ reason });
 	} catch (err) {
 		console.error('snapshot failed', err);
+		logEvent({ event: 'server_error', where: 'snapshot', message: errorMessage(err) });
 		metrics.errors.inc({ where: 'snapshot' });
 	}
 	return snapshot.rooms.length;
@@ -245,7 +269,7 @@ const sweeper = setInterval(() => {
 }, 5_000);
 
 let shuttingDown = false;
-function shutdown(signal: string) {
+async function shutdown(signal: string) {
 	if (shuttingDown) return;
 	shuttingDown = true;
 	clearInterval(sweeper);
@@ -255,9 +279,11 @@ function shutdown(signal: string) {
 	store.close();
 	console.log(`${signal}: saved ${count} room(s), shutting down`);
 	server.stop(true);
+	// Send the last log lines before going; capped so a slow Loki can't hold up a redeploy.
+	await loki?.stop(2_000);
 	process.exit(0);
 }
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGTERM', () => void shutdown('SIGTERM'));
+process.on('SIGINT', () => void shutdown('SIGINT'));
 
-console.log(`game server listening on :${server.port}`);
+console.log(`game server listening on :${server.port}${loki ? ', logs to Loki' : ''}`);

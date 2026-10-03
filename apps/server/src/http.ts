@@ -23,6 +23,8 @@ export interface ApiDeps {
 	/** Null when AI generation isn't configured (no API key). */
 	ai: { generator: PackGenerator; quota: AiQuota } | null;
 	metrics?: Metrics;
+	/** Unexpected errors (bugs, not bad requests), for the server log. */
+	onError?: (err: unknown) => void;
 }
 
 type Handler = (ctx: {
@@ -47,7 +49,14 @@ const STATUS: Record<ErrorCode, number> = {
  * The HTTP API (everything under /api). Returns a plain `(Request, ip) => Response`
  * so it's easy to test without a running server.
  */
-export function createApi({ rooms, packs, limiter, ai, metrics = new Metrics() }: ApiDeps) {
+export function createApi({
+	rooms,
+	packs,
+	limiter,
+	ai,
+	metrics = new Metrics(),
+	onError
+}: ApiDeps) {
 	const limited = (ip: string) => {
 		if (!limiter.allow(ip)) throw new ApiError('rate_limited', 'Slow down a little');
 	};
@@ -156,7 +165,10 @@ export function createApi({ rooms, packs, limiter, ai, metrics = new Metrics() }
 			const params = route.regex.exec(pathname)!.groups ?? {};
 			return await route.handler({ req, params, ip });
 		} catch (err) {
-			return handleError(err, () => metrics.errors.inc({ where: 'http' }));
+			return handleError(err, () => {
+				metrics.errors.inc({ where: 'http' });
+				onError?.(err);
+			});
 		}
 	};
 }

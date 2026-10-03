@@ -31,8 +31,19 @@ export type RoomEvent =
 	  }
 	| { event: 'room_closed'; room: string; reason: 'left' | 'expired' };
 
-export type RoomLogger = (e: RoomEvent) => void;
+export type ServerEvent =
+	RoomEvent | { event: 'server_error'; where: 'http' | 'ws' | 'snapshot'; message: string };
 
-export const stdoutLogger: RoomLogger = (e) => {
-	console.log(JSON.stringify({ t: new Date().toISOString(), ...e }));
-};
+export type RoomLogger = (e: RoomEvent) => void;
+export type ServerLogger = (e: ServerEvent) => void;
+
+/** An error as one short line: the message and the top of the stack, no request data. */
+export function errorMessage(err: unknown): string {
+	const text = err instanceof Error ? (err.stack ?? err.message) : String(err);
+	return text.split('\n').slice(0, 4).join(' | ').slice(0, 500);
+}
+
+/** Log each event as a JSON line through `write` (stdout by default). */
+export function jsonLogger(write: (line: string) => void = console.log): ServerLogger {
+	return (e) => write(JSON.stringify({ t: new Date().toISOString(), ...e }));
+}
