@@ -7,6 +7,7 @@ import { openDb } from './db/index.ts';
 import { ApiError } from './errors.ts';
 import { createRegistry } from './games.ts';
 import { createApi } from './http.ts';
+import { stdoutLogger } from './log.ts';
 import { Metrics, metricsAllowed } from './metrics.ts';
 import { PackStore } from './packs.ts';
 import { RateLimiter } from './rate-limit.ts';
@@ -82,6 +83,7 @@ const rooms = new RoomManager(
 	metrics
 );
 rooms.onCustomPackPlayed = (code) => packs.recordPlay(code);
+rooms.log = stdoutLogger;
 
 const store = new SnapshotStore(`${DATA_DIR}/server.sqlite`);
 const restored = store.take(SNAPSHOT_MAX_AGE_MS);
@@ -166,7 +168,10 @@ server = Bun.serve({
 				const welcome = rooms.connect(session);
 				// One live socket per session: a new tab or reconnect replaces the old one.
 				const prev = sockets.get(session);
-				if (prev && prev !== ws) prev.close(CloseCode.Replaced, 'replaced');
+				if (prev && prev !== ws) {
+					prev.close(CloseCode.Replaced, 'replaced');
+					stdoutLogger({ event: 'replaced', room: welcome.room.code, player: welcome.you.id });
+				}
 				sockets.set(session, ws);
 				ws.subscribe(roomTopic(welcome.room.code));
 				send(ws, { type: 'welcome', ...welcome });

@@ -21,7 +21,8 @@ export class TestServer {
 				SNAPSHOT_EVERY_MS: '500',
 				ANTHROPIC_API_KEY: ''
 			},
-			stdio: ['ignore', 'pipe', 'pipe']
+			// stdout is the room event log; nothing reads it here, and an unread pipe would fill and block.
+			stdio: ['ignore', 'ignore', 'pipe']
 		});
 		this.proc.stderr?.on('data', (d) => process.stderr.write(`[server] ${d}`));
 		await this.waitForHealth();

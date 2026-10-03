@@ -4,7 +4,14 @@ import type { TriviaView } from '@games/trivia';
 import { INTRO_MS } from '@games/trivia';
 import { findTriviaPack } from '@games/content';
 import { ApiError } from './errors.ts';
-import { IDLE_ROOM_TTL_MS, RoomManager, VIP_GRACE_MS, type RoomEvents } from './rooms.ts';
+import type { RoomEvent } from './log.ts';
+import {
+	IDLE_ROOM_TTL_MS,
+	IGNORED_LOG_EVERY_MS,
+	RoomManager,
+	VIP_GRACE_MS,
+	type RoomEvents
+} from './rooms.ts';
 
 let clock: number;
 let ids: number;
@@ -541,5 +548,61 @@ describe('fresh questions in a room', () => {
 		expect(unplayed).toHaveLength(2);
 		expect(second).toEqual(expect.arrayContaining(unplayed));
 		expect(new Set(second).size).toBe(10);
+	});
+});
+
+describe('event log', () => {
+	let logged: RoomEvent[];
+	beforeEach(() => {
+		logged = [];
+		rooms.log = (e) => logged.push(e);
+	});
+
+	test('a late join shows up between the game start and the answers', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		rooms.handle(host.session, { type: 'start', gameId: 'hangman' });
+		const late = join(host.code, 'Bob');
+
+		expect(logged.map((e) => e.event)).toEqual([
+			'room_created',
+			'joined',
+			'game_started',
+			'joined'
+		]);
+		expect(logged.at(-1)).toEqual({
+			event: 'joined',
+			room: host.code,
+			player: late.you.id!,
+			role: 'player',
+			midGame: 'hangman',
+			admitted: false
+		});
+	});
+
+	test('never logs names or session tokens', () => {
+		const host = rooms.create({ mode: 'party' });
+		const ada = join(host.code, 'Ada');
+		rooms.connect(ada.session);
+		const text = JSON.stringify(logged);
+		expect(text).not.toContain('Ada');
+		expect(text).not.toContain(ada.session);
+		expect(text).not.toContain(host.session);
+	});
+
+	test('ignored actions are throttled per member, with a count of the rest', () => {
+		const host = rooms.create({ mode: 'party' });
+		const ada = join(host.code, 'Ada');
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		// Still in the intro: answers do nothing.
+		const answer = () =>
+			rooms.handle(ada.session, { type: 'action', action: { type: 'answer', choice: 0 } });
+		for (let i = 0; i < 50; i++) answer();
+		clock += IGNORED_LOG_EVERY_MS;
+		answer();
+
+		const ignored = logged.filter((e) => e.event === 'action_ignored');
+		expect(ignored).toHaveLength(2);
+		expect(ignored[1]).toMatchObject({ player: ada.you.id, action: 'answer', suppressed: 49 });
 	});
 });

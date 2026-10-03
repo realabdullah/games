@@ -28,12 +28,15 @@ import {
 import { isProfane } from '@games/content';
 import { ApiError } from './errors.ts';
 import { createRegistry, type Registry } from './games.ts';
+import type { RoomLogger } from './log.ts';
 import { Metrics } from './metrics.ts';
 
 /** How long a disconnected VIP keeps their crown before it passes on. */
 export const VIP_GRACE_MS = 30_000;
 /** Rooms with nobody connected are closed after this long. */
 export const IDLE_ROOM_TTL_MS = 10 * 60_000;
+/** At most one "action ignored" log line per member this often; the rest are counted. */
+export const IGNORED_LOG_EVERY_MS = 5_000;
 
 interface Member {
 	id: string;
@@ -91,6 +94,11 @@ export interface RoomSnapshot {
 export class RoomManager {
 	private rooms = new Map<string, Room>();
 	private sessions = new Map<string, Session>();
+	/** Throttle state for `action_ignored` lines, by session. */
+	private ignoredLog = new Map<string, { at: number; suppressed: number }>();
+
+	/** Room events for the server log. */
+	log: RoomLogger = () => {};
 
 	constructor(
 		private events: RoomEvents,
@@ -139,6 +147,7 @@ export class RoomManager {
 		this.rooms.set(code, room);
 		this.revision++;
 		this.metrics.roomsCreated.inc({ mode: body.mode });
+		this.log({ event: 'room_created', room: code, mode: body.mode });
 
 		if (body.mode === 'party') {
 			const session = this.newId();
@@ -181,6 +190,7 @@ export class RoomManager {
 			m.disconnectedAt = null;
 		}
 		room.lastSeenAt = this.now();
+		this.log({ event: 'connected', room: room.code, player: s.id });
 		this.changed(room);
 		const game = this.gameUpdate(room, s);
 		if (game && room.game) {
@@ -200,6 +210,7 @@ export class RoomManager {
 			m.disconnectedAt = this.now();
 		}
 		room.lastSeenAt = this.now();
+		this.log({ event: 'disconnected', room: room.code, player: s.id });
 		this.changed(room);
 	}
 
@@ -232,6 +243,7 @@ export class RoomManager {
 					active: this.activeIds(room)
 				});
 				if (changed) this.gameChanged(room);
+				else this.logIgnored(session, room, s, msg.action);
 				return;
 			}
 			case 'settings': {
@@ -259,6 +271,7 @@ export class RoomManager {
 				if (!this.canControl(room, s))
 					throw new ApiError('forbidden', 'Only the host can end the game');
 				if (!room.game) return;
+				this.log({ event: 'game_ended', room: room.code, game: room.game.gameId });
 				room.game = null;
 				room.phase = 'lobby';
 				this.changed(room);
@@ -421,6 +434,12 @@ export class RoomManager {
 		room.phase = 'playing';
 		room.gameFinished = false;
 		this.metrics.gamesStarted.inc({ game: msg.gameId });
+		this.log({
+			event: 'game_started',
+			room: room.code,
+			game: msg.gameId,
+			players: room.players.length
+		});
 		if (loaded.customCode) this.onCustomPackPlayed?.(loaded.customCode);
 		this.changed(room);
 		this.gameChanged(room);
@@ -470,6 +489,7 @@ export class RoomManager {
 		) {
 			room.gameFinished = true;
 			this.metrics.gamesFinished.inc({ game: room.game.gameId });
+			this.log({ event: 'game_finished', room: room.code, game: room.game.gameId });
 		}
 		const updates = [...this.sessions.entries()]
 			.filter(([, s]) => s.code === room.code)
@@ -494,13 +514,23 @@ export class RoomManager {
 		this.sessions.set(member.session, s);
 		if (role === 'player' && room.mode === 'online' && room.vipId === null) room.vipId = member.id;
 		this.changed(room);
+		let admitted: boolean | undefined;
 		if (role === 'player' && room.game) {
 			// The game decides whether a mid-game joiner plays now or sits this one out.
 			const { game } = this.registry[room.game.gameId]!;
 			const player = { id: member.id, name: member.name, avatar: member.avatar };
 			const ctx = { now: this.now(), active: this.activeIds(room) };
-			if (stepSystem(game, room.game, { type: 'join', player }, ctx)) this.gameChanged(room);
+			admitted = stepSystem(game, room.game, { type: 'join', player }, ctx);
+			if (admitted) this.gameChanged(room);
 		}
+		this.log({
+			event: 'joined',
+			room: room.code,
+			player: member.id,
+			role,
+			midGame: room.game?.gameId ?? null,
+			...(admitted === undefined ? {} : { admitted })
+		});
 		return { code: room.code, session: member.session, you: this.you(room, s) };
 	}
 
@@ -508,6 +538,8 @@ export class RoomManager {
 		room.players = room.players.filter((p) => p.id !== m.id);
 		room.audience = room.audience.filter((a) => a.id !== m.id);
 		this.sessions.delete(m.session);
+		this.ignoredLog.delete(m.session);
+		this.log({ event: 'left', room: room.code, player: m.id, reason });
 		this.events.sessionEnded(m.session, reason);
 		// Online rooms only exist for their players.
 		if (room.mode === 'online' && room.players.length === 0) return this.close(room, 'expired');
@@ -536,6 +568,7 @@ export class RoomManager {
 	private close(room: Room, reason: 'left' | 'expired') {
 		this.rooms.delete(room.code);
 		this.revision++;
+		this.log({ event: 'room_closed', room: room.code, reason });
 		const sessions = [
 			room.host?.session,
 			...room.players.map((p) => p.session),
@@ -544,8 +577,32 @@ export class RoomManager {
 		for (const session of sessions) {
 			if (!session) continue;
 			this.sessions.delete(session);
+			this.ignoredLog.delete(session);
 			this.events.sessionEnded(session, reason === 'left' ? 'left' : 'expired');
 		}
+	}
+
+	/**
+	 * Actions the game ignored (late, duplicate, not your turn, not in this
+	 * game). Throttled per member so a spamming client can't flood the log.
+	 */
+	private logIgnored(session: string, room: Room, s: Session, action: unknown) {
+		const t = this.now();
+		const entry = this.ignoredLog.get(session);
+		if (entry && t - entry.at < IGNORED_LOG_EVERY_MS) {
+			entry.suppressed++;
+			return;
+		}
+		const type = (action as { type?: unknown } | null)?.type;
+		this.log({
+			event: 'action_ignored',
+			room: room.code,
+			player: s.id,
+			game: room.game!.gameId,
+			action: typeof type === 'string' ? type.slice(0, 20) : 'invalid',
+			suppressed: entry?.suppressed ?? 0
+		});
+		this.ignoredLog.set(session, { at: t, suppressed: 0 });
 	}
 
 	private canControl(room: Room, s: Session) {
