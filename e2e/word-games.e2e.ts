@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from './test.ts';
 import { E2E_SERVER_PORT } from '../playwright.config.ts';
 import { TestServer } from './server.ts';
 
@@ -97,4 +97,34 @@ test('Emoji Riddles party: guesses show on the big screen', async ({ browser }) 
 	await host.getByRole('button', { name: 'Skip timer' }).click();
 	await expect(host.getByRole('button', { name: 'Next' })).toBeVisible();
 	await expect(phones[1]!.getByText('It was')).toBeVisible();
+});
+
+test('Hangman party: someone who joins mid-game is told they’re in the next one', async ({
+	browser
+}) => {
+	const host = await (await browser.newContext()).newPage();
+	await host.goto('/');
+	await host.getByRole('button', { name: 'Host on a big screen' }).click();
+	await expect(host).toHaveURL(/\/host\/[A-Z]{4}$/);
+	const code = host.url().split('/').pop()!;
+	await host
+		.getByRole('group', { name: 'Pick a game' })
+		.getByRole('button', { name: /Hangman/ })
+		.click();
+
+	const join = async (name: string) => {
+		const phone = await (await browser.newContext(PHONE)).newPage();
+		await phone.goto(`/play/${code}`);
+		await phone.getByLabel('Your name').fill(name);
+		await phone.getByRole('button', { name: 'Join' }).click();
+		return phone;
+	};
+	await expect((await join('Ada')).getByText('You’re in!')).toBeVisible();
+	await host.getByRole('button', { name: 'Start game' }).click();
+	await host.getByRole('button', { name: 'Start now' }).click();
+
+	// The seat order is fixed at the start, so a newcomer waits, and is told why.
+	const late = await join('Bob');
+	await expect(late.getByRole('status')).toHaveText(/started before you joined/);
+	await shot(late, 'hangman-sitting-out');
 });

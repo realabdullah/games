@@ -263,3 +263,39 @@ test('curated packs load and are valid', () => {
 	expect(triviaPacks.length).toBeGreaterThanOrEqual(3);
 	for (const p of triviaPacks) expect(p.questions.length).toBeGreaterThanOrEqual(10);
 });
+
+describe('joining mid-game', () => {
+	const cy = { id: 'cy', name: 'Cy', avatar: '🐙' };
+	const withCy = [...ids, 'cy'];
+	const joinCy = (s: GameSession, now: number) =>
+		stepSystem(trivia, s, { type: 'join', player: cy }, { now, active: withCy });
+
+	test('a newcomer answers the current question and scores from zero', () => {
+		const s = setup();
+		tick(s, INTRO_MS);
+		expect(joinCy(s, INTRO_MS + 100)).toBe(true);
+		expect(view(s, { kind: 'player', playerId: 'cy' }).you).toMatchObject({
+			answered: null,
+			score: 0
+		});
+
+		send(
+			s,
+			{ kind: 'player', playerId: 'cy', vip: false },
+			{ type: 'answer', choice: correct(s) },
+			INTRO_MS + 200,
+			withCy
+		);
+		send(s, ada, { type: 'answer', choice: correct(s) }, INTRO_MS + 300, withCy);
+		send(s, bob, { type: 'answer', choice: wrong(s) }, INTRO_MS + 300, withCy);
+		expect(state(s).phase).toBe('reveal');
+		expect(state(s).scores.cy).toBeGreaterThan(0);
+	});
+
+	test('joining twice changes nothing', () => {
+		const s = setup();
+		joinCy(s, 0);
+		expect(joinCy(s, 0)).toBe(false);
+		expect(state(s).players).toHaveLength(3);
+	});
+});

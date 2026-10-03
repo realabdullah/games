@@ -45,8 +45,9 @@ jobs:
       - name: Formatting
         run: bun run lint
 
-      - name: Install the browser for end-to-end tests
-        run: bunx playwright install --with-deps chromium
+      # WebKit stands in for every iPhone browser (Safari, Brave, Chrome).
+      - name: Install the browsers for end-to-end tests
+        run: bunx playwright install --with-deps chromium webkit
 
       - name: End-to-end tests
         run: bun run test:e2e

@@ -189,6 +189,9 @@ export const doodle = defineGame<DoodleState, DoodleAction, DoodleConfig, Prompt
 		switch (action.type) {
 			case 'tick':
 				return tick(state, ctx);
+			case 'join':
+				// Drawing turns are dealt at the start; newcomers play the next game.
+				return state;
 			case 'roster':
 				return roster({ ...state, active: [...ctx.active] }, ctx);
 			case 'next':

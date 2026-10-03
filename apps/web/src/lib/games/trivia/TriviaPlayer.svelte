@@ -2,6 +2,7 @@
 	import type { TriviaView } from '@games/trivia';
 	import Timer from '$lib/components/Timer.svelte';
 	import type { PlayerViewProps } from '$lib/games/types';
+	import SittingOut from '$lib/components/SittingOut.svelte';
 	import { t } from '$lib/i18n';
 	import AnswerGrid from './AnswerGrid.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
@@ -26,6 +27,7 @@
 </script>
 
 <section class="trivia">
+	{#if !you && !audience && view.phase !== 'final'}<SittingOut />{/if}
 	{#if view.phase === 'intro'}
 		<div class="center">
 			<p class="kicker">{view.packTitle}</p>
@@ -40,7 +42,6 @@
 		<p class="kicker">{m.questionOf(view.index + 1, view.total)}</p>
 		<Timer endsAt={view.endsAt} durationMs={view.durationMs} {clockOffset} />
 		<h2 class="q">{view.question.q}</h2>
-		{#if spectating}<p class="muted">{m.nextRound}</p>{/if}
 		<AnswerGrid
 			choices={view.question.choices}
 			picked={you?.answered ?? null}

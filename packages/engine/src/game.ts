@@ -44,8 +44,12 @@ export function isController(actor: Actor): boolean {
  * Actions the runner sends on its own, with actor `system`:
  * - `tick`: time has passed; check deadlines from `nextDeadline`.
  * - `roster`: players left or were kicked; `ctx.active` has the new list.
+ * - `join`: a player joined the room mid-game. Admit them (see `admitPlayer`)
+ *   if the game can take a newcomer fairly; otherwise return the state as it
+ *   is and they play the next game. Every game must decide.
  */
-export type SystemAction = { type: 'tick' } | { type: 'roster' };
+export type SystemAction =
+	{ type: 'tick' } | { type: 'roster' } | { type: 'join'; player: GamePlayer };
 
 export interface GameContext {
 	rng: Rng;
@@ -118,4 +122,17 @@ export function defineGame<State, Action, Config, Content, View>(
 	def: GameDefinition<State, Action, Config, Content, View>
 ): GameDefinition<State, Action, Config, Content, View> {
 	return def;
+}
+
+/**
+ * Add a player who joined mid-game, for games where each player plays their
+ * own round (scores start at zero through `?? 0`). No-op if they're already in.
+ */
+export function admitPlayer<S extends { players: GamePlayer[]; active: string[] }>(
+	state: S,
+	player: GamePlayer,
+	ctx: GameContext
+): S {
+	if (state.players.some((p) => p.id === player.id)) return state;
+	return { ...state, players: [...state.players, player], active: [...ctx.active] };
 }

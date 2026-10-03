@@ -155,6 +155,9 @@ export const xo = defineGame<XoState, XoAction, XoConfig, unknown, XoView>({
 		switch (action.type) {
 			case 'tick':
 				return ctx.now >= state.phaseEndsAt ? advance(state, ctx) : state;
+			case 'join':
+				// Matches are paired at the start; newcomers play the next game.
+				return state;
 			case 'roster':
 				// The computer never leaves.
 				return roster(

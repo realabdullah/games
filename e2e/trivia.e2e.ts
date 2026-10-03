@@ -1,4 +1,4 @@
-import { expect, test, type Browser, type Page } from '@playwright/test';
+import { expect, test, type Browser, type Page } from './test.ts';
 import { E2E_SERVER_PORT } from '../playwright.config.ts';
 import { TestServer } from './server.ts';
 
@@ -66,6 +66,28 @@ test('a host and three phones play a full game of trivia', async ({ browser }) =
 	// Back to the lobby, everyone still there.
 	await host.getByRole('button', { name: 'Back to lobby' }).click();
 	await expect(host.getByRole('heading', { name: '3 players' })).toBeVisible();
+});
+
+test('someone who joins after the game starts can still answer', async ({ browser }) => {
+	const { host, code } = await hostRoom(browser);
+	const early = await Promise.all(['Ada', 'Bob', 'Cy'].map((n) => joinRoom(browser, code, n)));
+	await startTrivia(host, 3);
+
+	// The fourth friend arrives late, mid-question.
+	const late = await (await browser.newContext(PHONE)).newPage();
+	await late.goto(`/play/${code}`);
+	await late.getByLabel('Your name').fill('Dee');
+	await late.getByRole('button', { name: 'Join' }).click();
+
+	await expect(host.getByText('0 of 4 answered')).toBeVisible();
+	await expect(choices(late).first()).toBeEnabled();
+	await choices(late).first().click();
+	await expect(late.getByText('Locked in!')).toBeVisible();
+	await expect(host.getByText('1 of 4 answered')).toBeVisible();
+
+	for (const phone of early) await choices(phone).first().click();
+	await expect(host.getByLabel('Correct answer')).toBeVisible();
+	await expect(late.getByText(/Correct!|Not quite/)).toBeVisible();
 });
 
 test('a phone that reloads mid-question rejoins the same question', async ({ browser }) => {

@@ -144,6 +144,9 @@ export const icebreakers = defineGame<
 		switch (action.type) {
 			case 'tick':
 				return ctx.now >= state.phaseEndsAt ? advance(state, ctx) : state;
+			case 'join':
+				// Prompts are dealt at the start; newcomers play the next game.
+				return state;
 			case 'roster':
 				return maybeFinishEarly({ ...state, active: [...ctx.active] }, ctx);
 			case 'next':

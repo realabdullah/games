@@ -82,7 +82,6 @@ export const t = {
 		questionOf: (i: number, n: number) => `Question ${i} of ${n}`,
 		answered: (a: number, n: number) => `${a} of ${n} answered`,
 		lockedIn: 'Locked in!',
-		nextRound: 'This game started before you joined. You’re in the next one.',
 		skip: 'Skip timer',
 		correct: 'Correct!',
 		wrong: 'Not quite',
@@ -172,6 +171,8 @@ export const t = {
 		skip: 'Skip timer',
 		next: 'Next',
 		lockedIn: 'Locked in! Waiting for the others…',
+		sittingOut:
+			'This game started before you joined, so you’re watching this one. You’re in the next game.',
 		points: (n: number) => `+${n}`,
 		feedEmpty: 'Guesses show up here.',
 		guessedIt: (name: string) => `${name} guessed it!`,

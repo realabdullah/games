@@ -3,6 +3,7 @@
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Timer from '$lib/components/Timer.svelte';
 	import type { PlayerViewProps } from '$lib/games/types';
+	import SittingOut from '$lib/components/SittingOut.svelte';
 	import { t } from '$lib/i18n';
 	import XoBoard from './XoBoard.svelte';
 	import XoVersus from './XoVersus.svelte';
@@ -26,6 +27,7 @@
 </script>
 
 <section class="play">
+	{#if !you && !audience && view.phase !== 'final'}<SittingOut />{/if}
 	{#if view.phase === 'intro'}
 		<div class="center">
 			<h2 class="huge">{g.getReady}</h2>

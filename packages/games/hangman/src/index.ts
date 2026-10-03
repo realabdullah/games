@@ -162,6 +162,9 @@ export const hangman = defineGame<
 			case 'tick':
 				if (ctx.now < state.phaseEndsAt) return state;
 				return state.phase === 'turn' ? timeout(state, ctx) : advance(state, ctx);
+			case 'join':
+				// The seat order is fixed at the start; newcomers play the next game.
+				return state;
 			case 'roster': {
 				const next = { ...state, active: [...ctx.active] };
 				// Whoever's turn it was left: move on without costing a life.

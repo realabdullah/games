@@ -155,3 +155,16 @@ describe('Hangman', () => {
 		expect(view(s, 'ada').you?.yourTurn).toBe(true);
 	});
 });
+
+test('someone joining mid-game sits it out instead of breaking the seat order', () => {
+	const s = setup();
+	const dee = { id: 'dee', name: 'dee', avatar: '🦊' };
+	const changed = stepSystem(
+		hangman,
+		s,
+		{ type: 'join', player: dee },
+		{ now: INTRO_MS + 1, active: [...ids, 'dee'] }
+	);
+	expect(changed).toBe(false);
+	expect(view(s, 'dee').you).toBeNull();
+});

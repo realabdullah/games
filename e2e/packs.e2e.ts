@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './test.ts';
 import { E2E_SERVER_PORT } from '../playwright.config.ts';
 import { TestServer } from './server.ts';
 

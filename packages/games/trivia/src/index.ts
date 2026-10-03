@@ -1,5 +1,6 @@
 import type { TriviaPack } from '@games/content';
 import {
+	admitPlayer,
 	defineGame,
 	isController,
 	rankPlayers,
@@ -141,6 +142,9 @@ export const trivia = defineGame<TriviaState, TriviaAction, TriviaConfig, Trivia
 		switch (action.type) {
 			case 'tick':
 				return ctx.now >= state.phaseEndsAt ? advance(state, ctx) : state;
+			case 'join':
+				// Each question is its own race, so a newcomer can play from here on.
+				return admitPlayer(state, action.player, ctx);
 			case 'roster': {
 				const next = { ...state, active: [...ctx.active] };
 				return next.phase === 'question' && allAnswered(next) ? reveal(next, ctx) : next;

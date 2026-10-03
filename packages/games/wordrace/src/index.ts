@@ -1,6 +1,7 @@
 import type { PromptPack } from '@games/content';
 import {
 	addPoints,
+	admitPlayer,
 	defineGame,
 	isController,
 	rankPlayers,
@@ -152,6 +153,9 @@ export function createWordRace(isWord: (word: string) => boolean = () => true) {
 			switch (action.type) {
 				case 'tick':
 					return ctx.now >= state.phaseEndsAt ? advance(state, ctx) : state;
+				case 'join':
+					// Everyone races on their own board, so a newcomer can play from here on.
+					return admitPlayer(state, action.player, ctx);
 				case 'roster': {
 					const next = { ...state, active: [...ctx.active] };
 					return next.phase === 'guess' && allDone(next) ? reveal(next, ctx) : next;

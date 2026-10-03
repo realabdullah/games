@@ -494,6 +494,13 @@ export class RoomManager {
 		this.sessions.set(member.session, s);
 		if (role === 'player' && room.mode === 'online' && room.vipId === null) room.vipId = member.id;
 		this.changed(room);
+		if (role === 'player' && room.game) {
+			// The game decides whether a mid-game joiner plays now or sits this one out.
+			const { game } = this.registry[room.game.gameId]!;
+			const player = { id: member.id, name: member.name, avatar: member.avatar };
+			const ctx = { now: this.now(), active: this.activeIds(room) };
+			if (stepSystem(game, room.game, { type: 'join', player }, ctx)) this.gameChanged(room);
+		}
 		return { code: room.code, session: member.session, you: this.you(room, s) };
 	}
 

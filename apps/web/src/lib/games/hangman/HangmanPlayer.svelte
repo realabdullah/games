@@ -5,6 +5,7 @@
 	import Timer from '$lib/components/Timer.svelte';
 	import WordMask from '$lib/components/WordMask.svelte';
 	import type { PlayerViewProps } from '$lib/games/types';
+	import SittingOut from '$lib/components/SittingOut.svelte';
 	import { t } from '$lib/i18n';
 	import { eventText } from './event';
 	import Gallows from './Gallows.svelte';
@@ -61,6 +62,7 @@
 <svelte:window {onkeydown} />
 
 <section class="play">
+	{#if !you && !audience && view.phase !== 'final'}<SittingOut />{/if}
 	{#if view.phase === 'intro'}
 		<div class="center">
 			<h2 class="huge">{g.getReady}</h2>
@@ -141,7 +143,6 @@
 					<button class="btn teal" onclick={() => (solving = true)}>{m.solve}</button>
 				{/if}
 			{/if}
-			{#if !you}<p class="muted">{t.trivia.nextRound}</p>{/if}
 		{:else}
 			<p class="result" aria-live="polite">
 				{#if view.solvedBy}

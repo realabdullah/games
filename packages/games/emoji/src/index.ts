@@ -1,6 +1,7 @@
 import { censorText, type EmojiPack, type EmojiPuzzle } from '@games/content';
 import {
 	addPoints,
+	admitPlayer,
 	defineGame,
 	editDistance,
 	isController,
@@ -133,6 +134,9 @@ export const emoji = defineGame<EmojiState, EmojiAction, EmojiConfig, EmojiPack,
 		switch (action.type) {
 			case 'tick':
 				return tick(state, ctx);
+			case 'join':
+				// Each puzzle is its own race, so a newcomer can play from here on.
+				return admitPlayer(state, action.player, ctx);
 			case 'roster': {
 				const next = { ...state, active: [...ctx.active] };
 				return next.phase === 'puzzle' && allGuessed(next) ? reveal(next, ctx) : next;

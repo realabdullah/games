@@ -18,9 +18,13 @@ export default defineConfig({
 	reporter: process.env.CI ? 'github' : 'list',
 	use: {
 		baseURL: `http://localhost:${E2E_WEB_PORT}`,
-		...devices['Desktop Chrome'],
 		trace: 'retain-on-failure'
 	},
+	projects: [
+		{ name: 'chromium', use: devices['Desktop Chrome'] },
+		// Every browser on iPhone and iPad (Safari, Brave, Chrome) is WebKit underneath.
+		{ name: 'webkit', use: devices['Desktop Safari'] }
+	],
 	webServer: {
 		command: `bun run --cwd apps/web build && bun run --cwd apps/web preview --port ${E2E_WEB_PORT} --strictPort`,
 		url: `http://localhost:${E2E_WEB_PORT}`,

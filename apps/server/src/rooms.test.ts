@@ -237,6 +237,27 @@ describe('games', () => {
 		expect(trivia(host.session)?.phase).toBe('reveal');
 	});
 
+	test('someone who joins mid-game can answer the current question', () => {
+		const { host, players } = partyWithPlayers(3);
+		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
+		clock += INTRO_MS;
+		rooms.tick();
+
+		const late = join(host.code, 'Late');
+		expect(trivia(late.session)?.you).toMatchObject({ answered: null, score: 0 });
+		expect(trivia(host.session)?.playerCount).toBe(4);
+
+		rooms.handle(late.session, { type: 'action', action: { type: 'answer', choice: 1 } });
+		expect(trivia(late.session)?.you?.answered).toBe(1);
+		// Still waiting on the others: the newcomer counts toward "everyone answered".
+		expect(trivia(host.session)?.phase).toBe('question');
+		for (const p of players) {
+			rooms.handle(p.session, { type: 'action', action: { type: 'answer', choice: 0 } });
+		}
+		expect(trivia(host.session)?.phase).toBe('reveal');
+		expect(trivia(host.session)?.leaderboard.map((e) => e.name)).toContain('Late');
+	});
+
 	test('endGame returns to the lobby', () => {
 		const { host } = partyWithPlayers(1);
 		rooms.handle(host.session, { type: 'start', gameId: 'trivia' });
