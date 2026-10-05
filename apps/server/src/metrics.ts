@@ -105,7 +105,8 @@ export class Metrics {
 			this.aiPoolBatches,
 			this.aiPoolItems,
 			this.snapshots,
-			this.errors
+			this.errors,
+			this.logLines
 		];
 		return [...counters, ...this.gauges].flatMap((m) => m.render()).join('\n') + '\n';
 	}
