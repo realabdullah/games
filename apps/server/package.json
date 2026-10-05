@@ -10,6 +10,7 @@
 	},
 	"dependencies": {
 		"@anthropic-ai/sdk": "^0.131.0",
+		"@games/clock": "workspace:*",
 		"@games/content": "workspace:*",
 		"@games/doodle": "workspace:*",
 		"@games/emoji": "workspace:*",

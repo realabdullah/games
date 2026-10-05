@@ -187,6 +187,10 @@ export const t = {
 			secondsPerSum: 'Seconds per sum',
 			level: 'Level',
 			levels: { 1: 'Easy', 2: 'Medium', 3: 'Hard' } as Record<number, string>,
+			clockLevels: { 1: '2–6 seconds', 2: '5–12 seconds', 3: '10–25 seconds' } as Record<
+				number,
+				string
+			>,
 			matches: 'Matches',
 			turnSeconds: 'Seconds per move',
 			botLevel: 'Computer',
@@ -325,6 +329,23 @@ export const t = {
 		answerWas: 'The answer is',
 		noneYet: 'Nobody yet…'
 	},
+	clock: {
+		howTo:
+			'You’ll see a time. When the hidden clock starts, count in your head and tap when it’s up.',
+		roundOf: (i: number, n: number) => `Round ${i} of ${n}`,
+		target: (s: string) => `Tap at ${s}`,
+		getSet: 'Get set…',
+		running: 'The clock is running…',
+		countInHead: 'Count in your head',
+		tap: 'Tap!',
+		tapLabel: (s: string) => `Tap when ${s} have passed`,
+		tapped: 'Tapped! Wait for the others…',
+		tappedCount: (d: number, n: number) => `${d} of ${n} tapped`,
+		noTap: 'No tap',
+		perfect: 'Perfect!',
+		early: (s: string) => `${s} early`,
+		late: (s: string) => `${s} late`
+	},
 	xo: {
 		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
 		matchOf: (i: number, n: number) => `Match ${i} of ${n}`,
@@ -347,7 +368,8 @@ export const t = {
 			wordrace: 'A secret five-letter word and six tries. Same rules, no room needed.',
 			hangman: 'Pick letters and solve the word before you run out of lives.',
 			emoji: 'Decode emoji riddles against the clock. Faster answers score more.',
-			maths: 'Mental maths against the clock. Pick a level and beat your best score.'
+			maths: 'Mental maths against the clock. Pick a level and beat your best score.',
+			clock: 'How good is your sense of time? Tap when you think the hidden clock hits the target.'
 		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'

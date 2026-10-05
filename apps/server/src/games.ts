@@ -9,11 +9,12 @@ import {
 	type TriviaPack
 } from '@games/content';
 import { isWord } from '@games/content/dictionary';
+import { clock, type ClockConfig } from '@games/clock';
 import { doodle, type DoodleConfig } from '@games/doodle';
 import { emoji, type EmojiConfig } from '@games/emoji';
 import { hangman, type HangmanConfig } from '@games/hangman';
 import { icebreakers, type IcebreakersConfig } from '@games/icebreakers';
-import { maths, type Level, type MathsConfig } from '@games/maths';
+import { maths, type MathsConfig } from '@games/maths';
 import { createWordRace, type WordRaceConfig } from '@games/wordrace';
 import { wit, type WitConfig } from '@games/wit';
 import { xo, type XoConfig } from '@games/xo';
@@ -118,6 +119,9 @@ function freshPack<T>(key: (item: T) => string) {
 
 const wordRace = createWordRace(isWord);
 
+type Level = 1 | 2 | 3;
+const level = (n: unknown, fallback: Level) => clamp(n, 1, 3, fallback) as Level;
+
 export type Registry = Record<string, RegisteredGame>;
 
 const clamp = (n: unknown, min: number, max: number, fallback: number) =>
@@ -213,7 +217,15 @@ export function createRegistry(packs?: PackStore): Registry {
 			config: (raw): MathsConfig => ({
 				rounds: clamp(raw?.rounds, 3, 20, maths.defaultConfig.rounds),
 				secondsPerSum: clamp(raw?.secondsPerSum, 5, 60, maths.defaultConfig.secondsPerSum),
-				level: clamp(raw?.level, 1, 3, maths.defaultConfig.level) as Level
+				level: level(raw?.level, maths.defaultConfig.level)
+			})
+		},
+		clock: {
+			game: clock,
+			content: () => ({ content: null, flagged: false }),
+			config: (raw): ClockConfig => ({
+				rounds: clamp(raw?.rounds, 1, 15, clock.defaultConfig.rounds),
+				level: level(raw?.level, clock.defaultConfig.level)
 			})
 		},
 		xo: {

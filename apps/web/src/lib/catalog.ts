@@ -1,3 +1,4 @@
+import { clock } from '@games/clock';
 import { doodle } from '@games/doodle';
 import { emoji } from '@games/emoji';
 import type { GameMeta, GameMode, GameTag } from '@games/engine';
@@ -42,5 +43,6 @@ export const catalog: CatalogEntry[] = [
 	live(wordRace.meta, { emoji: '🟩', color: 'var(--yellow)' }),
 	live(hangman.meta, { emoji: '🪢', color: 'var(--violet)' }),
 	live(emoji.meta, { emoji: '🤔', color: 'var(--pink)' }),
-	live(maths.meta, { emoji: '🧮', color: 'var(--teal)' })
+	live(maths.meta, { emoji: '🧮', color: 'var(--teal)' }),
+	live(clock.meta, { emoji: '⏱️', color: 'var(--yellow)' })
 ];

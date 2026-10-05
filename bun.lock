@@ -15,6 +15,7 @@
       "name": "server",
       "dependencies": {
         "@anthropic-ai/sdk": "^0.131.0",
+        "@games/clock": "workspace:*",
         "@games/content": "workspace:*",
         "@games/doodle": "workspace:*",
         "@games/emoji": "workspace:*",
@@ -40,6 +41,7 @@
       "version": "0.0.1",
       "dependencies": {
         "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+        "@games/clock": "workspace:*",
         "@games/content": "workspace:*",
         "@games/doodle": "workspace:*",
         "@games/emoji": "workspace:*",
@@ -78,6 +80,15 @@
     },
     "packages/engine": {
       "name": "@games/engine",
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/clock": {
+      "name": "@games/clock",
+      "dependencies": {
+        "@games/engine": "workspace:*",
+      },
       "devDependencies": {
         "@types/bun": "latest",
       },
@@ -246,6 +257,8 @@
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.25.12", "", { "os": "win32", "cpu": "x64" }, "sha512-alJC0uCZpTFrSL0CCDjcgleBXPnCrEAhTBILpeAp7M/OFgoqtAetfBzX0xM00MUsVVPpVjlPuMbREqnZCXaTnA=="],
 
     "@fontsource-variable/bricolage-grotesque": ["@fontsource-variable/bricolage-grotesque@5.3.0", "", {}, "sha512-TLi9Q4hJjS2UvoTMRSS2nHu6c4R56lAw60NR9QYtVRCHn0XtsFpiEhNffZ8Glsoxu6wEEwLKBP8lb94J52PNBA=="],
+
+    "@games/clock": ["@games/clock@workspace:packages/games/clock"],
 
     "@games/content": ["@games/content@workspace:packages/content"],
 

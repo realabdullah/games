@@ -6,6 +6,7 @@
 		wordRacePack,
 		type TriviaPack
 	} from '@games/content';
+	import { clock } from '@games/clock';
 	import { emoji } from '@games/emoji';
 	import type { AnyGame } from '@games/engine';
 	import { hangman } from '@games/hangman';
@@ -41,7 +42,8 @@
 		},
 		hangman: { game: async () => hangman, content: async () => hangmanPack },
 		emoji: { game: async () => emoji, content: async () => emojiPack },
-		maths: { game: async () => maths, content: async () => null }
+		maths: { game: async () => maths, content: async () => null },
+		clock: { game: async () => clock, content: async () => null }
 	};
 
 	let game = $state<LocalGame<unknown> | null>(null);

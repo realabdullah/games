@@ -1,3 +1,5 @@
+import ClockHost from './clock/ClockHost.svelte';
+import ClockPlayer from './clock/ClockPlayer.svelte';
 import DoodleHost from './doodle/DoodleHost.svelte';
 import DoodlePlayer from './doodle/DoodlePlayer.svelte';
 import EmojiHost from './emoji/EmojiHost.svelte';
@@ -90,6 +92,14 @@ export const gameUi: Record<string, GameUi> = {
 			{ key: 'level', label: s.level, options: [1, 2, 3], default: 1, labels: s.levels },
 			{ key: 'rounds', label: s.sums, options: [5, 10, 15], default: 10 },
 			{ key: 'secondsPerSum', label: s.secondsPerSum, options: [10, 20, 30], default: 20 }
+		]
+	},
+	clock: {
+		Host: ClockHost,
+		Player: ClockPlayer,
+		settings: [
+			{ key: 'level', label: s.level, options: [1, 2, 3], default: 1, labels: s.clockLevels },
+			{ key: 'rounds', label: s.rounds, options: [3, 5, 8], default: 5 }
 		]
 	}
 };
