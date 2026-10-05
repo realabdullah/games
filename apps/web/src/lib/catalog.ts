@@ -1,6 +1,7 @@
 import { clock } from '@games/clock';
 import { doodle } from '@games/doodle';
 import { emoji } from '@games/emoji';
+import { findIt } from '@games/findit';
 import type { GameMeta, GameMode, GameTag } from '@games/engine';
 import { hangman } from '@games/hangman';
 import { icebreakers } from '@games/icebreakers';
@@ -44,5 +45,6 @@ export const catalog: CatalogEntry[] = [
 	live(hangman.meta, { emoji: '🪢', color: 'var(--violet)' }),
 	live(emoji.meta, { emoji: '🤔', color: 'var(--pink)' }),
 	live(maths.meta, { emoji: '🧮', color: 'var(--teal)' }),
-	live(clock.meta, { emoji: '⏱️', color: 'var(--yellow)' })
+	live(clock.meta, { emoji: '⏱️', color: 'var(--yellow)' }),
+	live(findIt.meta, { emoji: '🔍', color: 'var(--violet)' })
 ];

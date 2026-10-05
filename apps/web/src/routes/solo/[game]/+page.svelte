@@ -8,6 +8,7 @@
 	} from '@games/content';
 	import { clock } from '@games/clock';
 	import { emoji } from '@games/emoji';
+	import { findIt } from '@games/findit';
 	import type { AnyGame } from '@games/engine';
 	import { hangman } from '@games/hangman';
 	import { maths } from '@games/maths';
@@ -43,7 +44,8 @@
 		hangman: { game: async () => hangman, content: async () => hangmanPack },
 		emoji: { game: async () => emoji, content: async () => emojiPack },
 		maths: { game: async () => maths, content: async () => null },
-		clock: { game: async () => clock, content: async () => null }
+		clock: { game: async () => clock, content: async () => null },
+		findit: { game: async () => findIt, content: async () => null }
 	};
 
 	let game = $state<LocalGame<unknown> | null>(null);

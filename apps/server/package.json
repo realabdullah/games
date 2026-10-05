@@ -14,6 +14,7 @@
 		"@games/content": "workspace:*",
 		"@games/doodle": "workspace:*",
 		"@games/emoji": "workspace:*",
+		"@games/findit": "workspace:*",
 		"@games/engine": "workspace:*",
 		"@games/hangman": "workspace:*",
 		"@games/icebreakers": "workspace:*",

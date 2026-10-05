@@ -191,6 +191,10 @@ export const t = {
 				number,
 				string
 			>,
+			gridSize: 'Grid',
+			gridSizes: { 1: '5 × 5', 2: '6 × 6', 3: '7 × 7' } as Record<number, string>,
+			grids: 'Grids',
+			secondsPerGrid: 'Seconds per grid',
 			matches: 'Matches',
 			turnSeconds: 'Seconds per move',
 			botLevel: 'Computer',
@@ -346,6 +350,17 @@ export const t = {
 		early: (s: string) => `${s} early`,
 		late: (s: string) => `${s} late`
 	},
+	findit: {
+		howTo: 'Everyone gets the same grid. Find it and tap it. A wrong tap freezes you for a moment.',
+		gridOf: (i: number, n: number) => `Grid ${i} of ${n}`,
+		find: (s: string) => `Find ${s}`,
+		findOdd: 'Find the odd one out',
+		found: (d: number, n: number) => `${d} of ${n} found it`,
+		youFound: 'Found it! 🎉',
+		frozen: 'Wrong one! Wait a moment…',
+		first: 'First!',
+		noneYet: 'Nobody yet…'
+	},
 	xo: {
 		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
 		matchOf: (i: number, n: number) => `Match ${i} of ${n}`,
@@ -369,7 +384,9 @@ export const t = {
 			hangman: 'Pick letters and solve the word before you run out of lives.',
 			emoji: 'Decode emoji riddles against the clock. Faster answers score more.',
 			maths: 'Mental maths against the clock. Pick a level and beat your best score.',
-			clock: 'How good is your sense of time? Tap when you think the hidden clock hits the target.'
+			clock: 'How good is your sense of time? Tap when you think the hidden clock hits the target.',
+			findit:
+				'Hunt for the number, emoji or odd one out. The faster you find it, the more you score.'
 		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'

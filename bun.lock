@@ -20,6 +20,7 @@
         "@games/doodle": "workspace:*",
         "@games/emoji": "workspace:*",
         "@games/engine": "workspace:*",
+        "@games/findit": "workspace:*",
         "@games/hangman": "workspace:*",
         "@games/icebreakers": "workspace:*",
         "@games/maths": "workspace:*",
@@ -46,6 +47,7 @@
         "@games/doodle": "workspace:*",
         "@games/emoji": "workspace:*",
         "@games/engine": "workspace:*",
+        "@games/findit": "workspace:*",
         "@games/hangman": "workspace:*",
         "@games/icebreakers": "workspace:*",
         "@games/maths": "workspace:*",
@@ -107,6 +109,15 @@
       "name": "@games/emoji",
       "dependencies": {
         "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/findit": {
+      "name": "@games/findit",
+      "dependencies": {
         "@games/engine": "workspace:*",
       },
       "devDependencies": {
@@ -267,6 +278,8 @@
     "@games/emoji": ["@games/emoji@workspace:packages/games/emoji"],
 
     "@games/engine": ["@games/engine@workspace:packages/engine"],
+
+    "@games/findit": ["@games/findit@workspace:packages/games/findit"],
 
     "@games/hangman": ["@games/hangman@workspace:packages/games/hangman"],
 

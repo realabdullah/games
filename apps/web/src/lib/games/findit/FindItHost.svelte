@@ -1,15 +1,16 @@
 <script lang="ts">
-	import type { MathsView } from '@games/maths';
+	import type { FindItView } from '@games/findit';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Finishers from '$lib/components/Finishers.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
 	import Timer from '$lib/components/Timer.svelte';
 	import type { HostViewProps } from '$lib/games/types';
 	import { t } from '$lib/i18n';
+	import FindGrid from './FindGrid.svelte';
 
 	let { view: raw, clockOffset, onaction, onplayagain, onendgame }: HostViewProps = $props();
-	const view = $derived(raw as MathsView);
-	const m = t.maths;
+	const view = $derived(raw as FindItView);
+	const m = t.findit;
 	const g = t.games;
 	const next = () => onaction({ type: 'next' });
 </script>
@@ -17,46 +18,38 @@
 <section class="host">
 	{#if view.phase === 'intro'}
 		<div class="center">
-			<h2 class="title">Quick Maths</h2>
+			<h2 class="title">Find It</h2>
 			<p class="big">{m.howTo}</p>
-			<p class="example" aria-hidden="true">7 × 8 = 56</p>
 			<div class="timer">
 				<Timer endsAt={view.endsAt} durationMs={view.durationMs} {clockOffset} large />
 			</div>
 			<button class="btn" onclick={next}>{g.startNow}</button>
 		</div>
-	{:else if (view.phase === 'sum' || view.phase === 'reveal') && view.sum}
+	{:else if view.phase === 'find' || view.phase === 'reveal'}
 		<header class="top">
-			<p class="kicker">{m.sumOf(view.round + 1, view.rounds)}</p>
-			{#if view.phase === 'sum'}
-				<p class="count">{m.solved(view.solvedCount, view.playerCount)}</p>
-			{/if}
+			<p class="kicker">{m.gridOf(view.round + 1, view.rounds)}</p>
+			<p class="prompt">{view.find === null ? m.findOdd : m.find(view.find)}</p>
 		</header>
 		<div class="stage">
 			<div class="main">
 				{#key view.round}
-					<p class="sum">
-						{view.sum}
-						<span class="equals">=</span>
-						<span class="answer" class:shown={view.answer !== null}
-							>{view.answer?.toLocaleString('en') ?? '?'}</span
-						>
-					</p>
+					<FindGrid cells={view.cells} size={view.size} answer={view.answer} large />
 				{/key}
-				{#if view.phase === 'sum'}
+				{#if view.phase === 'find'}
 					<Timer endsAt={view.endsAt} durationMs={view.durationMs} {clockOffset} large />
 				{/if}
 			</div>
 			<aside class="side">
-				{#if view.phase === 'sum'}
-					<Finishers players={view.solvers} empty={m.noneYet} first={m.first} />
+				{#if view.phase === 'find'}
+					<p class="count">{m.found(view.foundCount, view.playerCount)}</p>
+					<Finishers players={view.finders} empty={m.noneYet} first={m.first} />
 				{:else}
 					<Leaderboard entries={view.leaderboard} limit={5} />
 				{/if}
 			</aside>
 		</div>
 		<footer>
-			{#if view.phase === 'sum'}
+			{#if view.phase === 'find'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else}
 				<button class="btn pink" onclick={next}>{g.next}</button>
@@ -90,16 +83,10 @@
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
 		font-weight: 750;
 	}
-	.example {
-		font-size: clamp(1.3rem, 2.4vw, 2rem);
-		font-weight: 750;
-		color: var(--ink-soft);
-		font-variant-numeric: tabular-nums;
-	}
 	.top {
 		display: flex;
 		justify-content: space-between;
-		align-items: baseline;
+		align-items: center;
 		gap: 16px;
 	}
 	.kicker {
@@ -109,9 +96,13 @@
 		letter-spacing: 0.08em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
-	.count {
-		font-size: clamp(1.1rem, 2vw, 1.6rem);
-		font-weight: 750;
+	.prompt {
+		padding: 4px 18px;
+		border: var(--border);
+		border-radius: 999px;
+		background: var(--yellow);
+		font-size: clamp(1.4rem, 3vw, 2.4rem);
+		font-weight: 800;
 	}
 	.stage {
 		display: grid;
@@ -120,49 +111,24 @@
 	@media (min-width: 960px) {
 		.stage {
 			grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
-			min-height: calc(100dvh - 300px);
 		}
 	}
 	.main {
 		display: grid;
-		gap: clamp(16px, 3vh, 32px);
+		gap: 16px;
 		align-content: center;
-		justify-items: center;
-		text-align: center;
-	}
-	.sum {
-		font-size: clamp(3.4rem, 10vw, 8rem);
-		font-weight: 800;
-		line-height: 1.1;
-		font-variant-numeric: tabular-nums;
-		animation: pop 450ms cubic-bezier(0.3, 1.5, 0.5, 1);
-	}
-	.equals {
-		color: var(--ink-soft);
-	}
-	.answer {
-		color: var(--ink-soft);
-	}
-	.answer.shown {
-		color: oklch(45% 0.13 160);
 	}
 	.side {
 		display: grid;
+		gap: 12px;
 		align-content: start;
+	}
+	.count {
+		font-size: clamp(1.1rem, 2vw, 1.6rem);
+		font-weight: 750;
 	}
 	footer {
 		display: flex;
 		justify-content: center;
-	}
-	@keyframes pop {
-		from {
-			transform: scale(0.6);
-			opacity: 0;
-		}
-	}
-	@media (prefers-reduced-motion: reduce) {
-		.sum {
-			animation: none;
-		}
 	}
 </style>

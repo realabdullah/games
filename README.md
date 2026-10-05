@@ -16,6 +16,7 @@ One person opens the game on a big screen (a TV, or a shared screen on a video c
 - **Emoji Riddles**: read a row of emojis and race to name the word, film or saying.
 - **Quick Maths**: everyone gets the same sum, and the fastest right answer scores most.
 - **Stop the Clock**: count in your head and tap when a hidden clock hits the target time.
+- **Find It**: spot the number, emoji or odd one out in a grid before anyone else.
 
 Most games also work with everyone on their own screen, and some can be played solo.
 

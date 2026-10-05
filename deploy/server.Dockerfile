@@ -18,6 +18,7 @@ COPY packages/games/hangman/package.json packages/games/hangman/
 COPY packages/games/emoji/package.json packages/games/emoji/
 COPY packages/games/maths/package.json packages/games/maths/
 COPY packages/games/clock/package.json packages/games/clock/
+COPY packages/games/findit/package.json packages/games/findit/
 RUN bun install --frozen-lockfile --production --filter server
 COPY packages packages
 COPY apps/server apps/server

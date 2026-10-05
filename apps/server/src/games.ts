@@ -10,6 +10,7 @@ import {
 } from '@games/content';
 import { isWord } from '@games/content/dictionary';
 import { clock, type ClockConfig } from '@games/clock';
+import { findIt, type FindItConfig } from '@games/findit';
 import { doodle, type DoodleConfig } from '@games/doodle';
 import { emoji, type EmojiConfig } from '@games/emoji';
 import { hangman, type HangmanConfig } from '@games/hangman';
@@ -226,6 +227,15 @@ export function createRegistry(packs?: PackStore): Registry {
 			config: (raw): ClockConfig => ({
 				rounds: clamp(raw?.rounds, 1, 15, clock.defaultConfig.rounds),
 				level: level(raw?.level, clock.defaultConfig.level)
+			})
+		},
+		findit: {
+			game: findIt,
+			content: () => ({ content: null, flagged: false }),
+			config: (raw): FindItConfig => ({
+				rounds: clamp(raw?.rounds, 3, 20, findIt.defaultConfig.rounds),
+				secondsPerGrid: clamp(raw?.secondsPerGrid, 5, 60, findIt.defaultConfig.secondsPerGrid),
+				level: level(raw?.level, findIt.defaultConfig.level)
 			})
 		},
 		xo: {

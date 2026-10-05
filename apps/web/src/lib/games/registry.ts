@@ -4,6 +4,8 @@ import DoodleHost from './doodle/DoodleHost.svelte';
 import DoodlePlayer from './doodle/DoodlePlayer.svelte';
 import EmojiHost from './emoji/EmojiHost.svelte';
 import EmojiPlayer from './emoji/EmojiPlayer.svelte';
+import FindItHost from './findit/FindItHost.svelte';
+import FindItPlayer from './findit/FindItPlayer.svelte';
 import HangmanHost from './hangman/HangmanHost.svelte';
 import HangmanPlayer from './hangman/HangmanPlayer.svelte';
 import IcebreakersHost from './icebreakers/IcebreakersHost.svelte';
@@ -100,6 +102,15 @@ export const gameUi: Record<string, GameUi> = {
 		settings: [
 			{ key: 'level', label: s.level, options: [1, 2, 3], default: 1, labels: s.clockLevels },
 			{ key: 'rounds', label: s.rounds, options: [3, 5, 8], default: 5 }
+		]
+	},
+	findit: {
+		Host: FindItHost,
+		Player: FindItPlayer,
+		settings: [
+			{ key: 'level', label: s.gridSize, options: [1, 2, 3], default: 1, labels: s.gridSizes },
+			{ key: 'rounds', label: s.grids, options: [5, 8, 12], default: 8 },
+			{ key: 'secondsPerGrid', label: s.secondsPerGrid, options: [10, 20, 30], default: 20 }
 		]
 	}
 };
