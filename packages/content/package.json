@@ -4,6 +4,8 @@
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
+		"./packs": "./src/packs/index.ts",
+		"./packs/*": "./src/packs/*.ts",
 		"./dictionary": "./src/words/dictionary.ts"
 	},
 	"scripts": {

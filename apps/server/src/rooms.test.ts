@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { MAX_ROOM_PLAYERS, type GameUpdate, type RoomView, type You } from '@games/protocol';
 import type { TriviaView } from '@games/trivia';
 import { INTRO_MS } from '@games/trivia';
-import { findTriviaPack } from '@games/content';
+import { findTriviaPack } from '@games/content/packs';
 import { ApiError } from './errors.ts';
 import type { RoomEvent } from './log.ts';
 import {

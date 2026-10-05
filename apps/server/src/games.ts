@@ -1,3 +1,4 @@
+import type { TriviaPack } from '@games/content';
 import {
 	anagramPack,
 	doodlePack,
@@ -6,9 +7,8 @@ import {
 	hangmanPack,
 	icebreakerPack,
 	witPack,
-	wordRacePack,
-	type TriviaPack
-} from '@games/content';
+	wordRacePack
+} from '@games/content/packs';
 import { isWord } from '@games/content/dictionary';
 import { createAnagram, wordsForLevel, type AnagramConfig } from '@games/anagram';
 import { clock, type ClockConfig } from '@games/clock';

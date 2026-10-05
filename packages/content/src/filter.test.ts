@@ -8,7 +8,7 @@ import {
 	triviaPacks,
 	witPack,
 	wordRacePack
-} from './index.ts';
+} from './packs/index.ts';
 import { isWord } from './words/dictionary.ts';
 
 test('catches profanity, including obfuscated spellings', () => {

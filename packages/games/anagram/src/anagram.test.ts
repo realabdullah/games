@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { anagramPack } from '@games/content';
+import { anagramPack } from '@games/content/packs';
 import {
 	createRng,
 	startGame,

@@ -1,12 +1,5 @@
 <script lang="ts">
-	import {
-		anagramPack,
-		emojiPack,
-		findTriviaPack,
-		hangmanPack,
-		wordRacePack,
-		type TriviaPack
-	} from '@games/content';
+	import type { TriviaPack } from '@games/content';
 	import { createAnagram } from '@games/anagram';
 	import { clock } from '@games/clock';
 	import { emoji } from '@games/emoji';
@@ -32,26 +25,34 @@
 	let { data } = $props();
 	const entry = $derived(data.game);
 
-	/** Games that can run in the browser, with how to load them and their content. */
+	/**
+	 * Games that can run in the browser, with how to load them and their content.
+	 * Content and the dictionary load only when you start, so they never slow the page down.
+	 */
 	const solo: Record<
 		string,
 		{ game: () => Promise<AnyGame>; content: (req: StartRequest) => Promise<unknown> }
 	> = {
 		trivia: { game: async () => trivia, content: (req) => loadPack(req.packId ?? 'general') },
 		xo: { game: async () => xo, content: async () => null },
-		// The dictionary is big, so it only loads when you play.
 		wordrace: {
 			game: async () => createWordRace((await import('@games/content/dictionary')).isWord),
-			content: async () => wordRacePack
+			content: async () => (await import('@games/content/packs/wordrace')).wordRacePack
 		},
-		hangman: { game: async () => hangman, content: async () => hangmanPack },
-		emoji: { game: async () => emoji, content: async () => emojiPack },
+		hangman: {
+			game: async () => hangman,
+			content: async () => (await import('@games/content/packs/hangman')).hangmanPack
+		},
+		emoji: {
+			game: async () => emoji,
+			content: async () => (await import('@games/content/packs/emoji')).emojiPack
+		},
 		maths: { game: async () => maths, content: async () => null },
 		clock: { game: async () => clock, content: async () => null },
 		findit: { game: async () => findIt, content: async () => null },
 		anagram: {
 			game: async () => createAnagram((await import('@games/content/dictionary')).isWord),
-			content: async () => anagramPack
+			content: async () => (await import('@games/content/packs/anagram')).anagramPack
 		},
 		memory: { game: async () => memory, content: async () => null }
 	};
@@ -62,7 +63,7 @@
 
 	/** Curated packs ship with the app; your own packs are fetched with their edit token. */
 	async function loadPack(packId: string): Promise<TriviaPack | null> {
-		const curated = findTriviaPack(packId);
+		const curated = (await import('@games/content/packs/trivia')).findTriviaPack(packId);
 		if (curated) return curated;
 		const mine = myPacks.get(packId);
 		if (!mine) return null;

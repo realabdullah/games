@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { tick, untrack } from 'svelte';
-	import { summarize, triviaPacks } from '@games/content';
+	import { triviaPackSummaries } from '@games/content';
 	import type { GameMode } from '@games/engine';
 	import type { PackSummary, RoomSettings } from '@games/protocol';
 	import { api } from '$lib/api';
@@ -48,7 +48,8 @@
 	/** Solo can have its own settings (e.g. the computer's level). */
 	const settingsFor = (id: string) =>
 		(mode === 'solo' && gameUi[id]?.soloSettings) || gameUi[id]?.settings || [];
-	const curated = triviaPacks.map(summarize);
+
+	const curated = triviaPackSummaries;
 
 	let gameId = $state(untrack(() => onlyGame) ?? 'trivia');
 	let packId = $state(curated[0]!.id);

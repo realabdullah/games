@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import type { TriviaPack } from '@games/content';
-import { triviaPacks } from '@games/content';
+import { triviaPacks } from '@games/content/packs';
 import {
 	startGame,
 	stepFromClient,
