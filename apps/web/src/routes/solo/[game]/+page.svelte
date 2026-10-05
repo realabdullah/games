@@ -9,6 +9,7 @@
 	import { emoji } from '@games/emoji';
 	import type { AnyGame } from '@games/engine';
 	import { hangman } from '@games/hangman';
+	import { maths } from '@games/maths';
 	import { trivia } from '@games/trivia';
 	import { createWordRace } from '@games/wordrace';
 	import { xo } from '@games/xo';
@@ -39,7 +40,8 @@
 			content: async () => wordRacePack
 		},
 		hangman: { game: async () => hangman, content: async () => hangmanPack },
-		emoji: { game: async () => emoji, content: async () => emojiPack }
+		emoji: { game: async () => emoji, content: async () => emojiPack },
+		maths: { game: async () => maths, content: async () => null }
 	};
 
 	let game = $state<LocalGame<unknown> | null>(null);

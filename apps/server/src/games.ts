@@ -13,6 +13,7 @@ import { doodle, type DoodleConfig } from '@games/doodle';
 import { emoji, type EmojiConfig } from '@games/emoji';
 import { hangman, type HangmanConfig } from '@games/hangman';
 import { icebreakers, type IcebreakersConfig } from '@games/icebreakers';
+import { maths, type Level, type MathsConfig } from '@games/maths';
 import { createWordRace, type WordRaceConfig } from '@games/wordrace';
 import { wit, type WitConfig } from '@games/wit';
 import { xo, type XoConfig } from '@games/xo';
@@ -205,6 +206,15 @@ export function createRegistry(packs?: PackStore): Registry {
 				)
 			}),
 			fresh: freshPack<{ answer: string }>((p) => p.answer)
+		},
+		maths: {
+			game: maths,
+			content: () => ({ content: null, flagged: false }),
+			config: (raw): MathsConfig => ({
+				rounds: clamp(raw?.rounds, 3, 20, maths.defaultConfig.rounds),
+				secondsPerSum: clamp(raw?.secondsPerSum, 5, 60, maths.defaultConfig.secondsPerSum),
+				level: clamp(raw?.level, 1, 3, maths.defaultConfig.level) as Level
+			})
 		},
 		xo: {
 			game: xo,

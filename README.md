@@ -14,6 +14,7 @@ One person opens the game on a big screen (a TV, or a shared screen on a video c
 - **Word Race**: everyone gets the same secret five-letter word and six tries to find it.
 - **Hangman**: take turns picking letters before the room runs out of lives.
 - **Emoji Riddles**: read a row of emojis and race to name the word, film or saying.
+- **Quick Maths**: everyone gets the same sum, and the fastest right answer scores most.
 
 Most games also work with everyone on their own screen, and some can be played solo.
 

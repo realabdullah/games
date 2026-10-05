@@ -183,6 +183,10 @@ export const t = {
 			drawSeconds: 'Seconds to draw',
 			secondsPerWord: 'Seconds per word',
 			secondsPerPuzzle: 'Seconds per puzzle',
+			sums: 'Sums',
+			secondsPerSum: 'Seconds per sum',
+			level: 'Level',
+			levels: { 1: 'Easy', 2: 'Medium', 3: 'Hard' } as Record<number, string>,
 			matches: 'Matches',
 			turnSeconds: 'Seconds per move',
 			botLevel: 'Computer',
@@ -307,6 +311,20 @@ export const t = {
 		got: (d: number, n: number) => `${d} of ${n} got it`,
 		answerWas: 'It was'
 	},
+	maths: {
+		howTo: 'Everyone gets the same sum. Type the answer fast. You get three tries.',
+		sumOf: (i: number, n: number) => `Sum ${i} of ${n}`,
+		answerLabel: 'Your answer',
+		send: 'Go',
+		solved: (d: number, n: number) => `${d} of ${n} got it`,
+		first: 'First!',
+		correct: 'Correct! 🎉',
+		notIt: (n: number) => `Not ${n.toLocaleString('en')}`,
+		triesLeft: (n: number) => (n === 1 ? '1 try left' : `${n} tries left`),
+		out: 'Out of tries. Wait for the next one.',
+		answerWas: 'The answer is',
+		noneYet: 'Nobody yet…'
+	},
 	xo: {
 		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
 		matchOf: (i: number, n: number) => `Match ${i} of ${n}`,
@@ -328,7 +346,8 @@ export const t = {
 			xo: 'Take on the computer. Pick how tough it plays.',
 			wordrace: 'A secret five-letter word and six tries. Same rules, no room needed.',
 			hangman: 'Pick letters and solve the word before you run out of lives.',
-			emoji: 'Decode emoji riddles against the clock. Faster answers score more.'
+			emoji: 'Decode emoji riddles against the clock. Faster answers score more.',
+			maths: 'Mental maths against the clock. Pick a level and beat your best score.'
 		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'

@@ -16,6 +16,7 @@ COPY packages/games/xo/package.json packages/games/xo/
 COPY packages/games/wordrace/package.json packages/games/wordrace/
 COPY packages/games/hangman/package.json packages/games/hangman/
 COPY packages/games/emoji/package.json packages/games/emoji/
+COPY packages/games/maths/package.json packages/games/maths/
 RUN bun install --frozen-lockfile
 COPY . .
 # Optional: your self-hosted GoatCounter, e.g. https://stats.example.com

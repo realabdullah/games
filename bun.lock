@@ -21,6 +21,7 @@
         "@games/engine": "workspace:*",
         "@games/hangman": "workspace:*",
         "@games/icebreakers": "workspace:*",
+        "@games/maths": "workspace:*",
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
         "@games/wit": "workspace:*",
@@ -45,6 +46,7 @@
         "@games/engine": "workspace:*",
         "@games/hangman": "workspace:*",
         "@games/icebreakers": "workspace:*",
+        "@games/maths": "workspace:*",
         "@games/protocol": "workspace:*",
         "@games/trivia": "workspace:*",
         "@games/wit": "workspace:*",
@@ -114,6 +116,15 @@
       "name": "@games/icebreakers",
       "dependencies": {
         "@games/content": "workspace:*",
+        "@games/engine": "workspace:*",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+    },
+    "packages/games/maths": {
+      "name": "@games/maths",
+      "dependencies": {
         "@games/engine": "workspace:*",
       },
       "devDependencies": {
@@ -247,6 +258,8 @@
     "@games/hangman": ["@games/hangman@workspace:packages/games/hangman"],
 
     "@games/icebreakers": ["@games/icebreakers@workspace:packages/games/icebreakers"],
+
+    "@games/maths": ["@games/maths@workspace:packages/games/maths"],
 
     "@games/protocol": ["@games/protocol@workspace:packages/protocol"],
 
