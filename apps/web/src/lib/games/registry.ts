@@ -63,7 +63,7 @@ export const gameUi: Record<string, GameUi> = {
 	wit: {
 		Host: WitHost,
 		Player: WitPlayer,
-		settings: [{ key: 'rounds', label: s.rounds, options: [1, 2], default: 2 }]
+		settings: [flavour, { key: 'rounds', label: s.rounds, options: [1, 2], default: 2 }]
 	},
 	doodle: {
 		Host: DoodleHost,

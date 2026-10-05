@@ -6,7 +6,7 @@ import {
 	hangmanPack,
 	icebreakerPacks,
 	triviaPacks,
-	witPack,
+	witPacks,
 	wordRacePack
 } from './packs/index.ts';
 import { isWord } from './words/dictionary.ts';
@@ -34,9 +34,8 @@ test('curated packs are clean', () => {
 
 test('curated prompts and words are clean', () => {
 	for (const pack of [
-		icebreakerPacks.naija,
-		icebreakerPacks.global,
-		witPack,
+		...Object.values(icebreakerPacks),
+		...Object.values(witPacks),
 		doodlePack,
 		wordRacePack
 	]) {

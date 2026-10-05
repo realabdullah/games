@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import { FLAVOUR, flavourItems, summarize, triviaPackSummaries } from './index.ts';
-import { emojiPacks, icebreakerPacks, triviaPacks } from './packs/index.ts';
+import { emojiPacks, icebreakerPacks, triviaPacks, witPacks } from './packs/index.ts';
 
 test('the lobby’s trivia summaries match the packs', () => {
 	expect(triviaPackSummaries).toEqual(triviaPacks.map(summarize));
@@ -17,8 +17,14 @@ describe('flavours', () => {
 	});
 
 	test('every flavour has enough for a long game', () => {
-		for (const pack of [...Object.values(emojiPacks), ...Object.values(icebreakerPacks)]) {
-			expect(pack.items.length).toBeGreaterThanOrEqual(40);
+		const packs = [emojiPacks, icebreakerPacks, witPacks].flatMap(Object.values);
+		for (const pack of packs) expect(pack.items.length).toBeGreaterThanOrEqual(40);
+	});
+
+	test('Mix never repeats an item: no overlap between flavours', () => {
+		for (const packs of [icebreakerPacks, witPacks]) {
+			const naija = new Set(packs.naija.items);
+			expect(packs.global.items.filter((i) => naija.has(i))).toEqual([]);
 		}
 	});
 });

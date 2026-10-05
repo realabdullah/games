@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { MAX_ROOM_PLAYERS, type GameUpdate, type RoomView, type You } from '@games/protocol';
 import type { TriviaView } from '@games/trivia';
 import { INTRO_MS } from '@games/trivia';
-import { findTriviaPack, icebreakerPacks } from '@games/content/packs';
+import { findTriviaPack, icebreakerPacks, witPacks } from '@games/content/packs';
 import { ApiError } from './errors.ts';
 import type { RoomEvent } from './log.ts';
 import {
@@ -681,5 +681,18 @@ describe('content flavour', () => {
 	test('global when the host picks it', () => {
 		for (const prompt of prompts({ flavour: 3 }))
 			expect(icebreakerPacks.global.items).toContain(prompt);
+	});
+
+	/** Start `gameId` with three players and return its state. */
+	const started = <T>(gameId: string, config: Record<string, number> = {}) => {
+		const host = rooms.create({ mode: 'party' });
+		for (const name of ['Ada', 'Bola', 'Chidi']) join(host.code, name);
+		rooms.handle(host.session, { type: 'start', gameId, config });
+		return rooms.snapshot().rooms.at(-1)!.game!.state as T;
+	};
+
+	test('Quick Wit uses Naija prompts by default', () => {
+		const state = started<{ deck: string[] }>('wit');
+		for (const prompt of state.deck) expect(witPacks.naija.items).toContain(prompt);
 	});
 });

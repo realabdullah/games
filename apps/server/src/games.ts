@@ -6,7 +6,7 @@ import {
 	findTriviaPack,
 	hangmanPack,
 	icebreakerPacks,
-	witPack,
+	witPacks,
 	wordRacePack
 } from '@games/content/packs';
 import { isWord } from '@games/content/dictionary';
@@ -141,6 +141,16 @@ function freshFlavour<T>(key: (item: T) => string) {
 	};
 }
 
+/**
+ * For games that deal from a whole deck (Quick Wit): every item of the chosen
+ * flavours, shuffled by the game itself.
+ */
+function flavourDeck(content: unknown, config: unknown): Fresh {
+	const packs = content as Record<Flavour, { items: string[] }>;
+	const items = flavourItems(packs, (config as { flavour: number }).flavour);
+	return { content: { id: 'curated', title: 'Curated', items }, used: [], cycled: false };
+}
+
 const flavour = (n: unknown) => clamp(n, FLAVOUR.naija, FLAVOUR.global, FLAVOUR.naija);
 const onOff = (n: unknown) => clamp(n, 0, 1, 0);
 
@@ -196,12 +206,14 @@ export function createRegistry(packs?: PackStore): Registry {
 		},
 		wit: {
 			game: wit,
-			content: () => ({ content: witPack, flagged: false }),
-			config: (raw): Omit<WitConfig, 'familyFilter'> => ({
+			content: () => ({ content: witPacks, flagged: false }),
+			config: (raw): Omit<WitConfig, 'familyFilter'> & { flavour: number } => ({
 				rounds: clamp(raw?.rounds, 1, 3, wit.defaultConfig.rounds),
 				writeSeconds: clamp(raw?.writeSeconds, 30, 180, wit.defaultConfig.writeSeconds),
-				voteSeconds: clamp(raw?.voteSeconds, 10, 60, wit.defaultConfig.voteSeconds)
-			})
+				voteSeconds: clamp(raw?.voteSeconds, 10, 60, wit.defaultConfig.voteSeconds),
+				flavour: flavour(raw?.flavour)
+			}),
+			fresh: flavourDeck
 		},
 		doodle: {
 			game: doodle,
