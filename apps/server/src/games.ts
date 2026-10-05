@@ -1,11 +1,11 @@
-import type { TriviaPack } from '@games/content';
+import { FLAVOUR, flavourItems, type Flavour, type TriviaPack } from '@games/content';
 import {
 	anagramPack,
 	doodlePack,
-	emojiPack,
+	emojiPacks,
 	findTriviaPack,
 	hangmanPack,
-	icebreakerPack,
+	icebreakerPacks,
 	witPack,
 	wordRacePack
 } from '@games/content/packs';
@@ -121,6 +121,22 @@ function freshPack<T>(key: (item: T) => string) {
 	};
 }
 
+/**
+ * For packs kept per flavour (Naija, global): the lobby's "Content" setting
+ * picks which, then rematches avoid repeats as with `freshPack`.
+ */
+function freshFlavour<T>(key: (item: T) => string) {
+	return (content: unknown, config: unknown, played: readonly string[], random: () => number) => {
+		const packs = content as Record<Flavour, { id: string; title: string; items: T[] }>;
+		const { rounds, flavour } = config as { rounds: number; flavour: number };
+		const pool = flavourItems(packs, flavour);
+		const { items, used, cycled } = freshItems(pool, rounds, played, random, key);
+		return { content: { id: 'curated', title: 'Curated', items }, used, cycled };
+	};
+}
+
+const flavour = (n: unknown) => clamp(n, FLAVOUR.naija, FLAVOUR.global, FLAVOUR.naija);
+
 const wordRace = createWordRace(isWord);
 const anagram = createAnagram(isWord);
 
@@ -160,12 +176,14 @@ export function createRegistry(packs?: PackStore): Registry {
 		},
 		icebreakers: {
 			game: icebreakers,
-			content: () => ({ content: icebreakerPack, flagged: false }),
-			config: (raw): Omit<IcebreakersConfig, 'familyFilter'> => ({
+			content: () => ({ content: icebreakerPacks, flagged: false }),
+			config: (raw): Omit<IcebreakersConfig, 'familyFilter'> & { flavour: number } => ({
 				rounds: clamp(raw?.rounds, 1, 5, icebreakers.defaultConfig.rounds),
 				writeSeconds: clamp(raw?.writeSeconds, 20, 180, icebreakers.defaultConfig.writeSeconds),
-				guessSeconds: clamp(raw?.guessSeconds, 10, 60, icebreakers.defaultConfig.guessSeconds)
-			})
+				guessSeconds: clamp(raw?.guessSeconds, 10, 60, icebreakers.defaultConfig.guessSeconds),
+				flavour: flavour(raw?.flavour)
+			}),
+			fresh: freshFlavour<string>((prompt) => prompt)
 		},
 		wit: {
 			game: wit,
@@ -204,8 +222,9 @@ export function createRegistry(packs?: PackStore): Registry {
 		},
 		emoji: {
 			game: emoji,
-			content: () => ({ content: emojiPack, flagged: false }),
-			config: (raw): Omit<EmojiConfig, 'familyFilter'> => ({
+			content: () => ({ content: emojiPacks, flagged: false }),
+			config: (raw): Omit<EmojiConfig, 'familyFilter'> & { flavour: number } => ({
+				flavour: flavour(raw?.flavour),
 				rounds: clamp(raw?.rounds, 3, 15, emoji.defaultConfig.rounds),
 				secondsPerPuzzle: clamp(
 					raw?.secondsPerPuzzle,
@@ -214,7 +233,7 @@ export function createRegistry(packs?: PackStore): Registry {
 					emoji.defaultConfig.secondsPerPuzzle
 				)
 			}),
-			fresh: freshPack<{ answer: string }>((p) => p.answer)
+			fresh: freshFlavour<{ answer: string }>((p) => p.answer)
 		},
 		maths: {
 			game: maths,

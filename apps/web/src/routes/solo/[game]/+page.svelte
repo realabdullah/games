@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { TriviaPack } from '@games/content';
+	import { flavourItems, type TriviaPack } from '@games/content';
 	import { createAnagram } from '@games/anagram';
 	import { clock } from '@games/clock';
 	import { emoji } from '@games/emoji';
@@ -45,7 +45,14 @@
 		},
 		emoji: {
 			game: async () => emoji,
-			content: async () => (await import('@games/content/packs/emoji')).emojiPack
+			content: async (req) => {
+				const { emojiPacks } = await import('@games/content/packs/emoji');
+				return {
+					id: 'curated',
+					title: 'Curated',
+					items: flavourItems(emojiPacks, req.config?.flavour)
+				};
+			}
 		},
 		maths: { game: async () => maths, content: async () => null },
 		clock: { game: async () => clock, content: async () => null },

@@ -1,0 +1,609 @@
+{
+	"id": "emoji-ng",
+	"title": "Naija emoji riddles",
+	"items": [
+		{
+			"emoji": "🍚🍅🌶️",
+			"answer": "jollof rice",
+			"category": "Naija food",
+			"also": ["jollof"]
+		},
+		{
+			"emoji": "🍌🔥",
+			"answer": "boli",
+			"category": "Naija food",
+			"also": ["roasted plantain", "bole"]
+		},
+		{
+			"emoji": "🥩🌶️🔥",
+			"answer": "suya",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "💨💨🍩",
+			"answer": "puff puff",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "🌶️🍲",
+			"answer": "pepper soup",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "👊🍠",
+			"answer": "pounded yam",
+			"category": "Naija food",
+			"also": ["iyan"]
+		},
+		{
+			"emoji": "🍜🥚",
+			"answer": "indomie",
+			"category": "Naija food",
+			"also": ["indomie and egg", "noodles"]
+		},
+		{
+			"emoji": "🌴🍷",
+			"answer": "palm wine",
+			"category": "Naija food",
+			"also": ["palmwine"]
+		},
+		{
+			"emoji": "🌺🥤",
+			"answer": "zobo",
+			"category": "Naija food",
+			"also": ["zobo drink"]
+		},
+		{
+			"emoji": "🍹🍊🍋",
+			"answer": "chapman",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "🌽🥥",
+			"answer": "corn and coconut",
+			"category": "Naija food",
+			"also": ["roasted corn and coconut"]
+		},
+		{
+			"emoji": "🐐🌶️🔥",
+			"answer": "asun",
+			"category": "Naija food",
+			"also": ["peppered goat meat"]
+		},
+		{
+			"emoji": "🍚🍳🥕",
+			"answer": "fried rice",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "🥜🍪",
+			"answer": "kuli kuli",
+			"category": "Naija food",
+			"also": ["kulikuli"]
+		},
+		{
+			"emoji": "🍌🍟",
+			"answer": "dodo",
+			"category": "Naija food",
+			"also": ["fried plantain", "plantain"]
+		},
+		{
+			"emoji": "🐌🌶️",
+			"answer": "peppered snail",
+			"category": "Naija food",
+			"also": ["snail"]
+		},
+		{
+			"emoji": "🥣🌽",
+			"answer": "pap",
+			"category": "Naija food",
+			"also": ["ogi", "akamu"]
+		},
+		{
+			"emoji": "🥤🌾",
+			"answer": "kunu",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "🍈🌰🍲",
+			"answer": "egusi soup",
+			"category": "Naija food",
+			"also": ["egusi"]
+		},
+		{
+			"emoji": "🥬🍲",
+			"answer": "efo riro",
+			"category": "Naija food",
+			"also": ["efo", "vegetable soup"]
+		},
+		{
+			"emoji": "🥚🥯",
+			"answer": "egg roll",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "🥩🥧",
+			"answer": "meat pie",
+			"category": "Naija food",
+			"also": ["meatpie"]
+		},
+		{
+			"emoji": "🌭🍞",
+			"answer": "sausage roll",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "👉🔪🐟",
+			"answer": "point and kill",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "🤏🍢🍗",
+			"answer": "small chops",
+			"category": "Naija food"
+		},
+		{
+			"emoji": "💧🛍️",
+			"answer": "pure water",
+			"category": "Naija life",
+			"also": ["sachet water"]
+		},
+		{
+			"emoji": "🏠⛓️",
+			"answer": "living in bondage",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "👑👦👦",
+			"answer": "king of boys",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "💍🎉",
+			"answer": "the wedding party",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "🦁❤️",
+			"answer": "lionheart",
+			"category": "Nollywood",
+			"also": ["lion heart"]
+		},
+		{
+			"emoji": "⚔️🍲🛣️",
+			"answer": "battle on buka street",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "📱🔄",
+			"answer": "phone swap",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "🌗🟡☀️",
+			"answer": "half of a yellow sun",
+			"category": "Naija books"
+		},
+		{
+			"emoji": "🧩💥",
+			"answer": "things fall apart",
+			"category": "Naija books"
+		},
+		{
+			"emoji": "📅1️⃣",
+			"answer": "october 1",
+			"category": "Nollywood",
+			"also": ["october one", "october 1st"]
+		},
+		{
+			"emoji": "3️⃣0️⃣📅✈️",
+			"answer": "30 days in atlanta",
+			"category": "Nollywood",
+			"also": ["thirty days in atlanta"]
+		},
+		{
+			"emoji": "😄👨👨👨",
+			"answer": "merry men",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "💃✨👠",
+			"answer": "glamour girls",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "👬🤝",
+			"answer": "brotherhood",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "📕⬛",
+			"answer": "the black book",
+			"category": "Nollywood",
+			"also": ["black book"]
+		},
+		{
+			"emoji": "🩸👭",
+			"answer": "blood sisters",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "🏚️🏙️",
+			"answer": "shanty town",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "👑🦹",
+			"answer": "king of thieves",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "🍬🏃💨",
+			"answer": "sugar rush",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "🗿",
+			"answer": "the figurine",
+			"category": "Nollywood",
+			"also": ["figurine"]
+		},
+		{
+			"emoji": "🐦",
+			"answer": "swallow",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "🍞❤️",
+			"answer": "breaded life",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "⬆️⬇️👶",
+			"answer": "elevator baby",
+			"category": "Nollywood"
+		},
+		{
+			"emoji": "😌⬇️",
+			"answer": "calm down",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🔚🔚",
+			"answer": "last last",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🌍👸",
+			"answer": "african queen",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🏃‍♀️💨",
+			"answer": "rush",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🚫📲",
+			"answer": "unavailable",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🍂",
+			"answer": "fall",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🤖",
+			"answer": "terminator",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🦙🏔️",
+			"answer": "peru",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "⚡💡",
+			"answer": "electricity",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🤑👨",
+			"answer": "mr money",
+			"category": "Naija music",
+			"also": ["mister money"]
+		},
+		{
+			"emoji": "😔🔝",
+			"answer": "lonely at the top",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "📳💃",
+			"answer": "shake body",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🍬👩",
+			"answer": "sweet mother",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "📞👦",
+			"answer": "holla at your boy",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "🤒",
+			"answer": "fever",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "😊",
+			"answer": "smile",
+			"category": "Naija music"
+		},
+		{
+			"emoji": "✈️🏃‍♂️💨",
+			"answer": "japa",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "💸😩",
+			"answer": "sapa",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🚫😰",
+			"answer": "no wahala",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "✨👀",
+			"answer": "shine your eye",
+			"category": "Naija slang",
+			"also": ["shine your eyes"]
+		},
+		{
+			"emoji": "💡🎉",
+			"answer": "up nepa",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🟢⚪🟢🚫🔚",
+			"answer": "naija no dey carry last",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🔜👍",
+			"answer": "e go better",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🤷🏾‍♂️📏",
+			"answer": "how far",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🍽️🎉",
+			"answer": "chop life",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🧈👦",
+			"answer": "ajebutter",
+			"category": "Naija slang",
+			"also": ["ajebota"]
+		},
+		{
+			"emoji": "🪵👦",
+			"answer": "ajepako",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "➕🎁",
+			"answer": "jara",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🗣️👂",
+			"answer": "gist",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🦵🔀",
+			"answer": "k leg",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "💁🏾‍♀️😏",
+			"answer": "shakara",
+			"category": "Naija slang"
+		},
+		{
+			"emoji": "🕰️🐢",
+			"answer": "naija time",
+			"category": "Naija slang",
+			"also": ["african time"]
+		},
+		{
+			"emoji": "📞⚡",
+			"answer": "flash me",
+			"category": "Naija slang",
+			"also": ["flash", "flashing"]
+		},
+		{
+			"emoji": "🎉👗💃🍛",
+			"answer": "owambe",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "👗👗👗",
+			"answer": "aso ebi",
+			"category": "Naija life",
+			"also": ["asoebi"]
+		},
+		{
+			"emoji": "👩🏾🍲👉",
+			"answer": "mama put",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🏍️",
+			"answer": "okada",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🛺",
+			"answer": "keke",
+			"category": "Naija life",
+			"also": ["keke napep", "tricycle"]
+		},
+		{
+			"emoji": "🚐🟡",
+			"answer": "danfo",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🔌⛽",
+			"answer": "generator",
+			"category": "Naija life",
+			"also": ["gen"]
+		},
+		{
+			"emoji": "⛽🚗🚗🚗",
+			"answer": "fuel queue",
+			"category": "Naija life",
+			"also": ["fuel scarcity"]
+		},
+		{
+			"emoji": "🚗🚗🚗🚗",
+			"answer": "go slow",
+			"category": "Naija life",
+			"also": ["traffic"]
+		},
+		{
+			"emoji": "⬇️👕✅",
+			"answer": "bend down select",
+			"category": "Naija life",
+			"also": ["okrika"]
+		},
+		{
+			"emoji": "💸💃",
+			"answer": "spraying money",
+			"category": "Naija life",
+			"also": ["spray money", "money spraying"]
+		},
+		{
+			"emoji": "🧣👑👩🏾",
+			"answer": "gele",
+			"category": "Naija life",
+			"also": ["head tie"]
+		},
+		{
+			"emoji": "👘👨🏾",
+			"answer": "agbada",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🌈👗",
+			"answer": "ankara",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🎓🟢⚪🟢🏕️",
+			"answer": "nysc",
+			"category": "Naija life",
+			"also": ["youth service", "corper", "corps member"]
+		},
+		{
+			"emoji": "📝🏫😰",
+			"answer": "waec",
+			"category": "Naija life",
+			"also": ["neco", "jamb"]
+		},
+		{
+			"emoji": "📱💳",
+			"answer": "recharge card",
+			"category": "Naija life",
+			"also": ["airtime"]
+		},
+		{
+			"emoji": "🚦👮",
+			"answer": "lastma",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🦅🟢⚪🟢",
+			"answer": "super eagles",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🦅👩🏾⚽",
+			"answer": "super falcons",
+			"category": "Naija life"
+		},
+		{
+			"emoji": "🟢⚪🟢🏳️",
+			"answer": "nigerian flag",
+			"category": "Naija life",
+			"also": ["nigeria flag", "flag of nigeria"]
+		},
+		{
+			"emoji": "3️⃣🏝️🌉",
+			"answer": "third mainland bridge",
+			"category": "Around Naija",
+			"also": ["3rd mainland bridge"]
+		},
+		{
+			"emoji": "🪨🏛️",
+			"answer": "aso rock",
+			"category": "Around Naija"
+		},
+		{
+			"emoji": "🪨🙂",
+			"answer": "zuma rock",
+			"category": "Around Naija"
+		},
+		{
+			"emoji": "🐘🦁🌳",
+			"answer": "yankari",
+			"category": "Around Naija",
+			"also": ["yankari game reserve"]
+		},
+		{
+			"emoji": "🎭💃🎉",
+			"answer": "calabar carnival",
+			"category": "Around Naija"
+		},
+		{
+			"emoji": "🐟🎣🏆",
+			"answer": "argungu fishing festival",
+			"category": "Around Naija",
+			"also": ["argungu", "argungu festival"]
+		},
+		{
+			"emoji": "👸🏝️",
+			"answer": "victoria island",
+			"category": "Around Naija",
+			"also": ["vi"]
+		},
+		{
+			"emoji": "🍌🏝️",
+			"answer": "banana island",
+			"category": "Around Naija"
+		},
+		{
+			"emoji": "🐄⛰️🚡",
+			"answer": "obudu cattle ranch",
+			"category": "Around Naija",
+			"also": ["obudu", "obudu ranch"]
+		},
+		{
+			"emoji": "🛶🏘️🌊",
+			"answer": "makoko",
+			"category": "Around Naija"
+		}
+	]
+}

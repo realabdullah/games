@@ -1,5 +1,7 @@
 import * as v from 'valibot';
-import emojiPuzzles from '../prompts/emoji.json';
+import type { Flavour } from '../flavour.ts';
+import global from '../prompts/emoji.json';
+import naija from '../prompts/emoji.ng.json';
 import type { EmojiPack } from '../types.ts';
 
 const answerText = v.pipe(v.string(), v.trim(), v.minLength(2), v.maxLength(60));
@@ -17,4 +19,7 @@ const EmojiPackSchema = v.object({
 	items: v.pipe(v.array(EmojiPuzzleSchema), v.minLength(10))
 });
 
-export const emojiPack: EmojiPack = v.parse(EmojiPackSchema, emojiPuzzles);
+export const emojiPacks: Record<Flavour, EmojiPack> = {
+	naija: v.parse(EmojiPackSchema, naija),
+	global: v.parse(EmojiPackSchema, global)
+};

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test';
 import { MAX_ROOM_PLAYERS, type GameUpdate, type RoomView, type You } from '@games/protocol';
 import type { TriviaView } from '@games/trivia';
 import { INTRO_MS } from '@games/trivia';
-import { findTriviaPack } from '@games/content/packs';
+import { findTriviaPack, icebreakerPacks } from '@games/content/packs';
 import { ApiError } from './errors.ts';
 import type { RoomEvent } from './log.ts';
 import {
@@ -607,5 +607,28 @@ describe('event log', () => {
 		const ignored = logged.filter((e) => e.event === 'action_ignored');
 		expect(ignored).toHaveLength(2);
 		expect(ignored[1]).toMatchObject({ player: ada.you.id, action: 'answer', suppressed: 49 });
+	});
+});
+
+describe('content flavour', () => {
+	const prompts = (config: Record<string, number>) => {
+		const host = rooms.create({ mode: 'party' });
+		for (const name of ['Ada', 'Bola', 'Chidi']) join(host.code, name);
+		rooms.handle(host.session, {
+			type: 'start',
+			gameId: 'icebreakers',
+			config: { rounds: 3, ...config }
+		});
+		const state = rooms.snapshot().rooms.at(-1)!.game!.state as { prompts: string[] };
+		return state.prompts;
+	};
+
+	test('Naija by default', () => {
+		for (const prompt of prompts({})) expect(icebreakerPacks.naija.items).toContain(prompt);
+	});
+
+	test('global when the host picks it', () => {
+		for (const prompt of prompts({ flavour: 3 }))
+			expect(icebreakerPacks.global.items).toContain(prompt);
 	});
 });

@@ -187,6 +187,8 @@ export const t = {
 			secondsPerSum: 'Seconds per sum',
 			level: 'Level',
 			levels: { 1: 'Easy', 2: 'Medium', 3: 'Hard' } as Record<number, string>,
+			flavour: 'Content',
+			flavours: { 1: '🇳🇬 Naija', 2: 'Mix', 3: '🌍 Global' } as Record<number, string>,
 			clockLevels: { 1: '2–6 seconds', 2: '5–12 seconds', 3: '10–25 seconds' } as Record<
 				number,
 				string

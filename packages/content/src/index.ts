@@ -6,4 +6,5 @@
 export * from './trivia/schema.ts';
 export * from './filter.ts';
 export * from './types.ts';
+export * from './flavour.ts';
 export { triviaPackSummaries } from './trivia/summaries.ts';

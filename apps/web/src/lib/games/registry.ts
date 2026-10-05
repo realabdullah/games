@@ -18,7 +18,7 @@ import MemoryHost from './memory/MemoryHost.svelte';
 import MemoryPlayer from './memory/MemoryPlayer.svelte';
 import TriviaHost from './trivia/TriviaHost.svelte';
 import TriviaPlayer from './trivia/TriviaPlayer.svelte';
-import type { GameStream, GameUi } from './types';
+import type { GameSetting, GameStream, GameUi } from './types';
 import WitHost from './wit/WitHost.svelte';
 import WitPlayer from './wit/WitPlayer.svelte';
 import WordRaceHost from './wordrace/WordRaceHost.svelte';
@@ -29,13 +29,22 @@ import { t } from '$lib/i18n';
 
 const s = t.games.settings;
 
+/** Naija, Mix or Global content, for games with packs of each. Naija by default. */
+const flavour: GameSetting = {
+	key: 'flavour',
+	label: s.flavour,
+	options: [1, 2, 3],
+	default: 1,
+	labels: s.flavours
+};
+
 /** Screens and lobby settings for each game, by game id. */
 export const gameUi: Record<string, GameUi> = {
 	trivia: { Host: TriviaHost, Player: TriviaPlayer, settings: [] },
 	icebreakers: {
 		Host: IcebreakersHost,
 		Player: IcebreakersPlayer,
-		settings: [{ key: 'rounds', label: s.rounds, options: [1, 2, 3], default: 2 }]
+		settings: [flavour, { key: 'rounds', label: s.rounds, options: [1, 2, 3], default: 2 }]
 	},
 	wit: {
 		Host: WitHost,
@@ -87,6 +96,7 @@ export const gameUi: Record<string, GameUi> = {
 		Host: EmojiHost,
 		Player: EmojiPlayer,
 		settings: [
+			flavour,
 			{ key: 'rounds', label: s.puzzles, options: [5, 8, 12], default: 8 },
 			{ key: 'secondsPerPuzzle', label: s.secondsPerPuzzle, options: [30, 45, 60], default: 45 }
 		]

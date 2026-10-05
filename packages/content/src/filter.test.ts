@@ -2,9 +2,9 @@ import { expect, test } from 'bun:test';
 import { censorText, isProfane, packIsProfane } from './filter.ts';
 import {
 	doodlePack,
-	emojiPack,
+	emojiPacks,
 	hangmanPack,
-	icebreakerPack,
+	icebreakerPacks,
 	triviaPacks,
 	witPack,
 	wordRacePack
@@ -33,14 +33,20 @@ test('curated packs are clean', () => {
 });
 
 test('curated prompts and words are clean', () => {
-	for (const pack of [icebreakerPack, witPack, doodlePack, wordRacePack]) {
+	for (const pack of [
+		icebreakerPacks.naija,
+		icebreakerPacks.global,
+		witPack,
+		doodlePack,
+		wordRacePack
+	]) {
 		for (const item of pack.items) expect(isProfane(item)).toBe(false);
 	}
 });
 
 test('curated word games are clean', () => {
 	for (const item of hangmanPack.items) expect(isProfane(item.word)).toBe(false);
-	for (const item of emojiPack.items) {
+	for (const item of [...emojiPacks.naija.items, ...emojiPacks.global.items]) {
 		for (const answer of [item.answer, ...(item.also ?? [])]) expect(isProfane(answer)).toBe(false);
 	}
 });
