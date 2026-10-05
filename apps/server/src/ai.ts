@@ -16,10 +16,18 @@ export interface PackGenerator {
 	generate(req: GenerateRequest): Promise<TriviaPackDraft>;
 }
 
+/**
+ * Writes one JSON object that matches a schema. For content other than trivia
+ * packs (emoji riddles, icebreakers), where the caller owns the prompt.
+ */
+export interface JsonWriter {
+	writeJson<T>(system: string, user: string, schema: z.ZodType<T>): Promise<T>;
+}
+
 /** A provider in the failover chain, named for logs and metrics. */
-export interface NamedGenerator {
+export interface NamedGenerator<G = PackGenerator> {
 	name: string;
-	generator: PackGenerator;
+	generator: G;
 }
 
 /**
@@ -53,6 +61,50 @@ export class FailoverGenerator implements PackGenerator {
 			? lastError
 			: new ApiError('unavailable', 'Couldn’t generate questions right now. Try again later.');
 	}
+}
+
+/** Tries each provider in order and returns the first reply that fits the schema. */
+export class FailoverWriter implements JsonWriter {
+	constructor(
+		private providers: NamedGenerator<JsonWriter>[],
+		private onAttempt: (provider: string, result: 'ok' | 'failed') => void = () => {}
+	) {
+		if (providers.length === 0) throw new Error('FailoverWriter needs at least one provider');
+	}
+
+	async writeJson<T>(system: string, user: string, schema: z.ZodType<T>): Promise<T> {
+		let lastError: unknown;
+		for (const { name, generator } of this.providers) {
+			try {
+				const out = await generator.writeJson(system, user, schema);
+				this.onAttempt(name, 'ok');
+				return out;
+			} catch (err) {
+				this.onAttempt(name, 'failed');
+				console.error(`AI provider ${name} failed`, err instanceof Error ? err.message : err);
+				lastError = err;
+			}
+		}
+		throw lastError;
+	}
+}
+
+/** For providers without schema-enforced output: the rules plus the JSON shape to reply in. */
+export const withJsonShape = (system: string, schema: z.ZodType) =>
+	`${system}\n\nReply with only a JSON object, no other text, matching this JSON schema:\n${JSON.stringify(z.toJSONSchema(schema))}`;
+
+/** Parse a JSON reply against a schema, or throw. */
+export function parseJsonReply<T>(text: string | null | undefined, schema: z.ZodType<T>): T {
+	let json: unknown;
+	try {
+		// Some models wrap JSON in a ```json fence despite being asked not to.
+		json = JSON.parse((text ?? '').replace(/^\s*```(?:json)?\s*|\s*```\s*$/g, ''));
+	} catch {
+		throw new ApiError('unavailable', 'The reply wasn’t valid JSON');
+	}
+	const out = schema.safeParse(json);
+	if (!out.success) throw new ApiError('unavailable', 'The reply didn’t match the schema');
+	return out.data;
 }
 
 /** What any provider's writer returns; `toDraft` turns it into a pack. */

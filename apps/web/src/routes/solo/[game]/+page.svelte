@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { flavourItems, type TriviaPack } from '@games/content';
+	import { FLAVOUR, flavourItems, type TriviaPack } from '@games/content';
 	import { createAnagram } from '@games/anagram';
 	import { clock } from '@games/clock';
 	import { emoji } from '@games/emoji';
@@ -46,12 +46,16 @@
 		emoji: {
 			game: async () => emoji,
 			content: async (req) => {
-				const { emojiPacks } = await import('@games/content/packs/emoji');
-				return {
-					id: 'curated',
-					title: 'Curated',
-					items: flavourItems(emojiPacks, req.config?.flavour)
-				};
+				const flavour = req.config?.flavour ?? FLAVOUR.naija;
+				const rounds = req.config?.rounds ?? emoji.defaultConfig.rounds;
+				const [{ emojiPacks }, ai] = await Promise.all([
+					import('@games/content/packs/emoji'),
+					// One extra request, only when AI-written is on. If it fails, play curated.
+					req.config?.ai ? api.aiItems('emoji', flavour, rounds).catch(() => null) : null
+				]);
+				const curated = shuffle(flavourItems(emojiPacks, flavour));
+				const items = [...(ai?.items ?? []), ...curated].slice(0, rounds);
+				return { id: 'curated', title: 'Curated', items };
 			}
 		},
 		maths: { game: async () => maths, content: async () => null },
@@ -63,6 +67,15 @@
 		},
 		memory: { game: async () => memory, content: async () => null }
 	};
+
+	function shuffle<T>(items: readonly T[]): T[] {
+		const out = [...items];
+		for (let i = out.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[out[i], out[j]] = [out[j]!, out[i]!];
+		}
+		return out;
+	}
 
 	let game = $state<LocalGame<unknown> | null>(null);
 	let lastStart: StartRequest | null = null;

@@ -53,4 +53,6 @@ export interface GameSetting {
 	default: number;
 	/** Display names for options, e.g. { 1: 'Easy' }. Defaults to the number. */
 	labels?: Record<number, string>;
+	/** Only shown when the server has AI set up. */
+	needsAi?: boolean;
 }

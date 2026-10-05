@@ -1,12 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import type { TriviaPackDraft } from '@games/content';
+import type { z } from 'zod';
 import {
 	WRITER_SYSTEM,
 	WrittenPack,
 	toDraft,
 	writerPrompt,
 	type GenerateRequest,
+	type JsonWriter,
 	type PackGenerator,
 	type Research
 } from './ai.ts';
@@ -33,7 +35,7 @@ const MAX_CONTINUATIONS = 3;
  * cite a page the search really returned, and the writer never depends on how
  * search results and JSON output combine in one response.
  */
-export class ClaudePackGenerator implements PackGenerator {
+export class ClaudePackGenerator implements PackGenerator, JsonWriter {
 	private client = new Anthropic({ timeout: 120_000, maxRetries: 1 });
 
 	constructor(private options: ClaudeOptions) {}
@@ -41,6 +43,21 @@ export class ClaudePackGenerator implements PackGenerator {
 	async generate(req: GenerateRequest): Promise<TriviaPackDraft> {
 		const research = await this.research(req);
 		return this.write(req, research);
+	}
+
+	async writeJson<T>(system: string, user: string, schema: z.ZodType<T>): Promise<T> {
+		const response = await this.client.messages.parse({
+			model: this.options.model,
+			max_tokens: 8000,
+			system,
+			messages: [{ role: 'user', content: user }],
+			output_config: { format: zodOutputFormat(schema) }
+		});
+		if (response.stop_reason === 'refusal' || response.stop_reason === 'max_tokens') {
+			throw new ApiError('unavailable', `Claude stopped early: ${response.stop_reason}`);
+		}
+		if (!response.parsed_output) throw new ApiError('unavailable', 'Claude returned no output');
+		return response.parsed_output as T;
 	}
 
 	/** Grounding is best-effort: if search fails, write from the model's own knowledge. */

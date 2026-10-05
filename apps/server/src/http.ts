@@ -9,6 +9,8 @@ import {
 	type ErrorCode,
 	type ErrorResponse
 } from '@games/protocol';
+import { flavoursFor } from '@games/content';
+import type { AiPool, PoolKind } from './ai-pool.ts';
 import type { AiQuota, PackGenerator } from './ai.ts';
 import { ApiError } from './errors.ts';
 import { Metrics } from './metrics.ts';
@@ -22,6 +24,8 @@ export interface ApiDeps {
 	limiter: RateLimiter;
 	/** Null when AI generation isn't configured (no API key). */
 	ai: { generator: PackGenerator; quota: AiQuota } | null;
+	/** AI-written riddles and icebreakers, for solo games. Null when AI isn't configured. */
+	pool?: Pick<AiPool, 'sample' | 'topUp'> | null;
 	metrics?: Metrics;
 	/** Unexpected errors (bugs, not bad requests), for the server log. */
 	onError?: (err: unknown) => void;
@@ -54,6 +58,7 @@ export function createApi({
 	packs,
 	limiter,
 	ai,
+	pool = null,
 	metrics = new Metrics(),
 	onError
 }: ApiDeps) {
@@ -125,6 +130,26 @@ export function createApi({
 					enabled: !!ai,
 					remaining: ai ? ai.quota.remaining(ip) : 0
 				} satisfies AiStatusResponse)
+		],
+		[
+			'GET',
+			'/api/ai/items',
+			// Solo games run in the browser, so they fetch AI-written items here; rooms
+			// get them on the server. Answers from memory; never waits on the AI.
+			({ req, ip }) => {
+				if (!pool) throw new ApiError('unavailable', 'AI content isn’t set up on this server');
+				limited(ip);
+				const query = new URL(req.url).searchParams;
+				const kind = query.get('kind');
+				if (kind !== 'emoji' && kind !== 'icebreakers') {
+					throw new ApiError('bad_request', 'Unknown kind');
+				}
+				const flavours = flavoursFor(Number(query.get('flavour')));
+				const n = Math.min(15, Math.max(1, Number(query.get('n')) || 8));
+				const items = pool.sample(kind satisfies PoolKind, flavours, n, new Set());
+				pool.topUp(kind, flavours);
+				return json({ items: items.map((i) => i.item) });
+			}
 		],
 		[
 			'POST',

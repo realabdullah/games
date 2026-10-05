@@ -25,9 +25,10 @@ import {
 	type SessionResponse,
 	type You
 } from '@games/protocol';
-import { isProfane } from '@games/content';
+import { flavoursFor, isProfane } from '@games/content';
+import type { AiPool } from './ai-pool.ts';
 import { ApiError } from './errors.ts';
-import { createRegistry, type Registry } from './games.ts';
+import { createRegistry, type Fresh, type Registry } from './games.ts';
 import type { RoomLogger } from './log.ts';
 import { Metrics } from './metrics.ts';
 
@@ -415,7 +416,15 @@ export class RoomManager {
 		};
 		const playedKey = `${msg.gameId}:${msg.packId ?? ''}`;
 		const played = room.played?.[playedKey] ?? [];
-		const fresh = entry.fresh?.(loaded.content, config, played, this.random);
+		let fresh = entry.fresh?.(loaded.content, config, played, this.random);
+		if (entry.ai && this.aiPool && (config as { ai?: number }).ai === 1) {
+			fresh = this.withAi(
+				entry.ai,
+				fresh ?? { content: loaded.content, used: [], cycled: false },
+				config,
+				played
+			);
+		}
 
 		room.game = startGame(entry.game, {
 			mode: room.mode,
@@ -447,6 +456,36 @@ export class RoomManager {
 
 	/** Hook for counting plays of custom packs. */
 	onCustomPackPlayed?: (code: string) => void;
+
+	/** AI-written content to mix in when a game's "AI-written" setting is on. Off when unset. */
+	aiPool?: Pick<AiPool, 'sample' | 'topUp'>;
+
+	/**
+	 * AI items first, then curated ones to fill the rest. The pool answers from
+	 * memory; if it's short or stale it tops itself up in the background, so the
+	 * next game gets newer items and this one never waits.
+	 */
+	private withAi(
+		kind: NonNullable<Registry[string]['ai']>,
+		fresh: Fresh,
+		config: object,
+		played: readonly string[]
+	): Fresh {
+		const { rounds, flavour } = config as { rounds: number; flavour?: number };
+		const flavours = flavoursFor(flavour);
+		const picked = this.aiPool!.sample(kind, flavours, rounds, new Set(played));
+		this.aiPool!.topUp(kind, flavours);
+		const content = fresh.content as { items: unknown[] };
+		const curated = rounds - picked.length;
+		return {
+			content: {
+				...content,
+				items: [...picked.map((p) => p.item), ...content.items.slice(0, curated)]
+			},
+			used: [...picked.map((p) => p.key), ...fresh.used.slice(0, curated)],
+			cycled: fresh.cycled
+		};
+	}
 
 	private checkName(room: Room, name: string) {
 		if (room.settings.familyFilter && isProfane(name)) {

@@ -40,6 +40,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 	return body as T;
 }
 
+let aiEnabled: Promise<boolean> | undefined;
+
 export const api = {
 	createRoom: (body: CreateRoomBody) =>
 		request<SessionResponse>('/api/rooms', { method: 'POST', body: JSON.stringify(body) }),
@@ -70,6 +72,15 @@ export const api = {
 		}),
 
 	aiStatus: () => request<AiStatusResponse>('/api/ai'),
+	/** Whether this server has AI set up. Asked once per page load; it doesn't change. */
+	aiEnabled: () =>
+		(aiEnabled ??= request<AiStatusResponse>('/api/ai').then(
+			(s) => s.enabled,
+			() => false
+		)),
+	/** AI-written items for a solo game, from the server's pool. */
+	aiItems: (kind: 'emoji' | 'icebreakers', flavour: number, n: number) =>
+		request<{ items: unknown[] }>(`/api/ai/items?kind=${kind}&flavour=${flavour}&n=${n}`),
 	generatePack: (body: GeneratePackBody) =>
 		request<CreatedPackResponse>('/api/ai/packs', { method: 'POST', body: JSON.stringify(body) })
 };

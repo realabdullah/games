@@ -1,5 +1,12 @@
 import { sql } from 'drizzle-orm';
-import { index, integer, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import {
+	index,
+	integer,
+	primaryKey,
+	sqliteTable,
+	text,
+	uniqueIndex
+} from 'drizzle-orm/sqlite-core';
 
 /** Custom and AI-generated content packs. Curated packs live in the repo, not here. */
 export const packs = sqliteTable(
@@ -39,4 +46,26 @@ export const aiUsage = sqliteTable(
 		count: integer('count').notNull().default(0)
 	},
 	(t) => [primaryKey({ columns: [t.day, t.key] })]
+);
+
+/**
+ * AI-written game content (emoji riddles, icebreakers), kept so it can be
+ * reused across rooms. Loaded into memory at startup; written only when a
+ * background batch arrives.
+ */
+export const aiItems = sqliteTable(
+	'ai_items',
+	{
+		id: integer('id').primaryKey({ autoIncrement: true }),
+		/** Which game it's for, e.g. "emoji". */
+		kind: text('kind').notNull(),
+		/** "naija" or "global". */
+		flavour: text('flavour').notNull(),
+		/** Normalized answer or prompt, to skip duplicates. */
+		key: text('key').notNull(),
+		/** The item as JSON. */
+		item: text('item').notNull(),
+		createdAt: integer('created_at').notNull()
+	},
+	(t) => [uniqueIndex('ai_items_kind_key').on(t.kind, t.key)]
 );

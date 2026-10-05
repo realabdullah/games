@@ -24,6 +24,7 @@ import { wit, type WitConfig } from '@games/wit';
 import { xo, type XoConfig } from '@games/xo';
 import type { AnyGame } from '@games/engine';
 import { trivia, type TriviaConfig } from '@games/trivia';
+import type { PoolKind } from './ai-pool.ts';
 import type { PackStore } from './packs.ts';
 
 type RawConfig = Record<string, string | number | boolean> | undefined;
@@ -47,6 +48,11 @@ export interface RegisteredGame {
 	 * `played` lists the keys used since the room last went through the whole pack.
 	 */
 	fresh?(content: unknown, config: unknown, played: readonly string[], random: () => number): Fresh;
+	/**
+	 * Which AI pool can add to this game's content when the lobby's "AI-written"
+	 * setting is on. The content must be `{ items }` and the config have `rounds`.
+	 */
+	ai?: PoolKind;
 }
 
 export interface Fresh {
@@ -136,6 +142,7 @@ function freshFlavour<T>(key: (item: T) => string) {
 }
 
 const flavour = (n: unknown) => clamp(n, FLAVOUR.naija, FLAVOUR.global, FLAVOUR.naija);
+const onOff = (n: unknown) => clamp(n, 0, 1, 0);
 
 const wordRace = createWordRace(isWord);
 const anagram = createAnagram(isWord);
@@ -177,13 +184,15 @@ export function createRegistry(packs?: PackStore): Registry {
 		icebreakers: {
 			game: icebreakers,
 			content: () => ({ content: icebreakerPacks, flagged: false }),
-			config: (raw): Omit<IcebreakersConfig, 'familyFilter'> & { flavour: number } => ({
+			config: (raw): Omit<IcebreakersConfig, 'familyFilter'> & { flavour: number; ai: number } => ({
+				ai: onOff(raw?.ai),
 				rounds: clamp(raw?.rounds, 1, 5, icebreakers.defaultConfig.rounds),
 				writeSeconds: clamp(raw?.writeSeconds, 20, 180, icebreakers.defaultConfig.writeSeconds),
 				guessSeconds: clamp(raw?.guessSeconds, 10, 60, icebreakers.defaultConfig.guessSeconds),
 				flavour: flavour(raw?.flavour)
 			}),
-			fresh: freshFlavour<string>((prompt) => prompt)
+			fresh: freshFlavour<string>((prompt) => prompt),
+			ai: 'icebreakers'
 		},
 		wit: {
 			game: wit,
@@ -223,7 +232,8 @@ export function createRegistry(packs?: PackStore): Registry {
 		emoji: {
 			game: emoji,
 			content: () => ({ content: emojiPacks, flagged: false }),
-			config: (raw): Omit<EmojiConfig, 'familyFilter'> & { flavour: number } => ({
+			config: (raw): Omit<EmojiConfig, 'familyFilter'> & { flavour: number; ai: number } => ({
+				ai: onOff(raw?.ai),
 				flavour: flavour(raw?.flavour),
 				rounds: clamp(raw?.rounds, 3, 15, emoji.defaultConfig.rounds),
 				secondsPerPuzzle: clamp(
@@ -233,7 +243,8 @@ export function createRegistry(packs?: PackStore): Registry {
 					emoji.defaultConfig.secondsPerPuzzle
 				)
 			}),
-			fresh: freshFlavour<{ answer: string }>((p) => p.answer)
+			fresh: freshFlavour<{ answer: string }>((p) => p.answer),
+			ai: 'emoji'
 		},
 		maths: {
 			game: maths,

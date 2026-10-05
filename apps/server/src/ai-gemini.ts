@@ -1,10 +1,14 @@
 import type { TriviaPackDraft } from '@games/content';
+import type { z } from 'zod';
 import {
 	JSON_WRITER_SYSTEM,
+	parseJsonReply,
+	withJsonShape,
 	parseWritten,
 	providerError,
 	writerPrompt,
 	type GenerateRequest,
+	type JsonWriter,
 	type PackGenerator,
 	type Research
 } from './ai.ts';
@@ -32,7 +36,7 @@ const RESEARCH_PROMPT = (req: GenerateRequest) =>
  * the questions as JSON. Same two steps, and the same fallback to writing
  * without sources, as the Claude provider.
  */
-export class GeminiPackGenerator implements PackGenerator {
+export class GeminiPackGenerator implements PackGenerator, JsonWriter {
 	private fetch: typeof fetch;
 
 	constructor(private options: GeminiOptions) {
@@ -51,6 +55,15 @@ export class GeminiPackGenerator implements PackGenerator {
 			throw new ApiError('unavailable', 'Couldn’t generate questions for that topic. Try another.');
 		}
 		return parseWritten(textOf(candidate), req, research?.sources);
+	}
+
+	async writeJson<T>(system: string, user: string, schema: z.ZodType<T>): Promise<T> {
+		const response = await this.call({
+			systemInstruction: { parts: [{ text: withJsonShape(system, schema) }] },
+			contents: [{ role: 'user', parts: [{ text: user }] }],
+			generationConfig: { responseMimeType: 'application/json', maxOutputTokens: 8000 }
+		});
+		return parseJsonReply(textOf(response.candidates?.[0]), schema);
 	}
 
 	/** Grounding is best-effort: if it fails, write from the model's own knowledge. */

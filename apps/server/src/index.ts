@@ -2,7 +2,8 @@ import { mkdirSync } from 'node:fs';
 import type { Server, ServerWebSocket } from 'bun';
 import { CloseCode, parseClientMessage, type ServerMessage } from '@games/protocol';
 import { AiQuota } from './ai.ts';
-import { createPackGenerator } from './ai-providers.ts';
+import { AiPool, DEFAULT_POOL_OPTIONS } from './ai-pool.ts';
+import { createJsonWriter, createPackGenerator } from './ai-providers.ts';
 import { openDb } from './db/index.ts';
 import { ApiError } from './errors.ts';
 import { createRegistry } from './games.ts';
@@ -24,6 +25,10 @@ const startedAt = Date.now();
 const metrics = new Metrics();
 const AI_DAILY_PER_CLIENT = Number(process.env.AI_DAILY_PER_CLIENT ?? 5);
 const AI_DAILY_TOTAL = Number(process.env.AI_DAILY_TOTAL ?? 100);
+/** Background batches of AI-written riddles and icebreakers per day, across all games. */
+const AI_POOL_DAILY_BATCHES = Number(
+	process.env.AI_POOL_DAILY_BATCHES ?? DEFAULT_POOL_OPTIONS.dailyBatches
+);
 /** If set, /metrics needs `Authorization: Bearer <token>` (e.g. for Grafana Cloud to scrape it publicly). */
 const METRICS_TOKEN = process.env.METRICS_TOKEN || null;
 
@@ -124,11 +129,33 @@ const aiGenerator = createPackGenerator(undefined, (provider, result) =>
 	metrics.aiProviderCalls.inc({ provider, result })
 );
 
+// The same providers write emoji riddles and icebreakers in the background, for games
+// whose host turns on "AI-written".
+const aiWriter = createJsonWriter(undefined, (provider, result) =>
+	metrics.aiProviderCalls.inc({ provider, result })
+);
+const aiPool = aiWriter
+	? new AiPool(
+			db,
+			aiWriter,
+			{ ...DEFAULT_POOL_OPTIONS, dailyBatches: AI_POOL_DAILY_BATCHES },
+			{
+				batch: ({ kind, flavour, result, added, ms }) => {
+					metrics.aiPoolBatches.inc({ kind, flavour, result });
+					if (added) metrics.aiPoolItems.inc({ kind, flavour }, added);
+					logEvent({ event: 'ai_pool_batch', kind, flavour, result, added, ms });
+				}
+			}
+		)
+	: null;
+if (aiPool) rooms.aiPool = aiPool;
+
 const api = createApi({
 	rooms,
 	packs,
 	limiter,
 	metrics,
+	pool: aiPool,
 	ai: aiGenerator
 		? {
 				generator: aiGenerator,

@@ -72,6 +72,14 @@ export class Metrics {
 		'games_ai_provider_calls_total',
 		'AI provider attempts, by provider and result'
 	);
+	readonly aiPoolBatches = new Counter(
+		'games_ai_pool_batches_total',
+		'Background AI content batches, by kind, flavour and result'
+	);
+	readonly aiPoolItems = new Counter(
+		'games_ai_pool_items_total',
+		'AI-written items added to the pool, by kind and flavour'
+	);
 	readonly snapshots = new Counter('games_snapshots_total', 'Room snapshots written, by reason');
 	readonly errors = new Counter('games_errors_total', 'Unexpected server errors, by where');
 	readonly logLines = new Counter(
@@ -94,6 +102,8 @@ export class Metrics {
 			this.packsCreated,
 			this.aiGenerations,
 			this.aiProviderCalls,
+			this.aiPoolBatches,
+			this.aiPoolItems,
 			this.snapshots,
 			this.errors
 		];

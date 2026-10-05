@@ -32,7 +32,16 @@ export type RoomEvent =
 	| { event: 'room_closed'; room: string; reason: 'left' | 'expired' };
 
 export type ServerEvent =
-	RoomEvent | { event: 'server_error'; where: 'http' | 'ws' | 'snapshot'; message: string };
+	| RoomEvent
+	| { event: 'server_error'; where: 'http' | 'ws' | 'snapshot'; message: string }
+	| {
+			event: 'ai_pool_batch';
+			kind: string;
+			flavour: string;
+			result: 'ok' | 'failed';
+			added: number;
+			ms: number;
+	  };
 
 export type RoomLogger = (e: RoomEvent) => void;
 export type ServerLogger = (e: ServerEvent) => void;

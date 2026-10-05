@@ -610,6 +610,57 @@ describe('event log', () => {
 	});
 });
 
+describe('AI-written content', () => {
+	const start = (session: string, config: Record<string, number>) =>
+		rooms.handle(session, { type: 'start', gameId: 'emoji', config });
+	const puzzles = () =>
+		(rooms.snapshot().rooms[0]!.game!.state as { puzzles: { answer: string }[] }).puzzles;
+	const aiRiddle = (n: number) => ({
+		key: `ai${n}`,
+		item: { emoji: '🤖', answer: `ai riddle ${n}`, category: 'Naija life' }
+	});
+
+	let toppedUp: string[][];
+	beforeEach(() => {
+		toppedUp = [];
+		rooms.aiPool = {
+			sample: (_kind, _flavours, n, exclude) =>
+				[1, 2, 3]
+					.map(aiRiddle)
+					.filter((r) => !exclude.has(r.key))
+					.slice(0, n),
+			topUp: (_kind, flavours) => void toppedUp.push(flavours)
+		};
+	});
+
+	test('when on, AI riddles lead and curated ones fill the rest', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		start(host.session, { rounds: 5, ai: 1, flavour: 2 });
+		const answers = puzzles().map((p) => p.answer);
+		expect(answers).toHaveLength(5);
+		expect(answers.filter((a) => a.startsWith('ai riddle'))).toHaveLength(3);
+		expect(toppedUp).toEqual([['naija', 'global']]);
+	});
+
+	test('rematches skip AI riddles the room has had', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		start(host.session, { rounds: 3, ai: 1 });
+		rooms.handle(host.session, { type: 'endGame' });
+		start(host.session, { rounds: 3, ai: 1 });
+		expect(puzzles().some((p) => p.answer.startsWith('ai riddle'))).toBe(false);
+	});
+
+	test('when off, the pool isn’t touched', () => {
+		const host = rooms.create({ mode: 'party' });
+		join(host.code, 'Ada');
+		start(host.session, { rounds: 5 });
+		expect(puzzles().some((p) => p.answer.startsWith('ai riddle'))).toBe(false);
+		expect(toppedUp).toEqual([]);
+	});
+});
+
 describe('content flavour', () => {
 	const prompts = (config: Record<string, number>) => {
 		const host = rooms.create({ mode: 'party' });

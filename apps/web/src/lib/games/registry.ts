@@ -29,6 +29,16 @@ import { t } from '$lib/i18n';
 
 const s = t.games.settings;
 
+/** Mix in AI-written content, so regulars don't know every answer. Off by default. */
+const aiWritten: GameSetting = {
+	key: 'ai',
+	label: s.aiWritten,
+	options: [0, 1],
+	default: 0,
+	labels: s.aiWrittenOptions,
+	needsAi: true
+};
+
 /** Naija, Mix or Global content, for games with packs of each. Naija by default. */
 const flavour: GameSetting = {
 	key: 'flavour',
@@ -44,7 +54,11 @@ export const gameUi: Record<string, GameUi> = {
 	icebreakers: {
 		Host: IcebreakersHost,
 		Player: IcebreakersPlayer,
-		settings: [flavour, { key: 'rounds', label: s.rounds, options: [1, 2, 3], default: 2 }]
+		settings: [
+			flavour,
+			aiWritten,
+			{ key: 'rounds', label: s.rounds, options: [1, 2, 3], default: 2 }
+		]
 	},
 	wit: {
 		Host: WitHost,
@@ -97,6 +111,7 @@ export const gameUi: Record<string, GameUi> = {
 		Player: EmojiPlayer,
 		settings: [
 			flavour,
+			aiWritten,
 			{ key: 'rounds', label: s.puzzles, options: [5, 8, 12], default: 8 },
 			{ key: 'secondsPerPuzzle', label: s.secondsPerPuzzle, options: [30, 45, 60], default: 45 }
 		]

@@ -49,6 +49,14 @@
 	const settingsFor = (id: string) =>
 		(mode === 'solo' && gameUi[id]?.soloSettings) || gameUi[id]?.settings || [];
 
+	/** AI settings show once we know the server has AI; asked only for games that have them. */
+	let aiEnabled = $state(false);
+	$effect(() => {
+		if (!aiEnabled && settingsFor(gameId).some((st) => st.needsAi)) {
+			api.aiEnabled().then((on) => (aiEnabled = on));
+		}
+	});
+	const shownSettings = (id: string) => settingsFor(id).filter((st) => !st.needsAi || aiEnabled);
 	const curated = triviaPackSummaries;
 
 	let gameId = $state(untrack(() => onlyGame) ?? 'trivia');
@@ -326,9 +334,9 @@
 					</select>
 				</div>
 			</div>
-		{:else if settingsFor(gameId).length}
+		{:else if shownSettings(gameId).length}
 			<div class="settings">
-				{#each settingsFor(gameId) as st (st.key)}
+				{#each shownSettings(gameId) as st (st.key)}
 					<div class="field" class:wide={!!st.labels}>
 						<label for="{uid}-{st.key}">{st.label}</label>
 						<select id="{uid}-{st.key}" class="input" bind:value={extra[gameId]![st.key]}>
