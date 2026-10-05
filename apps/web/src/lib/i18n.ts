@@ -376,6 +376,23 @@ export const t = {
 		noneYet: 'Nobody yet…',
 		letters: (n: number) => `${n} letters`
 	},
+	memory: {
+		howTo:
+			'Tiles light up for a moment. Remember them, then tap them all. One wrong tap ends your turn.',
+		roundOf: (i: number, n: number) => `Round ${i} of ${n}`,
+		watch: 'Watch closely…',
+		tapThem: (n: number) => `Tap the ${n} tiles`,
+		found: (d: number, n: number) => `${d} of ${n}`,
+		done: (d: number, n: number) => `${d} of ${n} done`,
+		perfect: 'Perfect! 🎉',
+		oops: 'Oops, wrong tile',
+		got: (d: number, n: number) => `${d} of ${n} tiles`,
+		tile: (i: number, state: string) => `Tile ${i + 1}${state ? `, ${state}` : ''}`,
+		lit: 'lit',
+		right: 'right',
+		wrong: 'wrong',
+		grid: 'Tile grid'
+	},
 	xo: {
 		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
 		matchOf: (i: number, n: number) => `Match ${i} of ${n}`,
@@ -402,7 +419,8 @@ export const t = {
 			clock: 'How good is your sense of time? Tap when you think the hidden clock hits the target.',
 			findit:
 				'Hunt for the number, emoji or odd one out. The faster you find it, the more you score.',
-			anagram: 'Unscramble the letters against the clock. Longer words on harder levels.'
+			anagram: 'Unscramble the letters against the clock. Longer words on harder levels.',
+			memory: 'Remember which tiles lit up. One more tile every round.'
 		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'

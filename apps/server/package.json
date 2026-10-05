@@ -20,6 +20,7 @@
 		"@games/hangman": "workspace:*",
 		"@games/icebreakers": "workspace:*",
 		"@games/maths": "workspace:*",
+		"@games/memory": "workspace:*",
 		"@games/protocol": "workspace:*",
 		"@games/trivia": "workspace:*",
 		"@games/wit": "workspace:*",

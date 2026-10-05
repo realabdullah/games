@@ -32,9 +32,13 @@ const tile = (game: Pick<CatalogEntry, 'emoji' | 'color'>, size: number) =>
 
 const live = catalog.filter((g) => g.status === 'live');
 
-/** Up to three rows of tiles, so the grid stays inside the card as games are added. */
-const gridCols = Math.max(2, Math.ceil(live.length / 3));
-const gridTile = live.length > 6 ? 112 : 130;
+/**
+ * At most four columns, so the headline keeps its room; tiles shrink as rows
+ * are added, so the grid stays inside the card as games are added.
+ */
+const gridCols = Math.min(4, Math.max(2, Math.ceil(live.length / 3)));
+const gridRows = Math.ceil(live.length / gridCols);
+const gridTile = Math.min(130, Math.floor((500 - (gridRows - 1) * 24) / gridRows));
 
 const cards: Card[] = [
 	{

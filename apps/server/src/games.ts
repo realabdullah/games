@@ -13,6 +13,7 @@ import { isWord } from '@games/content/dictionary';
 import { createAnagram, wordsForLevel, type AnagramConfig } from '@games/anagram';
 import { clock, type ClockConfig } from '@games/clock';
 import { findIt, type FindItConfig } from '@games/findit';
+import { memory, type MemoryConfig } from '@games/memory';
 import { doodle, type DoodleConfig } from '@games/doodle';
 import { emoji, type EmojiConfig } from '@games/emoji';
 import { hangman, type HangmanConfig } from '@games/hangman';
@@ -262,6 +263,15 @@ export function createRegistry(packs?: PackStore): Registry {
 				);
 				return { content: { ...pack, items }, used, cycled };
 			}
+		},
+		memory: {
+			game: memory,
+			content: () => ({ content: null, flagged: false }),
+			config: (raw): MemoryConfig => ({
+				rounds: clamp(raw?.rounds, 3, 12, memory.defaultConfig.rounds),
+				recallSeconds: clamp(raw?.recallSeconds, 5, 60, memory.defaultConfig.recallSeconds),
+				level: level(raw?.level, memory.defaultConfig.level)
+			})
 		},
 		xo: {
 			game: xo,

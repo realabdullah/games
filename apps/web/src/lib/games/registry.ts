@@ -14,6 +14,8 @@ import IcebreakersHost from './icebreakers/IcebreakersHost.svelte';
 import IcebreakersPlayer from './icebreakers/IcebreakersPlayer.svelte';
 import MathsHost from './maths/MathsHost.svelte';
 import MathsPlayer from './maths/MathsPlayer.svelte';
+import MemoryHost from './memory/MemoryHost.svelte';
+import MemoryPlayer from './memory/MemoryPlayer.svelte';
 import TriviaHost from './trivia/TriviaHost.svelte';
 import TriviaPlayer from './trivia/TriviaPlayer.svelte';
 import type { GameStream, GameUi } from './types';
@@ -122,6 +124,14 @@ export const gameUi: Record<string, GameUi> = {
 			{ key: 'level', label: s.level, options: [1, 2, 3], default: 1, labels: s.wordLevels },
 			{ key: 'rounds', label: s.words, options: [5, 8, 12], default: 8 },
 			{ key: 'secondsPerWord', label: s.secondsPerWord, options: [30, 45, 60], default: 45 }
+		]
+	},
+	memory: {
+		Host: MemoryHost,
+		Player: MemoryPlayer,
+		settings: [
+			{ key: 'level', label: s.level, options: [1, 2, 3], default: 1, labels: s.levels },
+			{ key: 'rounds', label: s.rounds, options: [4, 6, 8], default: 6 }
 		]
 	}
 };

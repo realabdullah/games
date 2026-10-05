@@ -358,7 +358,7 @@ describe('word games', () => {
 		rooms.handle(session, { type: 'start', gameId, config });
 	const gameState = <T>() => rooms.snapshot().rooms[0]!.game!.state as T;
 
-	test.each(['wordrace', 'hangman', 'emoji', 'maths', 'clock', 'findit', 'anagram'])(
+	test.each(['wordrace', 'hangman', 'emoji', 'maths', 'clock', 'findit', 'anagram', 'memory'])(
 		'%s starts with one player',
 		(gameId) => {
 			const host = rooms.create({ mode: 'party' });

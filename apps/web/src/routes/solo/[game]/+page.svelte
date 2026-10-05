@@ -14,6 +14,7 @@
 	import type { AnyGame } from '@games/engine';
 	import { hangman } from '@games/hangman';
 	import { maths } from '@games/maths';
+	import { memory } from '@games/memory';
 	import { trivia } from '@games/trivia';
 	import { createWordRace } from '@games/wordrace';
 	import { xo } from '@games/xo';
@@ -51,7 +52,8 @@
 		anagram: {
 			game: async () => createAnagram((await import('@games/content/dictionary')).isWord),
 			content: async () => anagramPack
-		}
+		},
+		memory: { game: async () => memory, content: async () => null }
 	};
 
 	let game = $state<LocalGame<unknown> | null>(null);

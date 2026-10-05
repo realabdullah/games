@@ -7,6 +7,7 @@ import type { GameMeta, GameMode, GameTag } from '@games/engine';
 import { hangman } from '@games/hangman';
 import { icebreakers } from '@games/icebreakers';
 import { maths } from '@games/maths';
+import { memory } from '@games/memory';
 import { trivia } from '@games/trivia';
 import { wit } from '@games/wit';
 import { wordRace } from '@games/wordrace';
@@ -48,5 +49,6 @@ export const catalog: CatalogEntry[] = [
 	live(maths.meta, { emoji: '🧮', color: 'var(--teal)' }),
 	live(clock.meta, { emoji: '⏱️', color: 'var(--yellow)' }),
 	live(findIt.meta, { emoji: '🔍', color: 'var(--violet)' }),
-	live(anagram.meta, { emoji: '🔤', color: 'var(--pink)' })
+	live(anagram.meta, { emoji: '🔤', color: 'var(--pink)' }),
+	live(memory.meta, { emoji: '🧩', color: 'var(--teal)' })
 ];

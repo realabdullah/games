@@ -18,6 +18,7 @@ One person opens the game on a big screen (a TV, or a shared screen on a video c
 - **Stop the Clock**: count in your head and tap when a hidden clock hits the target time.
 - **Find It**: spot the number, emoji or odd one out in a grid before anyone else.
 - **Anagram Race**: unscramble the letters to find the word.
+- **Memory Grid**: remember which tiles lit up, then tap them back.
 
 Most games also work with everyone on their own screen, and some can be played solo.
 

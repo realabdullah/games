@@ -20,6 +20,7 @@ COPY packages/games/maths/package.json packages/games/maths/
 COPY packages/games/anagram/package.json packages/games/anagram/
 COPY packages/games/clock/package.json packages/games/clock/
 COPY packages/games/findit/package.json packages/games/findit/
+COPY packages/games/memory/package.json packages/games/memory/
 RUN bun install --frozen-lockfile
 COPY . .
 # Optional: your self-hosted GoatCounter, e.g. https://stats.example.com
