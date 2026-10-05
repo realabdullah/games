@@ -1,11 +1,13 @@
 <script lang="ts">
 	import {
+		anagramPack,
 		emojiPack,
 		findTriviaPack,
 		hangmanPack,
 		wordRacePack,
 		type TriviaPack
 	} from '@games/content';
+	import { createAnagram } from '@games/anagram';
 	import { clock } from '@games/clock';
 	import { emoji } from '@games/emoji';
 	import { findIt } from '@games/findit';
@@ -45,7 +47,11 @@
 		emoji: { game: async () => emoji, content: async () => emojiPack },
 		maths: { game: async () => maths, content: async () => null },
 		clock: { game: async () => clock, content: async () => null },
-		findit: { game: async () => findIt, content: async () => null }
+		findit: { game: async () => findIt, content: async () => null },
+		anagram: {
+			game: async () => createAnagram((await import('@games/content/dictionary')).isWord),
+			content: async () => anagramPack
+		}
 	};
 
 	let game = $state<LocalGame<unknown> | null>(null);

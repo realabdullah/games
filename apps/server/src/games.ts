@@ -1,4 +1,5 @@
 import {
+	anagramPack,
 	doodlePack,
 	emojiPack,
 	findTriviaPack,
@@ -9,6 +10,7 @@ import {
 	type TriviaPack
 } from '@games/content';
 import { isWord } from '@games/content/dictionary';
+import { createAnagram, wordsForLevel, type AnagramConfig } from '@games/anagram';
 import { clock, type ClockConfig } from '@games/clock';
 import { findIt, type FindItConfig } from '@games/findit';
 import { doodle, type DoodleConfig } from '@games/doodle';
@@ -119,6 +121,7 @@ function freshPack<T>(key: (item: T) => string) {
 }
 
 const wordRace = createWordRace(isWord);
+const anagram = createAnagram(isWord);
 
 type Level = 1 | 2 | 3;
 const level = (n: unknown, fallback: Level) => clamp(n, 1, 3, fallback) as Level;
@@ -237,6 +240,28 @@ export function createRegistry(packs?: PackStore): Registry {
 				secondsPerGrid: clamp(raw?.secondsPerGrid, 5, 60, findIt.defaultConfig.secondsPerGrid),
 				level: level(raw?.level, findIt.defaultConfig.level)
 			})
+		},
+		anagram: {
+			game: anagram,
+			content: () => ({ content: anagramPack, flagged: false }),
+			config: (raw): AnagramConfig => ({
+				rounds: clamp(raw?.rounds, 3, 15, anagram.defaultConfig.rounds),
+				secondsPerWord: clamp(raw?.secondsPerWord, 15, 120, anagram.defaultConfig.secondsPerWord),
+				level: level(raw?.level, anagram.defaultConfig.level)
+			}),
+			// Only words of this level's length, so rematches don't repeat them.
+			fresh(content, config, played, random) {
+				const { rounds, level } = config as AnagramConfig;
+				const pack = content as typeof anagramPack;
+				const { items, used, cycled } = freshItems(
+					wordsForLevel(pack.items, level),
+					rounds,
+					played,
+					random,
+					(w) => w.word
+				);
+				return { content: { ...pack, items }, used, cycled };
+			}
 		},
 		xo: {
 			game: xo,

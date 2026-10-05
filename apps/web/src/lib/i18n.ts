@@ -195,6 +195,7 @@ export const t = {
 			gridSizes: { 1: '5 × 5', 2: '6 × 6', 3: '7 × 7' } as Record<number, string>,
 			grids: 'Grids',
 			secondsPerGrid: 'Seconds per grid',
+			wordLevels: { 1: '5 letters', 2: '6–7 letters', 3: '8+ letters' } as Record<number, string>,
 			matches: 'Matches',
 			turnSeconds: 'Seconds per move',
 			botLevel: 'Computer',
@@ -361,6 +362,20 @@ export const t = {
 		first: 'First!',
 		noneYet: 'Nobody yet…'
 	},
+	anagram: {
+		howTo: 'Unscramble the letters to make a word. Faster answers score more.',
+		wordOf: (i: number, n: number) => `Word ${i} of ${n}`,
+		guessLabel: 'Your answer',
+		guess: 'Go',
+		shuffle: 'Shuffle letters',
+		solved: (d: number, n: number) => `${d} of ${n} got it`,
+		youGotIt: 'You got it! 🎉',
+		notIt: (text: string) => `“${text}” isn’t it`,
+		answerWas: 'It was',
+		first: 'First!',
+		noneYet: 'Nobody yet…',
+		letters: (n: number) => `${n} letters`
+	},
 	xo: {
 		howTo: 'Tic-tac-toe, king of the hill. Win and you stay on; the next challenger steps up.',
 		matchOf: (i: number, n: number) => `Match ${i} of ${n}`,
@@ -386,7 +401,8 @@ export const t = {
 			maths: 'Mental maths against the clock. Pick a level and beat your best score.',
 			clock: 'How good is your sense of time? Tap when you think the hidden clock hits the target.',
 			findit:
-				'Hunt for the number, emoji or odd one out. The faster you find it, the more you score.'
+				'Hunt for the number, emoji or odd one out. The faster you find it, the more you score.',
+			anagram: 'Unscramble the letters against the clock. Longer words on harder levels.'
 		} as Record<string, string>,
 		start: 'Play',
 		quit: 'Quit'

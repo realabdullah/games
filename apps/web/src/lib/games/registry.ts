@@ -1,3 +1,5 @@
+import AnagramHost from './anagram/AnagramHost.svelte';
+import AnagramPlayer from './anagram/AnagramPlayer.svelte';
 import ClockHost from './clock/ClockHost.svelte';
 import ClockPlayer from './clock/ClockPlayer.svelte';
 import DoodleHost from './doodle/DoodleHost.svelte';
@@ -111,6 +113,15 @@ export const gameUi: Record<string, GameUi> = {
 			{ key: 'level', label: s.gridSize, options: [1, 2, 3], default: 1, labels: s.gridSizes },
 			{ key: 'rounds', label: s.grids, options: [5, 8, 12], default: 8 },
 			{ key: 'secondsPerGrid', label: s.secondsPerGrid, options: [10, 20, 30], default: 20 }
+		]
+	},
+	anagram: {
+		Host: AnagramHost,
+		Player: AnagramPlayer,
+		settings: [
+			{ key: 'level', label: s.level, options: [1, 2, 3], default: 1, labels: s.wordLevels },
+			{ key: 'rounds', label: s.words, options: [5, 8, 12], default: 8 },
+			{ key: 'secondsPerWord', label: s.secondsPerWord, options: [30, 45, 60], default: 45 }
 		]
 	}
 };

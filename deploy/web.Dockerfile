@@ -17,6 +17,7 @@ COPY packages/games/wordrace/package.json packages/games/wordrace/
 COPY packages/games/hangman/package.json packages/games/hangman/
 COPY packages/games/emoji/package.json packages/games/emoji/
 COPY packages/games/maths/package.json packages/games/maths/
+COPY packages/games/anagram/package.json packages/games/anagram/
 COPY packages/games/clock/package.json packages/games/clock/
 COPY packages/games/findit/package.json packages/games/findit/
 RUN bun install --frozen-lockfile

@@ -1,3 +1,4 @@
+import { anagram } from '@games/anagram';
 import { clock } from '@games/clock';
 import { doodle } from '@games/doodle';
 import { emoji } from '@games/emoji';
@@ -46,5 +47,6 @@ export const catalog: CatalogEntry[] = [
 	live(emoji.meta, { emoji: '🤔', color: 'var(--pink)' }),
 	live(maths.meta, { emoji: '🧮', color: 'var(--teal)' }),
 	live(clock.meta, { emoji: '⏱️', color: 'var(--yellow)' }),
-	live(findIt.meta, { emoji: '🔍', color: 'var(--violet)' })
+	live(findIt.meta, { emoji: '🔍', color: 'var(--violet)' }),
+	live(anagram.meta, { emoji: '🔤', color: 'var(--pink)' })
 ];
