@@ -63,12 +63,14 @@
 		max-width: min(58vh, 640px);
 		gap: 10px;
 	}
+	/* Unlit tiles are raised cloth; lit and tapped ones are light panels. */
 	.tile {
+		--ink: var(--indigo);
 		aspect-ratio: 1;
 		padding: 0;
-		border: 2px solid var(--line);
-		border-radius: 10px;
-		background: var(--surface);
+		border: 1.5px dashed rgb(241 235 221 / 0.35);
+		border-radius: var(--radius);
+		background: var(--dye-raised);
 		touch-action: manipulation;
 		-webkit-tap-highlight-color: transparent;
 		transition: background-color 120ms ease-out;
@@ -77,16 +79,20 @@
 		cursor: pointer;
 	}
 	.lit {
-		background: var(--violet);
+		border-color: transparent;
+		background: var(--gold);
 	}
 	.pending {
-		background: var(--yellow);
+		border-color: transparent;
+		background: var(--starch);
 	}
 	.right {
-		background: var(--teal);
+		border-color: transparent;
+		background: var(--leaf);
 	}
 	.wrong {
-		background: oklch(70% 0.17 25);
+		border-color: transparent;
+		background: var(--clay);
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.tile {

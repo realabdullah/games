@@ -73,7 +73,7 @@
 						spellcheck="false"
 						enterkeyhint="send"
 					/>
-					<button class="btn pink" disabled={!guessText.trim()}>{m.guess}</button>
+					<button class="btn primary" disabled={!guessText.trim()}>{m.guess}</button>
 				</form>
 			{/if}
 			<GuessFeed feed={view.feed} />
@@ -91,7 +91,7 @@
 			{#if view.phase === 'puzzle'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		{/if}
 	{:else if view.phase === 'final'}
@@ -127,17 +127,26 @@
 		gap: 12px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.category {
 		padding: 2px 12px;
 		border: 2px solid var(--line);
-		border-radius: 999px;
-		background: var(--yellow);
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 	}
 	.emoji {
@@ -154,7 +163,16 @@
 	}
 	.got {
 		padding: 14px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 		text-align: center;
 	}
@@ -171,12 +189,13 @@
 		text-align: center;
 	}
 	.points {
-		font-weight: 800;
-		color: oklch(40% 0.13 160);
+		font-family: var(--display);
+		font-weight: 400;
+		color: var(--good);
 	}
 	.score .points {
 		font-size: 1.6rem;
-		color: oklch(45% 0.13 160);
+		color: var(--good);
 	}
 	@keyframes pop {
 		from {

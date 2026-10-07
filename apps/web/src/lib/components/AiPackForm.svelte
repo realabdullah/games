@@ -66,7 +66,7 @@
 	</div>
 	{#if error}<p class="error" role="alert">{error}</p>{/if}
 	<button
-		class="btn teal"
+		class="btn ghost"
 		disabled={generating || status.remaining === 0 || topic.trim().length < 3}
 		aria-busy={generating}
 	>
@@ -80,7 +80,16 @@
 		display: grid;
 		gap: 14px;
 		padding: 18px;
-		background: color-mix(in oklch, var(--teal) 30%, var(--surface));
+		background: color-mix(in oklch, var(--leaf) 30%, var(--surface));
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	h2 {
 		font-size: 1.3rem;

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { PlayerInfo } from '@games/protocol';
 	import { t } from '$lib/i18n';
 	import { flip } from 'svelte/animate';
@@ -23,10 +24,10 @@
 			animate:flip={{ duration: 250 }}
 			in:scale={{ start: 0.6, duration: 280 }}
 		>
-			<span class="avatar" aria-hidden="true">{p.avatar}</span>
+			<span class="avatar" aria-hidden="true"><Motif id={p.avatar} /></span>
 			<span class="name">
 				{p.name}
-				{#if p.vip}<span class="crown" title="Host">👑</span>{/if}
+				{#if p.vip}<span class="host">{t.lobby.host}</span>{/if}
 			</span>
 			{#if !p.connected}<span class="badge">{t.lobby.offline}</span>{/if}
 			{#if onkick && p.id !== youId}
@@ -58,7 +59,16 @@
 		min-width: 0;
 	}
 	.you {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.offline {
 		opacity: 0.55;
@@ -80,6 +90,14 @@
 	.large .name {
 		font-size: 1.4rem;
 	}
+	.host {
+		margin-left: 4px;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--madder);
+	}
 	.badge {
 		margin-left: auto;
 		font-size: 0.8rem;
@@ -95,6 +113,14 @@
 		border: var(--border);
 		border-radius: 50%;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: var(--ink);
 		font: inherit;
 		font-weight: 800;
@@ -116,8 +142,8 @@
 			opacity: 1;
 		}
 		.kick:hover {
-			background: var(--danger);
-			color: white;
+			background: var(--madder);
+			color: var(--starch);
 		}
 	}
 </style>

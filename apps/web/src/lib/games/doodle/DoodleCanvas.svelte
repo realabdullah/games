@@ -250,6 +250,15 @@
 		border: var(--border);
 		border-radius: 50%;
 		background: var(--c, var(--surface));
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		cursor: pointer;
 		transition:
 			transform 120ms ease-out,
@@ -260,12 +269,12 @@
 		background: var(--ink);
 	}
 	.active {
-		transform: translate(-2px, -2px);
-		box-shadow: 3px 3px 0 var(--line);
+		outline: 2.5px solid var(--ink);
+		outline-offset: 3px;
 	}
 	.swatch:focus-visible,
 	.size:focus-visible {
-		transform: translate(-2px, -2px);
-		box-shadow: 3px 3px 0 var(--focus);
+		outline: 2.5px dashed var(--focus);
+		outline-offset: 3px;
 	}
 </style>

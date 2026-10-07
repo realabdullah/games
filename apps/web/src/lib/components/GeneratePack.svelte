@@ -47,7 +47,8 @@
 
 {#if status?.enabled}
 	{#if !open}
-		<button type="button" class="btn teal small" onclick={() => (open = true)}>{p.generate}</button>
+		<button type="button" class="btn ghost small" onclick={() => (open = true)}>{p.generate}</button
+		>
 	{:else if review}
 		<section class="review" aria-live="polite">
 			<p class="note">{p.generated}</p>

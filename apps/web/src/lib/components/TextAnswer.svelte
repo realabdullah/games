@@ -48,7 +48,7 @@
 		}}></textarea>
 	<div class="row">
 		<span class="count" class:low={left <= 10} aria-live="polite">{left}</span>
-		<button class="btn pink" disabled={!text.trim()}>{submitLabel}</button>
+		<button class="btn primary" disabled={!text.trim()}>{submitLabel}</button>
 	</div>
 </form>
 

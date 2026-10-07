@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Dye from '$lib/components/Dye.svelte';
 	import { FLAVOUR, flavourItems, type TriviaPack } from '@games/content';
 	import { createAnagram } from '@games/anagram';
 	import { clock } from '@games/clock';
@@ -130,11 +131,13 @@
 	image="/og/{entry.id}.png"
 />
 
+<Dye game={entry.id} />
+
 <main>
 	{#if game?.view}
 		{@const Screen = gameUi[entry.id]!.Player}
 		<header class="top">
-			<span class="kicker">{t.solo.title(entry.name)}</span>
+			<span class="eyebrow">{t.solo.title(entry.name)}</span>
 			<button class="btn ghost small" onclick={quit}>{t.solo.quit}</button>
 		</header>
 		<Screen
@@ -175,10 +178,6 @@
 		margin: 0 auto;
 		padding: 24px var(--gutter) 48px;
 	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
-	}
 	h1 {
 		font-size: 2.6rem;
 	}
@@ -186,9 +185,6 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-	}
-	.kicker {
-		font-weight: 800;
 	}
 	.pick {
 		padding: 20px;

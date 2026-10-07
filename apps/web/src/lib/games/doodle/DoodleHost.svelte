@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { DoodleView } from '@games/doodle';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
@@ -35,7 +36,7 @@
 	{:else if view.phase === 'choose' && view.drawer}
 		<div class="center">
 			<p class="kicker">{m.turnOf(view.turn + 1, view.turns)}</p>
-			<p class="avatar" aria-hidden="true">{view.drawer.avatar}</p>
+			<p class="avatar" aria-hidden="true"><Motif id={view.drawer.avatar} /></p>
 			<h2 class="title">{m.choosing(view.drawer.name)}</h2>
 		</div>
 	{:else if (view.phase === 'draw' || view.phase === 'reveal') && view.drawer}
@@ -68,7 +69,7 @@
 			{#if view.phase === 'draw'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		</footer>
 	{:else if view.phase === 'final'}
@@ -92,10 +93,10 @@
 		width: min(100%, 600px);
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.title {
@@ -103,7 +104,8 @@
 	}
 	.big {
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.avatar {
 		font-size: clamp(4rem, 10vw, 8rem);

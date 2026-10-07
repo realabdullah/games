@@ -43,7 +43,7 @@
 			<aside>
 				<Leaderboard entries={view.leaderboard} limit={6} />
 				{#if view.phase === 'result'}
-					<button class="btn pink" onclick={next}>{g.next}</button>
+					<button class="btn primary" onclick={next}>{g.next}</button>
 				{/if}
 			</aside>
 		</div>
@@ -68,10 +68,10 @@
 		width: min(100%, 600px);
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.title {
@@ -80,7 +80,8 @@
 	.big {
 		max-width: 30ch;
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.top {
 		display: flex;

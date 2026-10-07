@@ -60,6 +60,14 @@
 		border: 2px solid var(--line);
 		border-radius: 10px;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: var(--ink);
 		font: inherit;
 		font-weight: 800;
@@ -74,7 +82,16 @@
 		cursor: pointer;
 	}
 	button.cell:active:not(:disabled) {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.frozen .cell {
 		opacity: 0.5;
@@ -83,7 +100,16 @@
 		background: oklch(85% 0.08 25);
 	}
 	.answer {
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		outline: 4px solid var(--ink);
 		outline-offset: -2px;
 		opacity: 1;

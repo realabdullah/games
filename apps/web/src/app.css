@@ -1,31 +1,93 @@
-@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource/young-serif/400.css';
+@import '@fontsource-variable/familjen-grotesk/wght.css';
 
+/*
+ * Adire: indigo resist-dye cloth. The page is the cloth (a dark dye that each
+ * game can change), panels are starch-white, and the edges are stitched.
+ *
+ * Colour tokens are contextual. On the cloth, --ink is light; any light
+ * panel (.surface, .card, .btn, .input, or a component rule that paints a
+ * light fill) re-declares the ink tokens so text and lines on it go dark.
+ */
 :root {
-	--bg: oklch(97% 0.03 80);
-	--surface: oklch(100% 0 0);
-	--ink: oklch(22% 0.03 280);
-	--ink-soft: oklch(45% 0.03 280);
-	--line: var(--ink);
+	/* palette */
+	--indigo: #18224b;
+	--starch: #f1ebdd;
+	--paper: #fbf8f1;
+	--gold: #e0a526;
+	--clay: #e8906f;
+	--madder: #a8392a;
+	--leaf: #9cc4a8;
+	--sky: #aebcf0;
+	--faded: #4a527a;
+	--lavender: #cdc8de;
 
-	--pink: oklch(68% 0.22 0);
-	--yellow: oklch(88% 0.17 95);
-	--teal: oklch(75% 0.13 185);
-	--violet: oklch(62% 0.2 295);
-	--danger: oklch(58% 0.21 27);
+	/* the cloth: one dye per game, set with data-dye on <html> */
+	--dye: var(--indigo);
+	--dye-raised: color-mix(in oklab, var(--dye), white 9%);
+	--weave: rgb(241 235 221 / 0.07);
 
-	--radius: 18px;
-	--radius-sm: 12px;
-	--border: 3px solid var(--line);
-	--shadow: 4px 4px 0 var(--line);
-	--shadow-lg: 7px 7px 0 var(--line);
-	/* Focus is a lifted, colored hard shadow (never a browser ring). */
-	--focus: var(--violet);
-	--focus-shadow: 5px 5px 0 var(--focus);
+	/* on the cloth */
+	--ink: var(--starch);
+	--ink-soft: var(--lavender);
+	--line: var(--starch);
+	--surface: var(--starch);
+	--on-ink: var(--indigo);
+	--danger: #f4a08a;
+	--good: #a6e3b6;
+	--warn: var(--gold);
+	--focus: var(--gold);
 
-	--font: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+	--radius: 6px;
+	--radius-sm: 4px;
+	--radius-sheet: 22px;
+	--border: 1.5px solid var(--line);
+	--stitch: 1.5px dashed var(--line);
+	--shadow: none;
+	--shadow-lg: 0 18px 40px -24px rgb(0 0 0 / 0.6);
+
+	--font: 'Familjen Grotesk Variable', system-ui, sans-serif;
+	--display: 'Young Serif', Georgia, serif;
 	--gutter: clamp(16px, 4vw, 40px);
 
-	color-scheme: light;
+	color-scheme: dark;
+}
+
+/* Game dyes: all dark enough for starch text and the gold accent. */
+:root[data-dye='madder'] {
+	--dye: #4a1c19;
+}
+:root[data-dye='kola'] {
+	--dye: #3a2a14;
+}
+:root[data-dye='forest'] {
+	--dye: #15352b;
+}
+:root[data-dye='plum'] {
+	--dye: #351a3b;
+}
+:root[data-dye='lagoon'] {
+	--dye: #0f3441;
+}
+
+/* A light panel: ink goes dark. Components add these four lines to any rule
+   that paints a light fill. */
+.surface,
+.card,
+.input,
+.btn:not(.ghost) {
+	--ink: var(--indigo);
+	--ink-soft: var(--faded);
+	--line: var(--indigo);
+	--surface: var(--paper);
+	--on-ink: var(--starch);
+	--danger: var(--madder);
+	--good: #1d6a43;
+	--warn: #855700;
+	--focus: var(--indigo);
+	--border: 1.5px solid var(--line);
+	--stitch: 1.5px dashed var(--line);
+	color: var(--ink);
 }
 
 *,
@@ -41,8 +103,18 @@ html {
 body {
 	margin: 0;
 	min-height: 100dvh;
-	background: var(--bg);
+	background-color: var(--dye);
+	background-image: radial-gradient(
+		circle,
+		transparent 9px,
+		var(--weave) 9px 11px,
+		transparent 11px 17px,
+		var(--weave) 17px 18px,
+		transparent 18px
+	);
+	background-size: 44px 44px;
 	color: var(--ink);
+	transition: background-color 400ms ease-out;
 	font-family: var(--font);
 	font-size: 1.0625rem;
 	line-height: 1.5;
@@ -52,10 +124,18 @@ body {
 h1,
 h2,
 h3 {
-	line-height: 1.05;
-	letter-spacing: -0.02em;
+	line-height: 1.08;
+	letter-spacing: -0.01em;
 	margin: 0;
 	text-wrap: balance;
+}
+
+/* Young Serif has one weight; never let the browser fake a bold. */
+h1,
+h2 {
+	font-family: var(--display);
+	font-weight: 400;
+	font-synthesis: none;
 }
 
 p {
@@ -68,25 +148,21 @@ a {
 }
 
 /*
- * Focus. Browser rings are off everywhere; every interactive element gets an
- * on-brand state instead: controls lift onto a violet hard shadow, links get
- * a highlighter. The :where() fallback has zero specificity so component
- * styles win, but nothing focusable is ever left without a visible state.
+ * Focus is a stitched outline: dashed, offset from the control, gold on the
+ * cloth and indigo on panels. The :where() fallback has zero specificity so
+ * component styles win, but nothing focusable is left without a visible state.
  */
 :focus {
 	outline: none;
 }
 
 :where(:focus-visible) {
-	border-radius: 6px;
-	box-shadow: 0 0 0 3px var(--focus);
+	outline: 2.5px dashed var(--focus);
+	outline-offset: 3px;
 }
 
 a:not(.btn):focus-visible {
-	border-radius: 4px;
-	background: var(--yellow);
-	box-shadow: 0 0 0 3px var(--yellow);
-	text-decoration-thickness: 3px;
+	border-radius: 2px;
 }
 
 button,
@@ -99,73 +175,75 @@ select {
 
 /* ---------- building blocks ---------- */
 
+/*
+ * Buttons. Default inverts the context (starch on the cloth, indigo on a
+ * panel); .primary is gold; .ghost is a stitched outline in the context ink.
+ */
 .btn {
-	--btn-bg: var(--yellow);
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 0.5em;
 	min-height: 52px;
 	padding: 0.65em 1.4em;
-	border: var(--border);
-	border-radius: 999px;
-	background: var(--btn-bg);
-	color: var(--ink);
-	box-shadow: var(--shadow);
+	border: 1.5px solid transparent;
+	border-radius: var(--radius-sm);
+	background: var(--btn-bg, var(--starch));
+	color: var(--indigo);
 	font: inherit;
-	font-weight: 750;
+	font-weight: 700;
 	font-size: 1.1rem;
 	text-decoration: none;
 	cursor: pointer;
 	transition:
 		transform 120ms ease-out,
-		box-shadow 120ms ease-out;
-	-webkit-tap-highlight-color: transparent;
+		background-color 150ms ease-out;
+}
+
+.surface .btn:not(.primary, .ghost),
+.card .btn:not(.primary, .ghost) {
+	--btn-bg: var(--indigo);
+	color: var(--starch);
+}
+
+.btn.primary {
+	--btn-bg: var(--gold);
+	color: var(--indigo);
+}
+
+.btn.ghost {
+	--btn-bg: transparent;
+	border: var(--stitch);
+	color: var(--ink);
 }
 
 .btn:active:not(:disabled) {
-	transform: translate(3px, 3px);
-	box-shadow: 1px 1px 0 var(--line);
+	transform: scale(0.97);
 }
 
 @media (hover: hover) {
 	.btn:hover:not(:disabled) {
-		transform: translate(-1px, -1px);
-		box-shadow: 5px 5px 0 var(--line);
+		background-color: color-mix(in oklab, var(--btn-bg, var(--starch)), white 14%);
+	}
+	.btn.ghost:hover:not(:disabled) {
+		background-color: color-mix(in oklab, var(--ink) 10%, transparent);
 	}
 }
 
-.btn:focus-visible:not(:active) {
-	transform: translate(-2px, -2px);
-	box-shadow: var(--focus-shadow);
-}
-
 .btn:disabled {
-	opacity: 0.55;
+	opacity: 0.5;
 	cursor: not-allowed;
 }
 
-.btn.pink {
-	--btn-bg: var(--pink);
-}
-.btn.teal {
-	--btn-bg: var(--teal);
-}
-.btn.ghost {
-	--btn-bg: var(--surface);
-}
 .btn.small {
 	min-height: 40px;
 	padding: 0.35em 1em;
 	font-size: 0.95rem;
-	box-shadow: 3px 3px 0 var(--line);
 }
 
 .card {
-	background: var(--surface);
-	border: var(--border);
+	background: var(--starch);
 	border-radius: var(--radius);
-	box-shadow: var(--shadow);
 }
 
 .field {
@@ -180,15 +258,12 @@ select {
 	padding: 0.5em 0.9em;
 	border: var(--border);
 	border-radius: var(--radius-sm);
-	background: var(--surface);
+	background: var(--paper);
 	color: var(--ink);
 	/* 16px+ avoids iOS zoom-on-focus */
 	font: inherit;
 	font-size: 1.25rem;
-	font-weight: 650;
-	transition:
-		transform 120ms ease-out,
-		box-shadow 120ms ease-out;
+	font-weight: 600;
 }
 
 .input::placeholder {
@@ -198,14 +273,14 @@ select {
 
 /* Typing focus shows for mouse users too: you need to see where the caret is. */
 .input:focus {
-	transform: translate(-2px, -2px);
-	box-shadow: 4px 4px 0 var(--focus);
+	outline: 2.5px dashed var(--gold);
+	outline-offset: 3px;
 }
 
 select.input {
 	appearance: none;
 	padding-right: 2.6em;
-	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23211d30' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2318224b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 6 4 4 4-4'/%3E%3C/svg%3E");
 	background-repeat: no-repeat;
 	background-position: right 0.9em center;
 	background-size: 1em;
@@ -224,13 +299,10 @@ input[type='checkbox']:not(.sr-only) {
 	height: 26px;
 	margin: 0;
 	border: var(--border);
-	border-radius: 8px;
-	background: var(--surface);
+	border-radius: var(--radius-sm);
+	background: transparent;
 	cursor: pointer;
-	transition:
-		transform 120ms ease-out,
-		box-shadow 120ms ease-out,
-		background-color 150ms ease-out;
+	transition: background-color 150ms ease-out;
 }
 
 input[type='radio']:not(.sr-only) {
@@ -256,7 +328,7 @@ input[type='checkbox']:not(.sr-only, .switch)::before {
 	width: 12px;
 	height: 7px;
 	margin-top: -3px;
-	border: solid var(--surface);
+	border: solid var(--on-ink);
 	border-width: 0 0 3px 3px;
 	rotate: -45deg;
 	scale: 0;
@@ -285,21 +357,19 @@ input[type='checkbox'].switch::before {
 	height: 20px;
 	border-radius: 50%;
 	background: var(--ink);
-	transition: translate 180ms cubic-bezier(0.3, 1.4, 0.5, 1);
+	transition:
+		translate 180ms cubic-bezier(0.3, 1.4, 0.5, 1),
+		background-color 150ms ease-out;
 }
 
 input[type='checkbox'].switch:checked {
-	background: var(--teal);
+	border-color: var(--gold);
+	background: var(--gold);
 }
 
 input[type='checkbox'].switch:checked::before {
+	background: var(--indigo);
 	translate: 22px 0;
-}
-
-input[type='radio']:not(.sr-only):focus-visible,
-input[type='checkbox']:not(.sr-only):focus-visible {
-	transform: translate(-2px, -2px);
-	box-shadow: 3px 3px 0 var(--focus);
 }
 
 /*
@@ -307,17 +377,39 @@ input[type='checkbox']:not(.sr-only):focus-visible {
  * and pack choices). The label takes the focus state for the radio.
  */
 .option:has(:focus-visible) {
-	/* Focus must beat selected/hover states set inside components. */
-	transform: translate(-2px, -2px) !important;
-	box-shadow: var(--focus-shadow) !important;
+	outline: 2.5px dashed var(--focus);
+	outline-offset: 3px;
+}
+
+/* "← Back" links at the top of a page. */
+.back {
+	justify-self: start;
+	color: var(--gold);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+/* Small caps-style label used above sections and in game headers. */
+.eyebrow {
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--gold);
+}
+
+.surface .eyebrow,
+.card .eyebrow {
+	color: var(--madder);
 }
 
 .input.code {
 	text-transform: uppercase;
-	letter-spacing: 0.3em;
+	letter-spacing: 0.4em;
 	text-align: center;
-	font-size: 2rem;
-	font-weight: 800;
+	font-family: var(--display);
+	font-size: 2.1rem;
+	font-weight: 400;
 }
 
 .error {

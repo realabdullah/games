@@ -7,6 +7,8 @@ export const t = {
 	tagline:
 		'Party games, brain teasers and icebreakers for any group. One screen, everyone’s phones.',
 	home: {
+		headline: 'One screen. Everyone’s phones.',
+		lede: 'Party games, brain teasers and icebreakers for any group.',
 		hostParty: 'Host on a big screen',
 		hostPartyHint: 'Share your screen or TV. Everyone joins on their phone.',
 		playOnline: 'Play online',
@@ -20,7 +22,8 @@ export const t = {
 		title: 'Join a game',
 		codeLabel: 'Room code',
 		nameLabel: 'Your name',
-		avatarLabel: 'Pick an avatar',
+		avatarLabel: 'Pick your motif',
+		motif: (id: string) => id.charAt(0).toUpperCase() + id.slice(1),
 		description: 'Got a room code? Join the game on your phone. No app or account needed.',
 		submit: 'Join',
 		submitting: 'Joining…'
@@ -46,7 +49,8 @@ export const t = {
 		leave: 'Leave room',
 		endGame: 'End game',
 		closeRoom: 'Close room',
-		offline: 'offline'
+		offline: 'offline',
+		host: 'host'
 	},
 	picker: {
 		title: 'Pick a game',

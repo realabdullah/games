@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
+	import Dye from '$lib/components/Dye.svelte';
 	import GamePicker from '$lib/components/GamePicker.svelte';
 	import type { StartRequest } from '$lib/games/types';
 	import { trackEvent } from '$lib/analytics';
@@ -48,6 +49,7 @@
 {:else}
 	<ConnectionGate {conn}>
 		{@const room = conn.room!}
+		<Dye game={room.phase === 'playing' ? conn.game?.gameId : null} />
 		{#if room.phase === 'playing' && conn.game}
 			<main class="host playing">
 				<header class="bar">
@@ -74,12 +76,16 @@
 		{:else}
 			{@const empty = room.players.length === 0}
 			<main class="host">
-				<header class="join card">
+				<header class="join">
 					<p class="how">
 						{t.lobby.joinAt} <strong>{joinUrl}</strong>
 						{t.lobby.withCode}
 					</p>
-					<p class="code" aria-label="Room code {code.split('').join(' ')}">{code}</p>
+					<p class="code" aria-label="Room code {code.split('').join(' ')}">
+						{#each code.split('') as letter, i (i)}
+							<span class="surface" aria-hidden="true">{letter}</span>
+						{/each}
+					</p>
 				</header>
 
 				<!-- Until someone joins, the game picker gets the whole width. -->
@@ -137,8 +143,8 @@
 		text-align: center;
 	}
 	.big {
-		font-size: 1.4rem;
-		font-weight: 750;
+		font-family: var(--display);
+		font-size: 1.6rem;
 	}
 	.host {
 		display: grid;
@@ -155,20 +161,54 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: 12px 32px;
-		padding: clamp(16px, 3vw, 28px) clamp(20px, 4vw, 40px);
-		background: var(--yellow);
-		box-shadow: var(--shadow-lg);
 	}
 	.how {
+		max-width: 20ch;
 		font-size: clamp(1.2rem, 2.5vw, 2rem);
-		font-weight: 650;
+		color: var(--ink-soft);
+	}
+	.how strong {
+		display: block;
+		font-family: var(--display);
+		font-weight: 400;
+		font-size: 1.35em;
+		color: var(--ink);
 	}
 	.code {
-		font-size: clamp(3.5rem, 10vw, 8rem);
-		font-weight: 800;
+		display: flex;
+		gap: clamp(6px, 1vw, 12px);
+	}
+	.code span {
+		display: grid;
+		place-items: center;
+		width: 0.95em;
+		height: 1.15em;
+		border-radius: var(--radius);
+		background: var(--starch);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
+		font-family: var(--display);
+		font-size: clamp(3.5rem, 9vw, 7rem);
 		line-height: 1;
-		letter-spacing: 0.12em;
-		font-variant-numeric: tabular-nums;
+	}
+	.code span:last-child {
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.lobby {
 		display: grid;
@@ -238,10 +278,18 @@
 	}
 	.mini-code {
 		padding: 4px 14px;
-		border: var(--border);
-		border-radius: 999px;
-		background: var(--yellow);
-		font-weight: 800;
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--indigo);
+		font-family: var(--display);
 		letter-spacing: 0.12em;
 	}
 </style>

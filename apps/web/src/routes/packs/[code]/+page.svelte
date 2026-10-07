@@ -113,10 +113,6 @@
 		margin: 0 auto;
 		padding: 32px var(--gutter) 48px;
 	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
-	}
 	.head {
 		display: flex;
 		align-items: center;
@@ -142,10 +138,18 @@
 		align-content: start;
 		gap: 8px;
 		padding: 16px;
-		box-shadow: 3px 3px 0 var(--line);
 	}
 	.share {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	h2 {
 		font-size: 1.15rem;

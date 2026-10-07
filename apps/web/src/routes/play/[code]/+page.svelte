@@ -3,6 +3,8 @@
 	import { page } from '$app/state';
 	import { api } from '$lib/api';
 	import ConnectionGate from '$lib/components/ConnectionGate.svelte';
+	import Dye from '$lib/components/Dye.svelte';
+	import Motif from '$lib/components/Motif.svelte';
 	import GamePicker from '$lib/components/GamePicker.svelte';
 	import { trackEvent } from '$lib/analytics';
 	import { gameUi } from '$lib/games/registry';
@@ -59,6 +61,8 @@
 		{@const room = conn.room!}
 		{@const you = conn.you!}
 		{@const vip = room.players.find((p) => p.vip)}
+		{@const me = room.players.find((p) => p.id === you.id)}
+		<Dye game={room.phase === 'playing' ? conn.game?.gameId : null} />
 		{#if room.phase === 'playing' && conn.game}
 			<main class="narrow">
 				<header class="top small">
@@ -95,7 +99,8 @@
 					<button class="btn ghost small" onclick={leave}>{t.lobby.leave}</button>
 				</header>
 
-				<div class="card status">
+				<div class="status">
+					{#if me}<Motif id={me.avatar} />{/if}
 					{#if you.role === 'audience'}
 						<p>{t.lobby.youAreAudience}</p>
 					{:else if you.vip}
@@ -139,16 +144,15 @@
 		margin: 0 auto;
 		padding: 24px var(--gutter) 48px;
 	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
-	}
 	h1 {
 		font-size: 2.4rem;
 	}
 	.code {
-		font-weight: 800;
+		color: var(--gold);
 		letter-spacing: 0.12em;
+	}
+	.top .code {
+		font-family: var(--display);
 	}
 	.top {
 		display: flex;
@@ -167,10 +171,21 @@
 		padding: 20px;
 	}
 	.status {
-		padding: 20px;
-		background: var(--teal);
-		font-size: 1.2rem;
-		font-weight: 700;
+		display: grid;
+		justify-items: center;
+		gap: 18px;
+		padding: 16px 8px 8px;
+		text-align: center;
+		font-family: var(--display);
+		font-size: 1.6rem;
+		line-height: 1.2;
+		text-wrap: balance;
+	}
+	.status :global(.motif) {
+		font-size: 7rem;
+		box-shadow:
+			0 0 0 6px var(--dye),
+			0 0 0 7.5px var(--starch);
 	}
 	h2 {
 		font-size: 1.4rem;

@@ -163,7 +163,7 @@
 			{#if view.phase === 'guess'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		{/if}
 	{:else if view.phase === 'final'}
@@ -198,10 +198,10 @@
 		gap: 12px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.board {
@@ -227,7 +227,8 @@
 	}
 	.points {
 		font-size: 1.6rem;
-		font-weight: 800;
-		color: oklch(45% 0.13 160);
+		font-family: var(--display);
+		font-weight: 400;
+		color: var(--good);
 	}
 </style>

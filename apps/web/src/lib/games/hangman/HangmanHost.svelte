@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { HangmanView } from '@games/hangman';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
@@ -47,7 +48,7 @@
 
 				{#if view.phase === 'turn' && view.turn}
 					<div class="turn card">
-						<span class="avatar" aria-hidden="true">{view.turn.avatar}</span>
+						<span class="avatar" aria-hidden="true"><Motif id={view.turn.avatar} /></span>
 						<span class="who">{m.turn(view.turn.name)}</span>
 					</div>
 					<Timer endsAt={view.endsAt} durationMs={view.durationMs} {clockOffset} large />
@@ -73,7 +74,7 @@
 
 		<footer>
 			{#if view.phase === 'reveal'}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		</footer>
 	{:else if view.phase === 'final'}
@@ -102,7 +103,8 @@
 	.big {
 		max-width: 30ch;
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.top {
 		display: flex;
@@ -111,17 +113,26 @@
 		gap: 16px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.category {
 		padding: 4px 16px;
 		border: var(--border);
-		border-radius: 999px;
-		background: var(--yellow);
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-size: clamp(1.1rem, 2vw, 1.6rem);
 		font-weight: 800;
 	}
@@ -178,7 +189,16 @@
 		align-items: center;
 		gap: 14px;
 		padding: 12px 24px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.avatar {
 		font-size: clamp(2rem, 4vw, 3rem);
@@ -199,7 +219,7 @@
 		animation: pop 350ms cubic-bezier(0.3, 1.5, 0.5, 1);
 	}
 	.event.hit {
-		color: oklch(45% 0.13 160);
+		color: var(--good);
 	}
 	.event.miss,
 	.event.timeout,

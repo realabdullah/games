@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import { MAX_GUESS_LENGTH, type DoodleView } from '@games/doodle';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Timer from '$lib/components/Timer.svelte';
@@ -55,7 +56,7 @@
 			</div>
 		{:else}
 			<div class="center">
-				<p class="avatar" aria-hidden="true">{view.drawer.avatar}</p>
+				<p class="avatar" aria-hidden="true"><Motif id={view.drawer.avatar} /></p>
 				<h2 class="title">{m.choosing(view.drawer.name)}</h2>
 			</div>
 		{/if}
@@ -97,7 +98,7 @@
 						spellcheck="false"
 						enterkeyhint="send"
 					/>
-					<button class="btn pink" disabled={!guessText.trim()}>{m.guess}</button>
+					<button class="btn primary" disabled={!guessText.trim()}>{m.guess}</button>
 				</form>
 			{/if}
 		{/if}
@@ -110,7 +111,7 @@
 			{#if view.phase === 'draw'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		{/if}
 	{:else if view.phase === 'final'}
@@ -137,10 +138,10 @@
 		text-align: center;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.huge {
@@ -166,7 +167,16 @@
 		padding: 12px 16px;
 		border: var(--border);
 		border-radius: var(--radius-sm);
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-size: 1.3rem;
 	}
 	.word-bar strong {
@@ -196,13 +206,23 @@
 	}
 	.got {
 		padding: 14px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 		text-align: center;
 	}
 	.points {
 		font-size: 2rem;
-		font-weight: 800;
+		font-family: var(--display);
+		font-weight: 400;
 		text-align: center;
 	}
 </style>

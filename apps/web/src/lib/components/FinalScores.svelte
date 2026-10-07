@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { LeaderboardEntry } from '@games/engine';
 	import { t } from '$lib/i18n';
 	import Leaderboard from './Leaderboard.svelte';
@@ -33,14 +34,14 @@
 			<h2 class="title">{m.place(you.rank)}</h2>
 			<p class="big">{m.points(you.score)}</p>
 		{:else if winner}
-			<p class="avatar" aria-hidden="true">{winner.avatar}</p>
+			<p class="avatar" aria-hidden="true"><Motif id={winner.avatar} /></p>
 			<h2 class="title">{winner.name} {m.wins}</h2>
 		{/if}
 	</div>
 	<div class="board"><Leaderboard entries={leaderboard} {youId} showDelta={false} {large} /></div>
 	{#if canControl}
 		<div class="actions">
-			<button class="btn pink" onclick={onplayagain}>{m.playAgain}</button>
+			<button class="btn primary" onclick={onplayagain}>{m.playAgain}</button>
 			<button class="btn ghost" onclick={onendgame}>{m.backToLobby}</button>
 		</div>
 	{:else}
@@ -61,10 +62,10 @@
 		text-align: center;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.title {
@@ -75,7 +76,8 @@
 	}
 	.big {
 		font-size: 1.6rem;
-		font-weight: 800;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.avatar {
 		font-size: clamp(4rem, 10vw, 8rem);

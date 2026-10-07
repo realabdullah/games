@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { XoView } from '@games/xo';
 	import { t } from '$lib/i18n';
 
@@ -17,7 +18,7 @@
 			class="side side-{side.mark}"
 			class:active={view.phase === 'turn' && view.turn === side.mark}
 		>
-			<span class="avatar" aria-hidden="true">{side.player?.avatar}</span>
+			<span class="avatar" aria-hidden="true"><Motif id={side.player?.avatar ?? ''} /></span>
 			<span class="name">{side.player?.name}</span>
 			<span class="mark">{side.mark}</span>
 		</div>
@@ -38,8 +39,17 @@
 		min-width: 0;
 		padding: 8px 12px;
 		border: var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		transition:
 			transform 160ms ease-out,
 			box-shadow 160ms ease-out;
@@ -48,13 +58,29 @@
 		flex-direction: row-reverse;
 	}
 	.active.side-X {
-		background: var(--pink);
-		transform: translate(-2px, -2px);
+		background: var(--clay);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		box-shadow: var(--shadow);
 	}
 	.active.side-O {
-		background: var(--teal);
-		transform: translate(-2px, -2px);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		box-shadow: var(--shadow);
 	}
 	.avatar {

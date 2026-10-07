@@ -18,7 +18,7 @@
 	<a href="/" class="back">← {t.appName}</a>
 	<h1>{m.title}</h1>
 	<p class="muted">{m.intro}</p>
-	<a class="btn pink" href="/packs/new">{m.newPack}</a>
+	<a class="btn primary" href="/packs/new">{m.newPack}</a>
 
 	<section aria-labelledby="mine">
 		<h2 id="mine">{m.mine}</h2>
@@ -52,10 +52,6 @@
 		margin: 0 auto;
 		padding: 32px var(--gutter) 64px;
 	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
-	}
 	h1 {
 		font-size: clamp(2.2rem, 7vw, 3rem);
 	}
@@ -83,7 +79,6 @@
 		gap: 14px;
 		padding: 14px 18px;
 		text-decoration: none;
-		box-shadow: 3px 3px 0 var(--line);
 	}
 	.pack {
 		transition:
@@ -92,8 +87,17 @@
 	}
 	.pack:focus-visible {
 		background: var(--surface);
-		transform: translate(-2px, -2px);
-		box-shadow: var(--focus-shadow);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
+		outline: 2.5px dashed var(--focus);
+		outline-offset: 3px;
 	}
 	.emoji {
 		font-size: 2rem;

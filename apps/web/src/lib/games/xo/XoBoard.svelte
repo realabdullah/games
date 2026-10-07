@@ -47,6 +47,14 @@
 		border: var(--border);
 		border-radius: var(--radius);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		box-shadow: var(--shadow);
 		color: var(--ink);
 		font: inherit;
@@ -62,19 +70,36 @@
 	}
 	@media (hover: hover) {
 		.live .cell:not(:disabled):hover {
-			background: color-mix(in oklch, var(--yellow) 35%, var(--surface));
+			background: color-mix(in oklch, var(--gold) 35%, var(--surface));
+			--ink: var(--indigo);
+			--ink-soft: var(--faded);
+			--line: var(--indigo);
+			--border: 1.5px solid var(--indigo);
+			--stitch: 1.5px dashed var(--indigo);
+			--good: #1d6a43;
+			--danger: var(--madder);
+			--warn: #855700;
+			color: var(--ink);
 		}
 	}
 	.cell:active:not(:disabled) {
 		transform: translate(3px, 3px);
-		box-shadow: 1px 1px 0 var(--line);
 	}
 	.cell:focus-visible {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--focus-shadow);
+		outline: 2.5px dashed var(--focus);
+		outline-offset: 3px;
 	}
 	.win {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.mark {
 		font-size: clamp(2.6rem, 14vw, 4.5rem);
@@ -86,11 +111,11 @@
 		font-size: clamp(3rem, 10vh, 7rem);
 	}
 	.mark-X {
-		color: var(--pink);
+		color: var(--clay);
 		-webkit-text-stroke: 2px var(--ink);
 	}
 	.mark-O {
-		color: var(--teal);
+		color: var(--leaf);
 		-webkit-text-stroke: 2px var(--ink);
 	}
 	@keyframes drop {

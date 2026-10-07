@@ -34,10 +34,6 @@
 		margin: 0 auto;
 		padding: 32px var(--gutter);
 	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
-	}
 	h1 {
 		font-size: 2.6rem;
 	}

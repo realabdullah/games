@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { WitView } from '@games/wit';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
@@ -50,7 +51,7 @@
 					<p class="text">{c[side] ?? m.noAnswer}</p>
 					{#if res}
 						<div class="by">
-							<span class="avatar" aria-hidden="true">{res.player.avatar}</span>
+							<span class="avatar" aria-hidden="true"><Motif id={res.player.avatar} /></span>
 							<strong>{res.player.name}</strong>
 							<span class="votes">{m.votes(res.votes)}</span>
 							{#if res.points > 0}<span class="pts">{g.points(res.points)}</span>{/if}
@@ -65,7 +66,7 @@
 		{:else}
 			{#if view.result?.sweep}<p class="sweep">{m.sweep}</p>{/if}
 			<div class="board"><Leaderboard entries={view.leaderboard} limit={5} large /></div>
-			<footer><button class="btn pink" onclick={next}>{g.next}</button></footer>
+			<footer><button class="btn primary" onclick={next}>{g.next}</button></footer>
 		{/if}
 	{:else if view.phase === 'final'}
 		<FinalScores leaderboard={view.leaderboard} canControl large {onplayagain} {onendgame} />
@@ -88,10 +89,10 @@
 		width: min(100%, 600px);
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.title {
@@ -99,7 +100,8 @@
 	}
 	.big {
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.top {
 		display: flex;
@@ -131,10 +133,28 @@
 		box-shadow: var(--shadow-lg);
 	}
 	.side-a {
-		background: var(--pink);
+		background: var(--clay);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.side-b {
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.winner {
 		animation: pop 450ms cubic-bezier(0.3, 1.5, 0.5, 1);
@@ -163,16 +183,34 @@
 	.pts {
 		padding: 2px 12px;
 		border: var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 	}
 	.sweep {
 		justify-self: center;
 		padding: 8px 22px;
 		border: var(--border);
-		border-radius: 999px;
-		background: var(--yellow);
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		box-shadow: var(--shadow);
 		font-size: clamp(1.3rem, 2.4vw, 2rem);
 		font-weight: 800;

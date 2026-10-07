@@ -60,7 +60,7 @@
 <style>
 	.keys {
 		--hit: oklch(72% 0.17 150);
-		--near: var(--yellow);
+		--near: var(--gold);
 		--miss: oklch(72% 0.02 280);
 		display: grid;
 		gap: 6px;
@@ -81,6 +81,14 @@
 		border: 2px solid var(--line);
 		border-radius: 8px;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: var(--ink);
 		box-shadow: 0 3px 0 var(--line);
 		font: inherit;

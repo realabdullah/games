@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { WordRaceView } from '@games/wordrace';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
@@ -54,7 +55,7 @@
 				{#each view.boards as b (b.player.id)}
 					<li class="player card" class:solved={b.solved} class:out={b.out}>
 						<p class="name">
-							<span aria-hidden="true">{b.player.avatar}</span>
+							<span aria-hidden="true"><Motif id={b.player.avatar} /></span>
 							<span class="who">{b.player.name}</span>
 							{#if b.solved}<span class="pts">{g.points(b.points)}</span>{/if}
 						</p>
@@ -75,7 +76,7 @@
 			{#if view.phase === 'guess'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		</footer>
 	{:else if view.phase === 'final'}
@@ -104,7 +105,8 @@
 	.big {
 		max-width: 30ch;
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.legend {
 		display: flex;
@@ -122,7 +124,16 @@
 		background: oklch(72% 0.17 150);
 	}
 	.swatch.near {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.top {
 		display: flex;
@@ -131,10 +142,10 @@
 		gap: 16px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.count {
@@ -192,7 +203,6 @@
 		display: grid;
 		gap: 8px;
 		padding: 10px;
-		box-shadow: 3px 3px 0 var(--line);
 	}
 	.player.solved {
 		background: oklch(93% 0.07 150);
@@ -214,7 +224,7 @@
 		white-space: nowrap;
 	}
 	.pts {
-		color: oklch(45% 0.13 160);
+		color: var(--good);
 		font-variant-numeric: tabular-nums;
 	}
 	footer {

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import { MAX_ANSWER_LENGTH, type WitView } from '@games/wit';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import TextAnswer from '$lib/components/TextAnswer.svelte';
@@ -88,14 +89,14 @@
 				<div class="card res side-{side}" class:mine={res.player.id === youId}>
 					<p class="text">{c[side] ?? m.noAnswer}</p>
 					<p class="by">
-						<span aria-hidden="true">{res.player.avatar}</span>
+						<span aria-hidden="true"><Motif id={res.player.avatar} /></span>
 						{res.player.name} · {m.votes(res.votes)}
 						{#if res.points > 0}<strong>{g.points(res.points)}</strong>{/if}
 					</p>
 				</div>
 			{/each}
 			{#if view.result.sweep}<p class="sweep">{m.sweep}</p>{/if}
-			{#if canControl}<button class="btn pink" onclick={next}>{g.next}</button>{/if}
+			{#if canControl}<button class="btn primary" onclick={next}>{g.next}</button>{/if}
 		{/if}
 	{:else if view.phase === 'final'}
 		<FinalScores
@@ -121,10 +122,10 @@
 		text-align: center;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.huge {
@@ -140,7 +141,16 @@
 	}
 	.note {
 		padding: 18px;
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 750;
 		text-align: center;
 	}
@@ -178,22 +188,39 @@
 	}
 	.option-btn:active:not(:disabled) {
 		transform: translate(3px, 3px);
-		box-shadow: 1px 1px 0 var(--line);
 	}
 	.option-btn:focus-visible {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--focus-shadow);
+		outline: 2.5px dashed var(--focus);
+		outline-offset: 3px;
 	}
 	.picked {
 		box-shadow:
-			0 0 0 3px var(--bg),
+			0 0 0 3px var(--dye),
 			0 0 0 7px var(--ink);
 	}
 	.side-a {
-		background: var(--pink);
+		background: var(--clay);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.side-b {
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.res {
 		display: grid;
@@ -202,7 +229,7 @@
 	}
 	.res.mine {
 		box-shadow:
-			0 0 0 3px var(--bg),
+			0 0 0 3px var(--dye),
 			0 0 0 7px var(--ink);
 	}
 	.text {
@@ -220,8 +247,17 @@
 		justify-self: center;
 		padding: 6px 18px;
 		border: var(--border);
-		border-radius: 999px;
-		background: var(--yellow);
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 	}
 </style>

@@ -45,7 +45,7 @@
 			/>
 		</label>
 		{#if error}<p class="error" role="alert">{error}</p>{/if}
-		<button class="btn pink" disabled={busy || code.trim().length !== ROOM_CODE_LENGTH}>
+		<button class="btn primary" disabled={busy || code.trim().length !== ROOM_CODE_LENGTH}>
 			{busy ? t.join.submitting : t.join.submit}
 		</button>
 	</form>
@@ -58,10 +58,6 @@
 		max-width: 440px;
 		margin: 0 auto;
 		padding: 32px var(--gutter);
-	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
 	}
 	h1 {
 		font-size: 2.6rem;

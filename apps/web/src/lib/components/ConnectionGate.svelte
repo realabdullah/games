@@ -40,7 +40,8 @@
 	}
 	.big {
 		font-size: 1.4rem;
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.banner {
 		position: fixed;
@@ -50,8 +51,17 @@
 		z-index: 10;
 		padding: 8px 18px;
 		border: var(--border);
-		border-radius: 999px;
-		background: var(--yellow);
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		box-shadow: var(--shadow);
 		font-weight: 750;
 	}

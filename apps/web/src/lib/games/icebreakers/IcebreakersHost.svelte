@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { IcebreakersView } from '@games/icebreakers';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import Leaderboard from '$lib/components/Leaderboard.svelte';
@@ -52,7 +53,7 @@
 				.filter(Boolean)}
 			<div class="reveal">
 				<div class="author card">
-					<span class="avatar" aria-hidden="true">{r.author.avatar}</span>
+					<span class="avatar" aria-hidden="true"><Motif id={r.author.avatar} /></span>
 					<span>
 						<span class="muted">{m.itWas}</span>
 						<strong class="name">{r.author.name}</strong>
@@ -64,7 +65,7 @@
 				</div>
 				<Leaderboard entries={view.leaderboard} limit={5} large />
 			</div>
-			<footer><button class="btn pink" onclick={next}>{g.next}</button></footer>
+			<footer><button class="btn primary" onclick={next}>{g.next}</button></footer>
 		{/if}
 	{:else if view.phase === 'final'}
 		<FinalScores leaderboard={view.leaderboard} canControl large {onplayagain} {onendgame} />
@@ -87,10 +88,10 @@
 		width: min(100%, 600px);
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.title {
@@ -98,7 +99,8 @@
 	}
 	.big {
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.top {
 		display: flex;
@@ -116,7 +118,16 @@
 	.answer {
 		margin: 0;
 		padding: clamp(24px, 4vw, 48px);
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		box-shadow: var(--shadow-lg);
 		font-size: clamp(2rem, 4.5vw, 3.6rem);
 		font-weight: 800;
@@ -150,7 +161,16 @@
 		align-items: center;
 		gap: 20px;
 		padding: 20px 28px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		animation: pop 400ms cubic-bezier(0.3, 1.5, 0.5, 1);
 	}
 	.author > span:last-child {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { AVATARS } from '@games/protocol';
+	import Motif from '$lib/components/Motif.svelte';
 	import { t } from '$lib/i18n';
 	import { loadProfile, saveProfile, type Profile } from '$lib/sessions';
 
@@ -49,15 +50,22 @@
 		<legend class="field">{t.join.avatarLabel}</legend>
 		{#each AVATARS as a (a)}
 			<label class="avatar option" class:selected={a === avatar}>
-				<input type="radio" name="avatar" value={a} bind:group={avatar} class="sr-only" />
-				<span aria-hidden="true">{a}</span>
+				<input
+					type="radio"
+					name="avatar"
+					value={a}
+					bind:group={avatar}
+					class="sr-only"
+					aria-label={t.join.motif(a)}
+				/>
+				<Motif id={a} />
 			</label>
 		{/each}
 	</fieldset>
 
 	{#if error}<p class="error" role="alert">{error}</p>{/if}
 
-	<button class="btn pink" type="submit" disabled={busy || !name.trim()}>
+	<button class="btn primary" type="submit" disabled={busy || !name.trim()}>
 		{busy ? submittingLabel : submitLabel}
 	</button>
 </form>
@@ -79,6 +87,9 @@
 		.avatars {
 			grid-template-columns: repeat(8, 1fr);
 		}
+		.avatar {
+			font-size: 3.1rem;
+		}
 	}
 	.avatars legend {
 		margin-bottom: 6px;
@@ -88,19 +99,15 @@
 		display: grid;
 		place-items: center;
 		aspect-ratio: 1;
-		border: var(--border);
-		border-radius: var(--radius-sm);
-		background: var(--surface);
-		font-size: clamp(1.75rem, 8vw, 2.25rem);
+		border-radius: 50%;
+		font-size: clamp(2.75rem, 17vw, 4.25rem);
 		cursor: pointer;
-		transition:
-			transform 120ms ease-out,
-			box-shadow 120ms ease-out;
+		transition: transform 140ms ease-out;
 	}
 	.avatar.selected {
-		background: var(--yellow);
-		box-shadow: 3px 3px 0 var(--line);
-		transform: translate(-2px, -2px);
+		outline: 2.5px dashed var(--gold);
+		outline-offset: 4px;
+		transform: scale(0.92);
 	}
 	.btn {
 		justify-self: stretch;

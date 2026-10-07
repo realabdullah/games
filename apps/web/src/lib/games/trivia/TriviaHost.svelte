@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { TriviaView } from '@games/trivia';
 	import Timer from '$lib/components/Timer.svelte';
 	import type { HostViewProps } from '$lib/games/types';
@@ -53,7 +54,7 @@
 				<Leaderboard entries={view.leaderboard} limit={5} large />
 			</div>
 			<footer class="controls">
-				<button class="btn pink" onclick={() => onaction({ type: 'next' })}>
+				<button class="btn primary" onclick={() => onaction({ type: 'next' })}>
 					{view.index + 1 < view.total ? m.next : m.seeResults}
 				</button>
 			</footer>
@@ -66,7 +67,7 @@
 		<div class="center">
 			<p class="kicker">{m.finalTitle}</p>
 			{#if view.leaderboard[0]}
-				<p class="winner-avatar" aria-hidden="true">{view.leaderboard[0].avatar}</p>
+				<p class="winner-avatar" aria-hidden="true"><Motif id={view.leaderboard[0].avatar} /></p>
 				<h2 class="title">{view.leaderboard[0].name} {m.wins}</h2>
 			{/if}
 		</div>
@@ -74,7 +75,7 @@
 			<Leaderboard entries={view.leaderboard} showDelta={false} large />
 		</div>
 		<footer class="controls">
-			<button class="btn pink" onclick={onplayagain}>{m.playAgain}</button>
+			<button class="btn primary" onclick={onplayagain}>{m.playAgain}</button>
 			<button class="btn ghost" onclick={onendgame}>{m.backToLobby}</button>
 		</footer>
 	{/if}
@@ -96,10 +97,10 @@
 		width: min(100%, 600px);
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.title {
@@ -107,7 +108,8 @@
 	}
 	.big {
 		font-size: clamp(1.6rem, 3vw, 2.4rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.top {
 		display: flex;
@@ -140,9 +142,18 @@
 	}
 	.fact {
 		padding: 16px 20px;
-		border-left: 8px solid var(--yellow);
+		border: var(--stitch);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.winner-avatar {
 		font-size: clamp(5rem, 12vw, 9rem);

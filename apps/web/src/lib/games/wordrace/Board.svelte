@@ -57,7 +57,7 @@
 <style>
 	.board {
 		--hit: oklch(72% 0.17 150);
-		--near: var(--yellow);
+		--near: var(--gold);
 		--miss: oklch(72% 0.02 280);
 		display: grid;
 		gap: 6px;
@@ -75,6 +75,15 @@
 		border: var(--border);
 		border-radius: 8px;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-size: clamp(1.4rem, 7vw, 2.2rem);
 		font-weight: 800;
 		text-transform: uppercase;

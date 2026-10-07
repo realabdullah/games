@@ -56,7 +56,7 @@
 		</div>
 		<footer>
 			{#if view.phase === 'reveal'}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		</footer>
 	{:else if view.phase === 'final'}
@@ -89,7 +89,8 @@
 	.big {
 		max-width: 30ch;
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
-		font-weight: 750;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.target {
 		font-size: clamp(3rem, 9vw, 7rem);
@@ -107,10 +108,10 @@
 		gap: 16px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: clamp(1rem, 1.6vw, 1.3rem);
 	}
 	.count {

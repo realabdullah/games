@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import { PERFECT_MS, type ClockRound } from '@games/clock';
 	import type { LeaderboardEntry } from '@games/engine';
 	import { t } from '$lib/i18n';
@@ -48,7 +49,7 @@
 				{#each players as p (p.id)}
 					<tr class:you={p.id === youId}>
 						<th scope="row">
-							<span aria-hidden="true">{p.avatar}</span>
+							<span aria-hidden="true"><Motif id={p.avatar} /></span>
 							<span class="name">{p.name}</span>
 						</th>
 						{#each history as round, i (i)}
@@ -84,6 +85,15 @@
 		border: var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	table {
 		width: 100%;
@@ -116,6 +126,15 @@
 		z-index: 1;
 		max-width: 9em;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		text-align: left;
 		font-weight: 750;
 	}
@@ -139,17 +158,26 @@
 		color: var(--ink-soft);
 	}
 	.best {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.perfect .off {
-		color: oklch(40% 0.13 160);
+		color: var(--good);
 		font-weight: 800;
 	}
 	.you > th,
 	.you > td {
 		box-shadow:
-			inset 0 3px 0 -1px var(--pink),
-			inset 0 -3px 0 -1px var(--pink);
+			inset 0 3px 0 -1px var(--clay),
+			inset 0 -3px 0 -1px var(--clay);
 	}
 	.legend {
 		font-size: 0.85rem;

@@ -68,7 +68,7 @@
 			</p>
 		{/if}
 		{#if canControl && view.phase === 'result'}
-			<button class="btn pink" onclick={next}>{g.next}</button>
+			<button class="btn primary" onclick={next}>{g.next}</button>
 		{/if}
 	{:else if view.phase === 'final'}
 		<FinalScores
@@ -97,10 +97,10 @@
 		text-align: center;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.huge {
@@ -111,12 +111,30 @@
 		border: var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-size: 1.2rem;
 		font-weight: 800;
 		text-align: center;
 	}
 	.mine {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		animation: nudge 500ms ease-out;
 	}
 	.result {
@@ -124,13 +142,31 @@
 		justify-content: center;
 		align-items: center;
 		gap: 10px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.pts {
 		padding: 0 10px;
 		border: var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	@keyframes nudge {
 		30% {

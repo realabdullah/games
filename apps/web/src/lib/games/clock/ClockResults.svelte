@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import { PERFECT_MS, type ClockResult } from '@games/clock';
 	import { t } from '$lib/i18n';
 	import { seconds } from './format';
@@ -21,7 +22,7 @@
 <ol class="results" class:large>
 	{#each results as r, i (r.player.id)}
 		<li class:you={r.player.id === youId} class:best={i === 0 && r.ms !== null}>
-			<span aria-hidden="true">{r.player.avatar}</span>
+			<span aria-hidden="true"><Motif id={r.player.avatar} /></span>
 			<strong class="name">{r.player.name}</strong>
 			<span class="time">{r.ms === null ? '–' : seconds(r.ms)}</span>
 			<span class="off">{offBy(r)}</span>
@@ -48,6 +49,15 @@
 		border: var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	li > span:first-child {
 		grid-area: avatar;
@@ -72,14 +82,24 @@
 	.points {
 		grid-area: points;
 		justify-self: end;
-		font-weight: 800;
-		color: oklch(40% 0.13 160);
+		font-family: var(--display);
+		font-weight: 400;
+		color: var(--good);
 	}
 	.best {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.you {
-		outline: 3px solid var(--pink);
+		outline: 3px solid var(--clay);
 		outline-offset: -1px;
 	}
 	.large {

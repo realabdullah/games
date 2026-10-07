@@ -23,7 +23,16 @@
 		aspect-ratio: 1;
 		border: var(--border);
 		border-radius: 10px;
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		box-shadow: 0 3px 0 var(--line);
 		font-size: clamp(1.4rem, 8vw, 2.2rem);
 		font-weight: 800;

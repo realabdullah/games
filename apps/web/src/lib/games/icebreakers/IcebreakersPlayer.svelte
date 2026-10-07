@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import { MAX_ANSWER_LENGTH, type IcebreakersView } from '@games/icebreakers';
 	import FinalScores from '$lib/components/FinalScores.svelte';
 	import TextAnswer from '$lib/components/TextAnswer.svelte';
@@ -67,7 +68,7 @@
 				<div class="who">
 					{#each view.players.filter((p) => p.id !== youId) as p (p.id)}
 						<button class="person" onclick={() => onaction({ type: 'guess', playerId: p.id })}>
-							<span class="avatar" aria-hidden="true">{p.avatar}</span>
+							<span class="avatar" aria-hidden="true"><Motif id={p.avatar} /></span>
 							<span>{p.name}</span>
 						</button>
 					{/each}
@@ -83,7 +84,10 @@
 				class:bad={!right && !you?.isAuthor}
 			>
 				<p class="muted">{m.itWas}</p>
-				<p class="author"><span aria-hidden="true">{r.author.avatar}</span> {r.author.name}</p>
+				<p class="author">
+					<span aria-hidden="true"><Motif id={r.author.avatar} /></span>
+					{r.author.name}
+				</p>
 				{#if you?.isAuthor}
 					<p>{m.fooled(r.fooled)}</p>
 				{:else if you}
@@ -91,7 +95,7 @@
 				{/if}
 				{#if you && !audience && you.points > 0}<p class="points">{g.points(you.points)}</p>{/if}
 			</div>
-			{#if canControl}<button class="btn pink" onclick={next}>{g.next}</button>{/if}
+			{#if canControl}<button class="btn primary" onclick={next}>{g.next}</button>{/if}
 		{/if}
 	{:else if view.phase === 'final'}
 		<FinalScores
@@ -117,10 +121,10 @@
 		text-align: center;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.huge {
@@ -138,7 +142,16 @@
 		overflow-wrap: anywhere;
 	}
 	.answer {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-size: clamp(1.4rem, 6vw, 1.9rem);
 		line-height: 1.2;
 	}
@@ -148,7 +161,16 @@
 	}
 	.note {
 		padding: 18px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 750;
 		text-align: center;
 	}
@@ -170,7 +192,14 @@
 		border: var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
-		box-shadow: 3px 3px 0 var(--line);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: var(--ink);
 		font: inherit;
 		font-weight: 750;
@@ -182,11 +211,10 @@
 	}
 	.person:active {
 		transform: translate(2px, 2px);
-		box-shadow: 1px 1px 0 var(--line);
 	}
 	.person:focus-visible {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--focus-shadow);
+		outline: 2.5px dashed var(--focus);
+		outline-offset: 3px;
 	}
 	.person .avatar {
 		font-size: 1.8rem;
@@ -199,10 +227,28 @@
 		text-align: center;
 	}
 	.good {
-		background: var(--teal);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.bad {
-		background: var(--pink);
+		background: var(--clay);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.author {
 		font-size: 1.8rem;
@@ -210,10 +256,12 @@
 	}
 	.big {
 		font-size: 1.3rem;
-		font-weight: 800;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.points {
 		font-size: 2rem;
-		font-weight: 800;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 </style>

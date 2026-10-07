@@ -45,6 +45,15 @@
 		border: var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		list-style: none;
 	}
 	.large {
@@ -62,10 +71,10 @@
 		font-weight: 750;
 	}
 	.correct {
-		color: oklch(45% 0.13 160);
+		color: var(--good);
 	}
 	.close {
-		color: oklch(50% 0.15 60);
+		color: var(--warn);
 		font-weight: 700;
 	}
 </style>

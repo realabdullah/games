@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
+
 	interface Props {
 		choices: string[];
 		/** The choice this viewer picked, if any. */
@@ -19,13 +21,8 @@
 		large = false
 	}: Props = $props();
 
-	// Shapes as well as colors, so choices are distinguishable without color.
-	const looks = [
-		{ shape: '▲', color: 'var(--pink)' },
-		{ shape: '◆', color: 'var(--teal)' },
-		{ shape: '●', color: 'var(--yellow)' },
-		{ shape: '■', color: 'var(--violet)' }
-	];
+	// Each choice has its own motif, so they differ by pattern, not colour alone.
+	const motifs = ['sun', 'stripes', 'diamonds', 'dots'];
 	const revealed = $derived(correct !== null);
 	const disabled = $derived(!onpick || picked !== null || revealed);
 	const maxCount = $derived(Math.max(1, ...(counts ?? [])));
@@ -33,10 +30,8 @@
 
 <div class="grid" class:large class:two={choices.length === 2}>
 	{#each choices as choice, i (i)}
-		{@const look = looks[i % looks.length]!}
 		<button
 			class="choice"
-			style:--c={look.color}
 			class:picked={picked === i}
 			class:right={revealed && correct === i}
 			class:dim={revealed ? correct !== i : picked !== null && picked !== i}
@@ -44,7 +39,7 @@
 			aria-pressed={picked === i}
 			onclick={() => onpick?.(i)}
 		>
-			<span class="shape" aria-hidden="true">{look.shape}</span>
+			<Motif id={motifs[i % motifs.length]!} />
 			<span class="text">{choice}</span>
 			{#if revealed && counts}
 				<span class="count" aria-label="{counts[i]} answers">
@@ -61,7 +56,7 @@
 	.grid {
 		display: grid;
 		grid-template-columns: 1fr;
-		gap: 12px;
+		gap: 10px;
 	}
 	@media (min-width: 560px) {
 		.grid {
@@ -69,62 +64,67 @@
 		}
 	}
 	.large {
-		gap: 20px;
+		gap: 18px;
 	}
 	.choice {
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
 		position: relative;
 		display: grid;
 		grid-template-columns: auto 1fr auto;
 		align-items: center;
 		gap: 14px;
-		min-height: 72px;
-		padding: 14px 18px;
-		border: var(--border);
+		min-height: 68px;
+		padding: 12px 16px 12px 12px;
+		border: 0;
 		border-radius: var(--radius);
-		background: var(--c);
+		background: var(--starch);
 		color: var(--ink);
-		box-shadow: var(--shadow);
 		font: inherit;
 		font-size: 1.2rem;
-		font-weight: 750;
+		font-weight: 700;
 		text-align: left;
 		cursor: pointer;
 		transition:
 			transform 120ms ease-out,
 			opacity 200ms ease-out,
-			box-shadow 120ms ease-out;
+			background-color 160ms ease-out;
 		-webkit-tap-highlight-color: transparent;
+	}
+	.choice > :global(.motif) {
+		font-size: 2.6rem;
 	}
 	.large .choice {
 		min-height: 110px;
+		padding-left: 18px;
 		font-size: clamp(1.4rem, 2.6vw, 2.2rem);
+	}
+	.large .choice > :global(.motif) {
+		font-size: clamp(3rem, 5vw, 4.5rem);
 	}
 	.choice:disabled {
 		cursor: default;
 	}
 	.choice:active:not(:disabled) {
-		transform: translate(3px, 3px);
-		box-shadow: 1px 1px 0 var(--line);
+		transform: scale(0.98);
 	}
-	/* Your pick: a thick ink ring, distinct from the violet focus lift. */
+	/* Your pick: gold cloth with a stitched edge. */
 	.picked {
-		box-shadow:
-			0 0 0 3px var(--bg),
-			0 0 0 7px var(--ink);
+		background: var(--gold);
+		outline: 2.5px dashed var(--starch);
+		outline-offset: 4px;
 	}
 	.choice:focus-visible {
-		transform: translate(-2px, -2px);
-		box-shadow: var(--focus-shadow);
+		outline: 2.5px dashed var(--gold);
+		outline-offset: 4px;
 	}
 	.dim {
 		opacity: 0.4;
 	}
 	.right {
+		background: var(--gold);
 		transform: scale(1.02);
-	}
-	.shape {
-		font-size: 1.3em;
-		line-height: 1;
 	}
 	.text {
 		min-width: 0;
@@ -139,7 +139,7 @@
 	.bar {
 		flex: 1;
 		height: 10px;
-		border-radius: 999px;
+		border-radius: var(--radius-sm);
 		background: var(--ink);
 		transform-origin: left;
 		transition: scale 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -149,15 +149,15 @@
 	}
 	.tick {
 		position: absolute;
-		top: -14px;
-		right: -10px;
+		top: -12px;
+		right: -8px;
 		display: grid;
 		place-items: center;
 		width: 36px;
 		height: 36px;
-		border: var(--border);
 		border-radius: 50%;
-		background: var(--surface);
+		background: var(--indigo);
+		color: var(--gold);
 		font-size: 1.2rem;
 	}
 </style>

@@ -193,7 +193,7 @@
 	<div class="save">
 		{#if error}<p class="error" role="alert">{error}</p>{/if}
 		{#if saved}<p class="ok" role="status">{m.saved}</p>{/if}
-		<button class="btn pink" disabled={busy}>{busy ? m.saving : saveLabel}</button>
+		<button class="btn primary" disabled={busy}>{busy ? m.saving : saveLabel}</button>
 	</div>
 </form>
 
@@ -207,7 +207,6 @@
 		display: grid;
 		gap: 12px;
 		padding: 16px;
-		box-shadow: 3px 3px 0 var(--line);
 	}
 	.row {
 		display: grid;
@@ -264,7 +263,16 @@
 		font-weight: 700;
 	}
 	.choice.correct {
-		background: color-mix(in oklch, var(--teal) 45%, transparent);
+		background: color-mix(in oklch, var(--leaf) 45%, transparent);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.x {
 		width: 36px;
@@ -272,6 +280,15 @@
 		border: 2px solid var(--line);
 		border-radius: 50%;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font: inherit;
 		font-weight: 800;
 		cursor: pointer;
@@ -293,7 +310,7 @@
 		display: grid;
 		gap: 8px;
 		padding: 12px 0 16px;
-		background: var(--bg);
+		background: var(--dye);
 	}
 	.ok {
 		font-weight: 700;

@@ -85,7 +85,7 @@
 		{#if view.reveal.fact}<p class="fact">{view.reveal.fact}</p>{/if}
 		<Timer endsAt={view.endsAt} durationMs={view.durationMs} {clockOffset} />
 		{#if canControl}
-			<button class="btn pink" onclick={() => onaction({ type: 'next' })}>
+			<button class="btn primary" onclick={() => onaction({ type: 'next' })}>
 				{view.index + 1 < view.total ? m.next : m.seeResults}
 			</button>
 		{/if}
@@ -102,7 +102,7 @@
 		<Leaderboard entries={view.leaderboard} {youId} showDelta={false} />
 		{#if canControl}
 			<div class="actions">
-				<button class="btn pink" onclick={onplayagain}>{m.playAgain}</button>
+				<button class="btn primary" onclick={onplayagain}>{m.playAgain}</button>
 				<button class="btn ghost" onclick={onendgame}>{m.backToLobby}</button>
 			</div>
 		{:else}
@@ -127,18 +127,19 @@
 		text-align: center;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.huge {
 		font-size: clamp(2.4rem, 10vw, 3.5rem);
 	}
 	.big {
-		font-size: 1.6rem;
-		font-weight: 800;
+		font-size: 2.2rem;
+		font-family: var(--display);
+		font-weight: 400;
 	}
 	.q {
 		font-size: clamp(1.4rem, 5vw, 2rem);
@@ -157,14 +158,34 @@
 		text-align: center;
 	}
 	.good {
-		background: var(--teal);
+		background: var(--gold)
+			repeating-radial-gradient(circle at 50% 0, transparent 0 22px, rgb(24 34 75 / 0.1) 22px 25px);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.bad {
-		background: var(--pink);
+		background: var(--clay);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.points {
 		font-size: 2.4rem;
-		font-weight: 800;
+		font-family: var(--display);
+		font-weight: 400;
 		font-variant-numeric: tabular-nums;
 	}
 	.streak {
@@ -175,8 +196,17 @@
 	}
 	.fact {
 		padding: 14px 16px;
-		border-left: 6px solid var(--yellow);
+		border: var(--stitch);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		border-radius: var(--radius-sm);
 	}
 	.actions {

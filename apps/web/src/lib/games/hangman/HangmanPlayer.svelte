@@ -122,7 +122,7 @@
 						enterkeyhint="send"
 						autofocus
 					/>
-					<button class="btn pink" disabled={!solveText.trim()}>{m.solve}</button>
+					<button class="btn primary" disabled={!solveText.trim()}>{m.solve}</button>
 					<button type="button" class="btn ghost small" onclick={() => (solving = false)}>
 						{m.cancel}
 					</button>
@@ -140,7 +140,7 @@
 					onletter={(letter) => onaction({ type: 'letter', letter })}
 				/>
 				{#if yourTurn}
-					<button class="btn teal" onclick={() => (solving = true)}>{m.solve}</button>
+					<button class="btn ghost" onclick={() => (solving = true)}>{m.solve}</button>
 				{/if}
 			{/if}
 		{:else}
@@ -157,7 +157,7 @@
 					{t.trivia.scoreLine(you.score, you.rank ?? 1, view.leaderboard.length)}
 				</p>
 			{/if}
-			{#if canControl}<button class="btn pink" onclick={next}>{g.next}</button>{/if}
+			{#if canControl}<button class="btn primary" onclick={next}>{g.next}</button>{/if}
 		{/if}
 	{:else if view.phase === 'final'}
 		<FinalScores
@@ -192,17 +192,26 @@
 		gap: 12px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.category {
 		padding: 2px 12px;
 		border: 2px solid var(--line);
-		border-radius: 999px;
-		background: var(--yellow);
+		border-radius: var(--radius-sm);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 	}
 	.board {
@@ -238,11 +247,29 @@
 		border: var(--border);
 		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 		text-align: center;
 	}
 	.banner.mine {
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-size: 1.2rem;
 	}
 	.event {
@@ -251,7 +278,7 @@
 		animation: pop 300ms ease-out;
 	}
 	.event.hit {
-		color: oklch(45% 0.13 160);
+		color: var(--good);
 	}
 	.event.miss,
 	.event.timeout,
@@ -274,8 +301,9 @@
 	}
 	.points {
 		font-size: 1.6rem;
-		font-weight: 800;
-		color: oklch(45% 0.13 160);
+		font-family: var(--display);
+		font-weight: 400;
+		color: var(--good);
 	}
 	@keyframes pop {
 		from {

@@ -82,7 +82,7 @@
 			{#if view.phase === 'recall'}
 				<button class="btn ghost small" onclick={next}>{g.skip}</button>
 			{:else if view.phase === 'reveal'}
-				<button class="btn pink" onclick={next}>{g.next}</button>
+				<button class="btn primary" onclick={next}>{g.next}</button>
 			{/if}
 		{/if}
 	{:else}
@@ -118,10 +118,10 @@
 		gap: 12px;
 	}
 	.kicker {
-		font-weight: 750;
-		color: var(--ink-soft);
+		font-weight: 700;
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.found {
@@ -138,13 +138,22 @@
 		text-align: center;
 	}
 	.good {
-		background: var(--teal);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.bad {
-		color: oklch(50% 0.17 25);
+		color: var(--danger);
 	}
 	.points {
 		font-size: 1.4rem;
-		color: oklch(45% 0.13 160);
+		color: var(--good);
 	}
 </style>

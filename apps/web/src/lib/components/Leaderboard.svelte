@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Motif from '$lib/components/Motif.svelte';
 	import type { LeaderboardEntry } from '@games/engine';
 	import { flip } from 'svelte/animate';
 
@@ -16,7 +17,7 @@
 	{#each entries.slice(0, limit) as e (e.id)}
 		<li class="row card" class:you={e.id === youId} animate:flip={{ duration: 400 }}>
 			<span class="rank">{e.rank}</span>
-			<span class="avatar" aria-hidden="true">{e.avatar}</span>
+			<span class="avatar" aria-hidden="true"><Motif id={e.avatar} /></span>
 			<span class="name">{e.name}</span>
 			{#if showDelta && e.delta > 0}<span class="delta">+{e.delta}</span>{/if}
 			<span class="score">{e.score.toLocaleString()}</span>
@@ -38,17 +39,25 @@
 		align-items: center;
 		gap: 12px;
 		padding: 10px 16px;
-		box-shadow: 3px 3px 0 var(--line);
 	}
 	.large .row {
 		padding: 14px 22px;
 		font-size: 1.4rem;
 	}
 	.you {
-		background: var(--yellow);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.rank {
-		font-weight: 800;
+		font-family: var(--display);
 		font-variant-numeric: tabular-nums;
 	}
 	.avatar {
@@ -63,12 +72,12 @@
 		font-weight: 750;
 	}
 	.delta {
-		color: oklch(50% 0.14 160);
+		color: var(--madder);
 		font-weight: 750;
 		font-variant-numeric: tabular-nums;
 	}
 	.score {
-		font-weight: 800;
+		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 	}
 </style>

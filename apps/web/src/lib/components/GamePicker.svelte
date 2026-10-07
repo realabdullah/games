@@ -5,6 +5,7 @@
 	import type { PackSummary, RoomSettings } from '@games/protocol';
 	import { api } from '$lib/api';
 	import { catalog } from '$lib/catalog';
+	import Motif from '$lib/components/Motif.svelte';
 	import { gameUi } from '$lib/games/registry';
 	import type { StartRequest } from '$lib/games/types';
 	import { t } from '$lib/i18n';
@@ -177,8 +178,8 @@
 		<section class="choice games" class:card={wide} aria-labelledby="{uid}-game-label">
 			<h2 class="label" id="{uid}-game-label">{p.title}</h2>
 			{#if !wide}
-				<div class="current game card" style:--accent={game.color}>
-					<span class="emoji" aria-hidden="true">{game.emoji}</span>
+				<div class="current game card">
+					<span class="emoji"><Motif id={game.motif} /></span>
 					<span class="text">
 						<strong>{game.name}</strong>
 						<span class="tagline">{game.tagline}</span>
@@ -214,12 +215,11 @@
 								<button
 									type="button"
 									class="tile"
-									style:--accent={g.color}
 									aria-pressed={g.id === gameId}
 									title={g.tagline}
 									onclick={() => pickGame(g.id)}
 								>
-									<span class="emoji" aria-hidden="true">{g.emoji}</span>
+									<span class="emoji"><Motif id={g.motif} /></span>
 									<span>{g.name}</span>
 									{#if wide}<span class="tagline">{g.tagline}</span>{/if}
 								</button>
@@ -236,7 +236,7 @@
 	<div class="setup" class:card={wide}>
 		{#if wide && game}
 			<h2 class="label setup-title">
-				<span aria-hidden="true">{game.emoji}</span>
+				<Motif id={game.motif} />
 				{game.name}
 			</h2>
 		{/if}
@@ -364,7 +364,7 @@
 
 		{#if blocked}<p class="error">{t.packs.flagged}</p>{/if}
 
-		<button class="btn pink" onclick={start} disabled={busy || tooFew || !game || blocked}>
+		<button class="btn primary" onclick={start} disabled={busy || tooFew || !game || blocked}>
 			{busy ? t.picker.starting : t.picker.start}
 		</button>
 		{#if game && tooFew}<p class="muted hint">{t.picker.needPlayers(game.players.min)}</p>{/if}
@@ -407,8 +407,7 @@
 		list-style: none;
 	}
 	.label {
-		font-weight: 800;
-		font-size: 1.1rem;
+		font-size: 1.25rem;
 	}
 	.current {
 		display: flex;
@@ -422,7 +421,15 @@
 	.game {
 		padding: 12px 14px;
 		background: var(--accent);
-		box-shadow: 3px 3px 0 var(--line);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.text {
 		display: grid;
@@ -436,7 +443,7 @@
 	}
 	.chooser {
 		padding: 12px;
-		border: 2px dashed var(--line);
+		border: var(--stitch);
 		border-radius: var(--radius);
 	}
 	.wide .games .chooser {
@@ -463,6 +470,14 @@
 		border: var(--border);
 		border-radius: var(--radius);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: inherit;
 		font: inherit;
 		font-weight: 700;
@@ -471,8 +486,16 @@
 		cursor: pointer;
 	}
 	.tile[aria-pressed='true'] {
-		background: var(--accent);
-		box-shadow: 3px 3px 0 var(--line);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.tile .emoji {
 		font-size: 1.75rem;
@@ -514,8 +537,16 @@
 		min-width: 0;
 		padding: 8px 14px;
 		border: var(--border);
-		border-radius: 999px;
+		border-radius: var(--radius-sm);
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: inherit;
 		font: inherit;
 		font-weight: 700;
@@ -527,13 +558,21 @@
 	}
 	.pack[aria-pressed='true'],
 	.pack.chosen {
-		background: var(--yellow);
-		box-shadow: 3px 3px 0 var(--line);
+		background: var(--gold);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 	}
 	.tile:focus-visible,
 	.pack:focus-visible {
-		outline: none;
-		box-shadow: var(--focus-shadow);
+		outline: 2.5px dashed var(--focus);
+		outline-offset: 3px;
 	}
 	.code {
 		display: grid;

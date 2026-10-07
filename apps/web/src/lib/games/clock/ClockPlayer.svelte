@@ -85,7 +85,7 @@
 				</p>
 			{/if}
 			<ClockResults results={view.results} target={view.target} {youId} />
-			{#if canControl}<button class="btn pink" onclick={next}>{g.next}</button>{/if}
+			{#if canControl}<button class="btn primary" onclick={next}>{g.next}</button>{/if}
 			{#if view.history.length > 1}
 				<ClockHistory history={view.history} players={view.leaderboard} {youId} />
 			{/if}
@@ -149,9 +149,9 @@
 		font-weight: 750;
 	}
 	.kicker {
-		color: var(--ink-soft);
+		color: var(--gold);
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.16em;
 		font-size: 0.9rem;
 	}
 	.target {
@@ -167,6 +167,14 @@
 		border: var(--border);
 		border-radius: 50%;
 		background: var(--surface);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		box-shadow: 0 6px 0 var(--line);
 		font: inherit;
 		font-size: 2rem;
@@ -178,7 +186,15 @@
 		-webkit-tap-highlight-color: transparent;
 	}
 	.tap.live {
-		background: var(--pink);
+		background: var(--clay);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
 		color: var(--ink);
 		cursor: pointer;
 	}
@@ -188,7 +204,16 @@
 	}
 	.done {
 		padding: 14px;
-		background: var(--teal);
+		background: var(--leaf);
+		--ink: var(--indigo);
+		--ink-soft: var(--faded);
+		--line: var(--indigo);
+		--border: 1.5px solid var(--indigo);
+		--stitch: 1.5px dashed var(--indigo);
+		--good: #1d6a43;
+		--danger: var(--madder);
+		--warn: #855700;
+		color: var(--ink);
 		font-weight: 800;
 		text-align: center;
 	}
@@ -203,7 +228,8 @@
 	}
 	.points {
 		font-size: 1.6rem;
-		font-weight: 800;
-		color: oklch(45% 0.13 160);
+		font-family: var(--display);
+		font-weight: 400;
+		color: var(--good);
 	}
 </style>

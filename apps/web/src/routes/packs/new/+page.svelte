@@ -49,10 +49,6 @@
 		margin: 0 auto;
 		padding: 32px var(--gutter) 0;
 	}
-	.back {
-		font-weight: 700;
-		text-decoration: none;
-	}
 	h1 {
 		font-size: clamp(2.2rem, 7vw, 3rem);
 	}
