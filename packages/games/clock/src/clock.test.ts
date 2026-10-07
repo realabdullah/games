@@ -104,3 +104,38 @@ describe('Stop the Clock', () => {
 		expect(state(s).phase).toBe('final');
 	});
 });
+
+describe('round history', () => {
+	test('everyone sees every round’s taps at each reveal and at the end', () => {
+		const s = setup();
+		tap(s, 'ada', target(s) - 300);
+		tap(s, 'bob', target(s) + 200);
+		const first = { ada: target(s) - 300, bob: target(s) + 200 };
+		expect(view(s, 'bob').history).toEqual([{ target: target(s), taps: first }]);
+
+		// Round two: only Ada taps.
+		stepSystem(clock, s, { type: 'tick' }, { now: state(s).phaseEndsAt, active: ids });
+		stepSystem(clock, s, { type: 'tick' }, { now: state(s).phaseEndsAt, active: ids });
+		expect(view(s, 'ada').history).toEqual([]); // hidden while the next round plays
+		stepFromClient(clock, s, { type: 'tap', ms: target(s) }, p('ada'), {
+			now: state(s).startedAt + target(s) + 100,
+			active: ids
+		});
+		stepSystem(clock, s, { type: 'tick' }, { now: state(s).phaseEndsAt, active: ids });
+		stepSystem(clock, s, { type: 'tick' }, { now: state(s).phaseEndsAt, active: ids });
+
+		expect(state(s).phase).toBe('final');
+		expect(view(s).history).toEqual([
+			{ target: state(s).targets[0]!, taps: first },
+			{ target: state(s).targets[1]!, taps: { ada: state(s).targets[1]! } }
+		]);
+	});
+
+	test('your own tap shows straight away; others’ stay hidden until the reveal', () => {
+		const s = setup();
+		tap(s, 'ada', 1_234);
+		expect(view(s, 'ada').you?.ms).toBe(1_234);
+		expect(view(s, 'bob').you?.ms).toBeNull();
+		expect(JSON.stringify(view(s, 'bob'))).not.toContain('1234');
+	});
+});

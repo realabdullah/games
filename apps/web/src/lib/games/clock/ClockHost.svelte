@@ -4,6 +4,7 @@
 	import Timer from '$lib/components/Timer.svelte';
 	import type { HostViewProps } from '$lib/games/types';
 	import { t } from '$lib/i18n';
+	import ClockHistory from './ClockHistory.svelte';
 	import ClockResults from './ClockResults.svelte';
 	import { seconds } from './format';
 
@@ -46,6 +47,11 @@
 				<div class="results">
 					<ClockResults results={view.results} target={view.target} large />
 				</div>
+				{#if view.history.length > 1}
+					<div class="results">
+						<ClockHistory history={view.history} players={view.leaderboard} large />
+					</div>
+				{/if}
 			{/if}
 		</div>
 		<footer>
@@ -55,6 +61,9 @@
 		</footer>
 	{:else if view.phase === 'final'}
 		<FinalScores leaderboard={view.leaderboard} canControl large {onplayagain} {onendgame} />
+		<div class="final-history">
+			<ClockHistory history={view.history} players={view.leaderboard} large />
+		</div>
 	{/if}
 </section>
 
@@ -107,6 +116,10 @@
 	.count {
 		font-size: clamp(1.1rem, 2vw, 1.6rem);
 		font-weight: 750;
+	}
+	.final-history {
+		justify-self: center;
+		width: min(100%, 900px);
 	}
 	footer {
 		display: flex;

@@ -6,6 +6,7 @@
 	import Timer from '$lib/components/Timer.svelte';
 	import type { PlayerViewProps } from '$lib/games/types';
 	import { t } from '$lib/i18n';
+	import ClockHistory from './ClockHistory.svelte';
 	import ClockResults from './ClockResults.svelte';
 	import { seconds } from './format';
 
@@ -35,7 +36,8 @@
 	 */
 	let startLocal = 0;
 	let started = $state(false);
-	let tappedRound = $state(-1);
+	/** Your tap, shown straight away rather than after the server confirms it. */
+	let myTap = $state<{ round: number; ms: number } | null>(null);
 
 	$effect(() => {
 		if (phase !== 'ready' && phase !== 'run') return;
@@ -47,13 +49,15 @@
 		return () => clearTimeout(timer);
 	});
 
-	const tapped = $derived(you?.tapped || tappedRound === round);
+	const tapped = $derived(you?.tapped || myTap?.round === round);
+	const myMs = $derived(you?.ms ?? (myTap?.round === round ? myTap.ms : null));
 	const canTap = $derived(started && !tapped && (phase === 'ready' || phase === 'run'));
 
 	function tap() {
 		if (!canTap) return;
-		tappedRound = round;
-		onaction({ type: 'tap', ms: Date.now() - startLocal });
+		const ms = Date.now() - startLocal;
+		myTap = { round, ms };
+		onaction({ type: 'tap', ms });
 	}
 </script>
 
@@ -82,12 +86,15 @@
 			{/if}
 			<ClockResults results={view.results} target={view.target} {youId} />
 			{#if canControl}<button class="btn pink" onclick={next}>{g.next}</button>{/if}
+			{#if view.history.length > 1}
+				<ClockHistory history={view.history} players={view.leaderboard} {youId} />
+			{/if}
 		{:else if you}
 			{#if !started}
 				<Timer endsAt={view.startsAt} durationMs={view.durationMs} {clockOffset} />
 			{/if}
 			{#if tapped}
-				<p class="done card">{m.tapped}</p>
+				<p class="done card">{myMs === null ? m.tapped : m.tappedAt(seconds(myMs))}</p>
 			{:else}
 				<!-- pointerdown, not click: a click lands later, and every millisecond counts. -->
 				<button
@@ -110,6 +117,11 @@
 			{canControl}
 			{onplayagain}
 			{onendgame}
+		/>
+		<ClockHistory
+			history={view.history}
+			players={view.leaderboard}
+			youId={audience ? null : youId}
 		/>
 	{/if}
 </section>

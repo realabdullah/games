@@ -60,6 +60,8 @@ export interface ClockState {
 	startedAt: number;
 	/** Each player's tap this round, in ms after the start. */
 	taps: Record<string, number>;
+	/** Taps from every round so far, kept so everyone can compare at the end. */
+	history: Record<string, number>[];
 	scores: Record<string, number>;
 	lastPoints: Record<string, number>;
 	active: string[];
@@ -75,6 +77,13 @@ export interface ClockResult {
 	points: number;
 }
 
+/** One finished round: the target and everyone's tap. */
+export interface ClockRound {
+	target: number;
+	/** By player id; missing means they didn't tap. */
+	taps: Record<string, number>;
+}
+
 export interface ClockView {
 	phase: Phase;
 	round: number;
@@ -88,7 +97,16 @@ export interface ClockView {
 	playerCount: number;
 	/** Closest first. Only at the reveal. */
 	results: ClockResult[];
-	you: { tapped: boolean; points: number; score: number; rank: number | null } | null;
+	/** Every finished round, at the reveal and the end. */
+	history: ClockRound[];
+	you: {
+		tapped: boolean;
+		/** Your own tap this round. Others' stay hidden until the reveal. */
+		ms: number | null;
+		points: number;
+		score: number;
+		rank: number | null;
+	} | null;
 	leaderboard: LeaderboardEntry[];
 }
 
@@ -106,6 +124,9 @@ export const clock = defineGame<ClockState, ClockAction, ClockConfig, null, Cloc
 
 	defaultConfig: { rounds: 5, level: 1 },
 
+	// 2: adds `history`.
+	stateVersion: 2,
+
 	setup({ config, players }, ctx) {
 		const [min, max] = TARGETS[config.level] ?? TARGETS[1];
 		return {
@@ -117,6 +138,7 @@ export const clock = defineGame<ClockState, ClockAction, ClockConfig, null, Cloc
 			phaseEndsAt: ctx.now + INTRO_MS,
 			startedAt: 0,
 			taps: {},
+			history: [],
 			scores: Object.fromEntries(players.map((p) => [p.id, 0])),
 			lastPoints: {},
 			active: players.map((p) => p.id)
@@ -170,9 +192,14 @@ export const clock = defineGame<ClockState, ClockAction, ClockConfig, null, Cloc
 			tappedCount: Object.keys(state.taps).length,
 			playerCount: state.players.filter((p) => state.active.includes(p.id)).length,
 			results: state.phase === 'reveal' ? results(state) : [],
+			history:
+				state.phase === 'reveal' || state.phase === 'final'
+					? state.history.map((taps, i) => ({ target: state.targets[i]!, taps }))
+					: [],
 			you: playing
 				? {
 						tapped: id in state.taps,
+						ms: state.taps[id] ?? null,
 						points: state.lastPoints[id] ?? 0,
 						score: state.scores[id] ?? 0,
 						rank: ranked.find((e) => e.id === id)?.rank ?? null
@@ -267,6 +294,7 @@ function reveal(state: ClockState, ctx: GameContext): ClockState {
 		...state,
 		phase: 'reveal',
 		phaseEndsAt: ctx.now + REVEAL_MS,
+		history: [...state.history, state.taps],
 		scores: addPoints(state.scores, points),
 		lastPoints: points
 	};
