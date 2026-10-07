@@ -1,4 +1,4 @@
-import { AVATARS } from '@games/protocol';
+import { AVATARS, type AvatarId } from '@games/protocol';
 
 /**
  * Session tokens are kept per room code so a refresh, a locked phone or a
@@ -32,7 +32,7 @@ export function clearSession(kind: SessionKind, code: string) {
 
 export interface Profile {
 	name: string;
-	avatar: (typeof AVATARS)[number];
+	avatar: AvatarId;
 }
 
 /** Remember the last name/avatar so joining the next room is one tap. */

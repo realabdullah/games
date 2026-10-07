@@ -150,7 +150,7 @@ describe('playing custom packs', () => {
 	test('a host can start trivia with a pack code', async () => {
 		const { body: created } = await createPack();
 		const host = rooms.create({ mode: 'party' });
-		rooms.join(host.code, { name: 'Ada', avatar: '🦊' });
+		rooms.join(host.code, { name: 'Ada', avatar: 'rings' });
 		rooms.handle(host.session, { type: 'start', gameId: 'trivia', packId: created.summary.code });
 		expect(rooms.info(host.code).phase).toBe('playing');
 	});
@@ -158,7 +158,7 @@ describe('playing custom packs', () => {
 	test('flagged packs need the family filter off', async () => {
 		const { body: created } = await createPack({ ...draft, title: 'Shit questions' });
 		const host = rooms.create({ mode: 'party' });
-		rooms.join(host.code, { name: 'Ada', avatar: '🦊' });
+		rooms.join(host.code, { name: 'Ada', avatar: 'rings' });
 		const start = () =>
 			rooms.handle(host.session, { type: 'start', gameId: 'trivia', packId: created.summary.code });
 		expect(start).toThrow('family filter');
@@ -279,16 +279,16 @@ describe('model output handling', () => {
 describe('family filter in rooms', () => {
 	test('blocks profane names while on', () => {
 		const host = rooms.create({ mode: 'party' });
-		expect(() => rooms.join(host.code, { name: 'shithead', avatar: '🦊' })).toThrow();
-		expect(() => rooms.create({ mode: 'online', name: 'fuckface', avatar: '🦊' })).toThrow();
+		expect(() => rooms.join(host.code, { name: 'shithead', avatar: 'rings' })).toThrow();
+		expect(() => rooms.create({ mode: 'online', name: 'fuckface', avatar: 'rings' })).toThrow();
 		expect(rooms.roomCount).toBe(1);
 		rooms.handle(host.session, { type: 'settings', familyFilter: false });
-		expect(rooms.join(host.code, { name: 'shithead', avatar: '🦊' }).you.role).toBe('player');
+		expect(rooms.join(host.code, { name: 'shithead', avatar: 'rings' }).you.role).toBe('player');
 	});
 
 	test('only the host can change settings', () => {
 		const host = rooms.create({ mode: 'party' });
-		const ada = rooms.join(host.code, { name: 'Ada', avatar: '🦊' });
+		const ada = rooms.join(host.code, { name: 'Ada', avatar: 'rings' });
 		expect(() => rooms.handle(ada.session, { type: 'settings', familyFilter: false })).toThrow();
 	});
 });

@@ -4,24 +4,30 @@ import { TriviaPackDraft } from '@games/content';
 export const ROOM_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // no I or O
 export const ROOM_CODE_LENGTH = 4;
 export const MAX_ROOM_PLAYERS = 12;
+/**
+ * Player avatars are adire-style motifs, drawn in CSS by the web app. The id
+ * is all that travels; `bot` is reserved for computer players.
+ */
 export const AVATARS = [
-	'🦊',
-	'🐸',
-	'🐙',
-	'🦄',
-	'🐼',
-	'🦁',
-	'🐧',
-	'🐝',
-	'🦖',
-	'🐳',
-	'🦉',
-	'🐢',
-	'🦩',
-	'🐨',
-	'🦔',
-	'🐞'
+	'rings',
+	'stripes',
+	'grid',
+	'dots',
+	'diamonds',
+	'sun',
+	'scales',
+	'checks',
+	'bands',
+	'crosses',
+	'moon',
+	'target',
+	'ladder',
+	'quarters',
+	'zigzag',
+	'seeds'
 ] as const;
+export type AvatarId = (typeof AVATARS)[number];
+export const BOT_AVATAR = 'bot';
 
 // ---------- shared shapes ----------
 

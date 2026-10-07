@@ -113,7 +113,7 @@ export const xo = defineGame<XoState, XoAction, XoConfig, unknown, XoView>({
 			people.length === 1 && (mode === 'solo' || level > 0)
 				? { id: BOT_ID, level: (level || 2) as BotLevel }
 				: null;
-		const players = bot ? [...people, { id: bot.id, name: 'Computer', avatar: '🤖' }] : people;
+		const players = bot ? [...people, { id: bot.id, name: 'Computer', avatar: 'bot' }] : people;
 		// Against the computer, the person always gets the first move.
 		const queue = bot ? players.map((p) => p.id) : ctx.rng.shuffle(players.map((p) => p.id));
 		return {
