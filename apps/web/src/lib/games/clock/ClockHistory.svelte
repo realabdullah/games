@@ -29,10 +29,10 @@
 </script>
 
 <section class="history" class:large>
-	<h3>{m.everyRound}</h3>
 	<!-- Many rounds scroll sideways here, never the page. -->
 	<div class="scroll">
 		<table>
+			<caption class="sr-only">{m.everyRound}</caption>
 			<thead>
 				<tr>
 					<th scope="col"><span class="sr-only">{m.player}</span></th>
@@ -78,9 +78,6 @@
 	.history {
 		display: grid;
 		gap: 8px;
-	}
-	h3 {
-		font-size: 1.1rem;
 	}
 	.scroll {
 		overflow-x: auto;
@@ -163,8 +160,5 @@
 	}
 	.large thead th {
 		font-size: 0.85em;
-	}
-	.large h3 {
-		font-size: clamp(1.2rem, 2vw, 1.6rem);
 	}
 </style>
