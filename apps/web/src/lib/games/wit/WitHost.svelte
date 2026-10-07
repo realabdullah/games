@@ -28,7 +28,7 @@
 	{:else if view.phase === 'write'}
 		<div class="center">
 			<p class="kicker">{g.roundOf(view.round + 1, view.rounds)}</p>
-			<h2 class="title">✍️ {m.writeOnPhone}</h2>
+			<h2 class="title">{m.writeOnPhone}</h2>
 			<p class="big" aria-live="polite">{g.done(view.doneCount, view.expectedCount)}</p>
 			<div class="timer">
 				<Timer endsAt={view.endsAt} durationMs={view.durationMs} {clockOffset} large />
@@ -133,7 +133,10 @@
 		box-shadow: var(--shadow-lg);
 	}
 	.side-a {
-		background: var(--clay);
+		background:
+			repeating-linear-gradient(90deg, var(--gold) 0 14px, var(--indigo) 14px 20px) top / 100% 10px
+				no-repeat,
+			var(--starch);
 		--ink: var(--indigo);
 		--ink-soft: var(--faded);
 		--line: var(--indigo);
@@ -145,7 +148,10 @@
 		color: var(--ink);
 	}
 	.side-b {
-		background: var(--leaf);
+		background:
+			repeating-linear-gradient(90deg, var(--madder) 0 6px, var(--starch) 6px 10px) top / 100% 10px
+				no-repeat,
+			var(--starch);
 		--ink: var(--indigo);
 		--ink-soft: var(--faded);
 		--line: var(--indigo);

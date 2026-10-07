@@ -92,7 +92,7 @@
 			{/if}
 		</div>
 
-		{#if summary.flagged}<p class="warn">⚠️ {m.flagged}</p>{/if}
+		{#if summary.flagged}<p class="warn">{m.flagged}</p>{/if}
 
 		{#if loaded}
 			<PackEditor initial={loaded.pack} saveLabel={m.save} onsave={save} />

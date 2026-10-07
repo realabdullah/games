@@ -36,7 +36,7 @@
 </script>
 
 <form class="card ai" onsubmit={generate}>
-	<h2>✨ {m.title}</h2>
+	<h2>{m.title}</h2>
 	<label class="field">
 		{m.topic}
 		<input

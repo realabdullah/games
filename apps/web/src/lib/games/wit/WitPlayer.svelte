@@ -187,19 +187,23 @@
 		opacity: 0.6;
 	}
 	.option-btn:active:not(:disabled) {
-		transform: translate(3px, 3px);
+		transform: scale(0.98);
 	}
 	.option-btn:focus-visible {
 		outline: 2.5px dashed var(--focus);
 		outline-offset: 3px;
 	}
-	.picked {
-		box-shadow:
-			0 0 0 3px var(--dye),
-			0 0 0 7px var(--ink);
+	/* Your vote: gold cloth with a stitched edge, like a trivia pick. */
+	.option-btn.picked {
+		background-color: var(--gold);
+		outline: 2.5px dashed var(--starch);
+		outline-offset: 4px;
 	}
 	.side-a {
-		background: var(--clay);
+		background:
+			repeating-linear-gradient(90deg, var(--gold) 0 14px, var(--indigo) 14px 20px) top / 100% 10px
+				no-repeat,
+			var(--starch);
 		--ink: var(--indigo);
 		--ink-soft: var(--faded);
 		--line: var(--indigo);
@@ -211,7 +215,10 @@
 		color: var(--ink);
 	}
 	.side-b {
-		background: var(--leaf);
+		background:
+			repeating-linear-gradient(90deg, var(--madder) 0 6px, var(--starch) 6px 10px) top / 100% 10px
+				no-repeat,
+			var(--starch);
 		--ink: var(--indigo);
 		--ink-soft: var(--faded);
 		--line: var(--indigo);

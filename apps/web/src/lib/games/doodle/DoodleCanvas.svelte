@@ -268,8 +268,9 @@
 		border-radius: 50%;
 		background: var(--ink);
 	}
+	/* The chosen colour and size: a solid gold ring (focus is dashed). */
 	.active {
-		outline: 2.5px solid var(--ink);
+		outline: 3px solid var(--gold);
 		outline-offset: 3px;
 	}
 	.swatch:focus-visible,

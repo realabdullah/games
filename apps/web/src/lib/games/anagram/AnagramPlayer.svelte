@@ -94,7 +94,7 @@
 				{/key}
 				<div class="row">
 					<p class="wrong" role="status">{you.lastWrong ? m.notIt(you.lastWrong) : ''}</p>
-					<button class="btn ghost small" type="button" onclick={shuffle}>🔀 {m.shuffle}</button>
+					<button class="btn ghost small" type="button" onclick={shuffle}>{m.shuffle}</button>
 				</div>
 			{/if}
 		{:else if view.phase === 'reveal'}

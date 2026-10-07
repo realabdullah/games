@@ -181,8 +181,9 @@
 	.code span {
 		display: grid;
 		place-items: center;
-		width: 0.95em;
-		height: 1.15em;
+		min-width: 1.05em;
+		height: 1.2em;
+		padding: 0 0.08em;
 		border-radius: var(--radius);
 		background: var(--starch);
 		--ink: var(--indigo);

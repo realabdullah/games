@@ -3,7 +3,7 @@
 	import type { XoView } from '@games/xo';
 	import { t } from '$lib/i18n';
 
-	/** "🦊 Ada (X) vs Bob (O) 🐸", with whoever's turn it is lifted. */
+	/** "Ada (X) vs Bob (O)", each with their motif, with whoever's turn it is lifted. */
 	let { view, large = false }: { view: XoView; large?: boolean } = $props();
 	const sides = $derived([
 		{ mark: 'X' as const, player: view.x },
