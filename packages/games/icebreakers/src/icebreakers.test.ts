@@ -24,7 +24,7 @@ const pack: PromptPack = {
 	items: ['Prompt A', 'Prompt B', 'Prompt C']
 };
 const players = [
-	{ id: 'ada', name: 'Ada', avatar: '🦊' },
+	{ id: 'ada', name: 'Ada', avatar: 'rings' },
 	{ id: 'bob', name: 'Bob', avatar: '🐸' },
 	{ id: 'cy', name: 'Cy', avatar: '🐙' }
 ];

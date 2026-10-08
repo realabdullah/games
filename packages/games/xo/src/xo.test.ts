@@ -24,7 +24,7 @@ import {
 	type XoView
 } from './index.ts';
 
-const mk = (ids: string[]) => ids.map((id) => ({ id, name: id, avatar: '🦊' }));
+const mk = (ids: string[]) => ids.map((id) => ({ id, name: id, avatar: 'rings' }));
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 
 function setup(ids = ['ada', 'bob'], matches = 3): GameSession {

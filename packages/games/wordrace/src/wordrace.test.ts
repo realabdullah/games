@@ -20,7 +20,7 @@ const pack: PromptPack = {
 };
 const DICTIONARY = new Set([...pack.items, 'adieu', 'stare', 'tears', 'hello', 'eerie']);
 const game = createWordRace((w) => DICTIONARY.has(w));
-const players = ['ada', 'bob'].map((id) => ({ id, name: id, avatar: '🦊' }));
+const players = ['ada', 'bob'].map((id) => ({ id, name: id, avatar: 'rings' }));
 const ids = players.map((p) => p.id);
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 const host = { kind: 'host' } as const;

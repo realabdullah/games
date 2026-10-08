@@ -22,7 +22,7 @@ import {
 	type Level
 } from './index.ts';
 
-const players = ['ada', 'bob'].map((id) => ({ id, name: id, avatar: '🦊' }));
+const players = ['ada', 'bob'].map((id) => ({ id, name: id, avatar: 'rings' }));
 const ids = players.map((p) => p.id);
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 const GRID_MS = 20_000;
