@@ -45,7 +45,7 @@ beforeEach(() => {
 	);
 });
 
-const join = (code: string, name: string) => rooms.join(code, { name, avatar: '🦊' });
+const join = (code: string, name: string) => rooms.join(code, { name, avatar: 'rings' });
 
 describe('party rooms', () => {
 	test('host creates, players join and connect', () => {
@@ -100,14 +100,14 @@ describe('party rooms', () => {
 
 describe('online rooms', () => {
 	test('creator is a VIP player', () => {
-		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: '🦊' });
+		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: 'rings' });
 		expect(ada.you).toMatchObject({ role: 'player', vip: true });
 		const bob = join(ada.code, 'Bob');
 		expect(bob.you.vip).toBe(false);
 	});
 
 	test('VIP passes on when the VIP leaves', () => {
-		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: '🦊' });
+		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: 'rings' });
 		const bob = join(ada.code, 'Bob');
 		rooms.connect(bob.session);
 		rooms.handle(ada.session, { type: 'leave' });
@@ -115,7 +115,7 @@ describe('online rooms', () => {
 	});
 
 	test('VIP passes on after a long disconnect, not a short one', () => {
-		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: '🦊' });
+		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: 'rings' });
 		const bob = join(ada.code, 'Bob');
 		rooms.connect(ada.session);
 		rooms.connect(bob.session);
@@ -131,7 +131,7 @@ describe('online rooms', () => {
 	});
 
 	test('room closes when the last player leaves', () => {
-		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: '🦊' });
+		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: 'rings' });
 		rooms.handle(ada.session, { type: 'leave' });
 		expect(rooms.roomCount).toBe(0);
 	});
@@ -207,7 +207,7 @@ describe('games', () => {
 	});
 
 	test('the online VIP starts the game', () => {
-		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: '🦊' });
+		const ada = rooms.create({ mode: 'online', name: 'Ada', avatar: 'rings' });
 		rooms.handle(ada.session, { type: 'start', gameId: 'trivia' });
 		expect(trivia(ada.session)?.phase).toBe('intro');
 	});
@@ -332,7 +332,7 @@ describe('phase 4 games', () => {
 			() => clock
 		);
 		const host = fresh.create({ mode: 'party' });
-		const ps = ['A', 'B', 'C'].map((n) => fresh.join(host.code, { name: n, avatar: '🦊' }));
+		const ps = ['A', 'B', 'C'].map((n) => fresh.join(host.code, { name: n, avatar: 'rings' }));
 		fresh.handle(host.session, { type: 'start', gameId: 'doodle' });
 		fresh.handle(host.session, { type: 'action', action: { type: 'next' } }); // skip intro
 		const drawerSession = ps.find(
