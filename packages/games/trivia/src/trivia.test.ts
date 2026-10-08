@@ -32,7 +32,7 @@ const pack: TriviaPack = {
 };
 
 const players = [
-	{ id: 'ada', name: 'Ada', avatar: '🦊' },
+	{ id: 'ada', name: 'Ada', avatar: 'rings' },
 	{ id: 'bob', name: 'Bob', avatar: '🐸' }
 ];
 const ids = players.map((p) => p.id);

@@ -15,7 +15,7 @@ import {
 const lionKing = { emoji: '🦁👑', answer: 'the lion king', category: 'Movies' };
 const hotDog = { emoji: '🔥🐕', answer: 'hot dog', category: 'Food', also: ['hotdog'] };
 const pack: EmojiPack = { id: 'test', title: 'Test', items: [lionKing, hotDog] };
-const players = ['ada', 'bob'].map((id) => ({ id, name: id, avatar: '🦊' }));
+const players = ['ada', 'bob'].map((id) => ({ id, name: id, avatar: 'rings' }));
 const ids = players.map((p) => p.id);
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 const PUZZLE_MS = 40_000;

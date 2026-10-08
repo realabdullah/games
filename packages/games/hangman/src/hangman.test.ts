@@ -17,7 +17,7 @@ const pack: HangmanPack = {
 	title: 'Test',
 	items: [{ word: 'ice cream', category: 'Food' }]
 };
-const players = ['ada', 'bob', 'cy'].map((id) => ({ id, name: id, avatar: '🦊' }));
+const players = ['ada', 'bob', 'cy'].map((id) => ({ id, name: id, avatar: 'rings' }));
 const ids = players.map((p) => p.id);
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 const TURN_MS = 15_000;
@@ -158,7 +158,7 @@ describe('Hangman', () => {
 
 test('someone joining mid-game sits it out instead of breaking the seat order', () => {
 	const s = setup();
-	const dee = { id: 'dee', name: 'dee', avatar: '🦊' };
+	const dee = { id: 'dee', name: 'dee', avatar: 'rings' };
 	const changed = stepSystem(
 		hangman,
 		s,

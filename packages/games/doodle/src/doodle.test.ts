@@ -43,7 +43,7 @@ const pack: PromptPack = {
 		'drum'
 	]
 };
-const players = ['ada', 'bob', 'cy'].map((id) => ({ id, name: id, avatar: '🦊' }));
+const players = ['ada', 'bob', 'cy'].map((id) => ({ id, name: id, avatar: 'rings' }));
 const ids = players.map((p) => p.id);
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 

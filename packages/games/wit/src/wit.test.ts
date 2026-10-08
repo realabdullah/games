@@ -25,7 +25,7 @@ const pack: PromptPack = {
 	title: 'Test',
 	items: Array.from({ length: 20 }, (_, i) => `Prompt ${i + 1}`)
 };
-const players = ['ada', 'bob', 'cy', 'dee'].map((id) => ({ id, name: id, avatar: '🦊' }));
+const players = ['ada', 'bob', 'cy', 'dee'].map((id) => ({ id, name: id, avatar: 'rings' }));
 const ids = players.map((p) => p.id);
 const p = (id: string) => ({ kind: 'player', playerId: id, vip: false }) as const;
 
